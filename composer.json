@@ -1,0 +1,20 @@
+{
+  "name": "exodus4d/pathfinder_esi",
+  "description": "ESI API library for Pathfinder",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mark Friedrich",
+      "email": "pathfinder@exodus4d.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Exodus4D\\ESI\\": "app/"
+    }
+  },
+  "require": {
+    "php-64bit": ">=7.0"
+  }
+}
