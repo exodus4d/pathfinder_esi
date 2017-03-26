@@ -21,6 +21,6 @@ class ESI {
     }
 
     public function getParam(){
-        return $this->test;
+        return $this->test . '333';
     }
 }
