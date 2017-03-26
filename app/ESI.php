@@ -9,7 +9,7 @@
 namespace Exodus4D\ESI;
 
 
-class ESI {
+class ESI implements ApiInterface {
 
     protected $test = '';
 
@@ -20,7 +20,7 @@ class ESI {
       //  $this->test = $param;
     }
 
-    public function getCharacterLocationData($first, $second){
-        return $first . ' - ' . $second;
+    public function getCharacterLocationData($characterId, $token){
+        return $characterId . ' - ' . $token;
     }
 }
