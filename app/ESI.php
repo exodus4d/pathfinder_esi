@@ -16,11 +16,11 @@ class ESI {
     /**
      * ESI constructor.
      */
-    public function __construct($param){
-        $this->test = $param;
+    public function __construct(){
+      //  $this->test = $param;
     }
 
-    public function getParam(){
-        return $this->test . '333';
+    public function getCharacterLocationData($first, $second){
+        return $first . ' - ' . $second;
     }
 }
