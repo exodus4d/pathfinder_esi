@@ -68,11 +68,34 @@ class WebClient extends \Web {
         return $statusType;
     }
 
+    /**
+     * @param int $code
+     * @param string $method
+     * @param string $url
+     * @param null $responseBody
+     * @return string
+     */
     protected function getErrorMessageFromJsonResponse(int $code, string $method, string $url, $responseBody = null):string {
         $message = empty($responseBody->message) ?  @constant('Base::HTTP_' . $code) : $responseBody->message;
-        $body = !is_null($responseBody) ? ' | body: ' . (string)$responseBody : '';
+        $body = !is_null($responseBody) ? ' | body: ' . print_r($responseBody, true) : '';
 
         return sprintf(self::ERROR_STATUS_LOG, $code, $message, $method, $url, $body);
+    }
+
+    /**
+     * get Logger obj for given status type
+     * @param string $statusType
+     * @return \Log
+     */
+    protected function getLogger(string $statusType): \Log{
+        switch($statusType){
+            case 'err_client':
+                $logfile = 'esi.error.client';
+                break;
+            default:
+                $logfile = 'esi.error.unknown';
+        }
+        return new \Log($logfile);
     }
 
     public function request($url,array $options = null){
@@ -91,9 +114,10 @@ class WebClient extends \Web {
                     json_decode($response['body'])
                 );
 
-                var_dump(' ---- ');
-                var_dump(@constant('Base::HTTP_' . $statusCode));
+                var_dump(' --6-- ');
                 var_dump($errorMsg);
+
+                $this->getLogger($statusType)->write($errorMsg);
                 break;
             default:
         }
