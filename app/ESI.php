@@ -40,8 +40,8 @@ class ESI implements ApiInterface {
             'timeout' => 4,
             'method' => 'GET',
             'header' => [
-                'User-agent: ' . $this->getUserAgent(),
-                'Accept: application/json'
+                'User-Agent: ' . $this->getUserAgent(),
+               // 'Accept: application/json'
             ]
         ];
 

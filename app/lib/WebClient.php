@@ -113,10 +113,6 @@ class WebClient extends \Web {
                     $url,
                     json_decode($response['body'])
                 );
-
-                var_dump(' --6-- ');
-                var_dump($errorMsg);
-
                 $this->getLogger($statusType)->write($errorMsg);
                 break;
             default:
