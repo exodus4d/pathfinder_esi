@@ -95,7 +95,7 @@ class WebClient extends \Web {
             default:
                 $logfile = 'esi.error.unknown';
         }
-        return new \Log($logfile);
+        return new \Log($logfile . '.log');
     }
 
     public function request($url,array $options = null){
