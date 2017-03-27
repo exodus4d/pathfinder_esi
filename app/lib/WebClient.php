@@ -11,6 +11,8 @@ namespace Exodus4D\ESI\Lib;
 
 class WebClient extends \Web {
 
+    const ERROR_STATUS_LOG                  = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
+
     /**
      * end of line
      * @var string
@@ -66,16 +68,34 @@ class WebClient extends \Web {
         return $statusType;
     }
 
+    protected function getErrorMessageFromJsonResponse(int $code, string $method, string $url, $responseBody = null):string {
+        $message = empty($responseBody->message) ?  @constant('Base::HTTP_' . $code) : $responseBody->message;
+        $body = !is_null($responseBody) ? ' | body: ' . print_r($responseBody, true) : '';
+
+        return sprintf(self::ERROR_STATUS_LOG, $code, $message, $method, $url, $body);
+    }
+
     public function request($url,array $options = null){
 
         $response = parent::request($url, $options);
 
         $statusCode = $this->getStatusCodeFromHeaders( $response['headers'] );
         $statusType = $this->getStatusType($statusCode);
-var_dump($statusCode);
-var_dump($statusType);
-        switch($statusType){
 
+        switch($statusType){
+            case 'err_client':
+                $errorMsg = $this->getErrorMessageFromJsonResponse(
+                    $statusCode,
+                    $options['method'],
+                    $url,
+                    json_decode($response['body'])
+                );
+
+                var_dump(' ---- ');
+                var_dump(@constant('Base::HTTP_' . $statusCode));
+                var_dump($errorMsg);
+                break;
+            default:
         }
 
         return $response;
