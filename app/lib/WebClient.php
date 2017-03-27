@@ -70,7 +70,7 @@ class WebClient extends \Web {
 
     protected function getErrorMessageFromJsonResponse(int $code, string $method, string $url, $responseBody = null):string {
         $message = empty($responseBody->message) ?  @constant('Base::HTTP_' . $code) : $responseBody->message;
-        $body = !is_null($responseBody) ? ' | body: ' . print_r($responseBody, true) : '';
+        $body = !is_null($responseBody) ? ' | body: ' . (string)$responseBody : '';
 
         return sprintf(self::ERROR_STATUS_LOG, $code, $message, $method, $url, $body);
     }
