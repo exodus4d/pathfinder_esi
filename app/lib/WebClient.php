@@ -120,6 +120,8 @@ class WebClient extends \Web {
         if( preg_grep('/^Warning: 299/i', $headers) ){
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
+
+        var_dump('logged....');
     }
 
     public function request($url,array $options = null){
