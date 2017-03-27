@@ -72,7 +72,8 @@ class WebClient extends \Web {
 
         $statusCode = $this->getStatusCodeFromHeaders( $response['headers'] );
         $statusType = $this->getStatusType($statusCode);
-
+var_dump($statusCode);
+var_dump($statusType);
         switch($statusType){
 
         }
