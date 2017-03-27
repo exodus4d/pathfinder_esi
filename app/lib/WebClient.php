@@ -11,7 +11,9 @@ namespace Exodus4D\ESI\Lib;
 
 class WebClient extends \Web {
 
-    const ERROR_STATUS_LOG                  = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
+    const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
+    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
 
     /**
      * end of line
@@ -92,17 +94,43 @@ class WebClient extends \Web {
             case 'err_client':
                 $logfile = 'esi.error.client';
                 break;
+            case 'resource_legacy':
+                $logfile = 'esi.resource.legacy';
+                break;
+            case 'resource_deprecated':
+                $logfile = 'esi.resource.deprecated';
+                break;
             default:
                 $logfile = 'esi.error.unknown';
         }
         return new \Log($logfile . '.log');
     }
 
+    /**
+     * check response headers for warnings/errors and log them
+     * @param array $headers
+     * @param string $url
+     */
+    protected function checkResponseHeaders(array $headers, string $url){
+        $headers = (array)$headers;
+
+        if( preg_grep('/^Warning: 199/i', $headers) ){
+            $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url));
+        }
+        if( preg_grep('/^Warning: 299/i', $headers) ){
+            $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
+        }
+    }
+
     public function request($url,array $options = null){
 
         $response = parent::request($url, $options);
 
-        $statusCode = $this->getStatusCodeFromHeaders( $response['headers'] );
+        // check response headers
+        $this->checkResponseHeaders($response['headers'], $url);
+
+
+        $statusCode = $this->getStatusCodeFromHeaders($response['headers']);
         $statusType = $this->getStatusType($statusCode);
 
         switch($statusType){

@@ -53,6 +53,8 @@ class ESI implements ApiInterface {
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
 
+        var_dump($response);
+
         return $response;
     }
 }
