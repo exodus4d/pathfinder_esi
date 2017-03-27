@@ -114,10 +114,10 @@ class WebClient extends \Web {
     protected function checkResponseHeaders(array $headers, string $url){
         $headers = (array)$headers;
 
-        if( preg_grep('/^Warning: 199/i', $headers) ){
+        if( !preg_grep('/^Warning: 199/i', $headers) ){
             $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url));
         }
-        if( preg_grep('/^Warning: 299/i', $headers) ){
+        if( !preg_grep('/^Warning: 299/i', $headers) ){
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
 
