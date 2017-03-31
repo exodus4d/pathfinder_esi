@@ -112,12 +112,11 @@ var_dump($response);
 
         $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
 
-        var_dump('getCharacterLocationData');
-        var_dump($requestOptions);
-
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
 
-        var_dump($response);
+        if( !empty($response) ){
+            $locationData = (new namespace\Mapper\Location($response))->getData();
+        }
 
 
         return $locationData;
