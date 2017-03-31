@@ -125,7 +125,7 @@ class WebClient extends \Web {
     public function request($url,array $options = null){
 
         $response = parent::request($url, $options);
-var_dump($response);
+
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
 
