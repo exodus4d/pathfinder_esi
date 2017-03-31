@@ -122,8 +122,10 @@ var_dump($response);
         return $locationData;
     }
 
-    public function getCorporationData(int $corporationId){
+    public function getCorporationData(int $corporationId): array {
         $url = 'https://esi.tech.ccp.is/latest/corporations/' . $corporationId . '/?datasource=tranquility';
+
+        $corporationData = [];
 
         $requestOptions = [
             'timeout' => 4,
@@ -139,6 +141,11 @@ var_dump($response);
 var_dump('getCorporationData');
 var_dump($response);
 
+        if( !empty($response) ){
+            $corporationData = (new namespace\Mapper\Corporation($response))->getData();
+            $corporationData['id'] = $corporationId;
+        }
 
+        return $corporationData;
     }
 }
