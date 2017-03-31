@@ -24,10 +24,11 @@ interface ApiInterface {
     public function getUserAgent();
 
     /**
+     * get corporation/alliance ids by characterIds
      * @param array $characterIds
      * @return array
      */
-    public function getCharacterAffiliationData(array $characterIds);
+    public function getCharacterAffiliationData(array $characterIds): array;
 
     /**
      * @param int $characterId

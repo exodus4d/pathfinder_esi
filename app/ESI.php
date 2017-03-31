@@ -35,7 +35,7 @@ class ESI implements ApiInterface {
         $this->userAgent = $userAgent;
     }
 
-    public function getCharacterAffiliationData(array $characterIds){
+    public function getCharacterAffiliationData(array $characterIds): array {
         $url = 'https://esi.tech.ccp.is/latest/characters/affiliation/?datasource=tranquility';
 
         $characterAffiliationData = [];
@@ -51,17 +51,13 @@ class ESI implements ApiInterface {
         ];
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-
+var_dump('reeeee');
+var_dump($response);
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
             }
         }
-
-        var_dump('getCharacterAffiliationData');
-        var_dump($requestOptions);
-        var_dump($response);
-        var_dump($characterAffiliationData);
 
         return $characterAffiliationData;
     }
