@@ -49,4 +49,10 @@ interface ApiInterface {
      */
     public function getCorporationData(int $corporationId): array;
 
+    /**
+     * @param int $allianceId
+     * @return array
+     */
+    public function getAllianceData(int $allianceId): array;
+
 }

@@ -122,6 +122,10 @@ var_dump($response);
         return $locationData;
     }
 
+    /**
+     * @param int $corporationId
+     * @return array
+     */
     public function getCorporationData(int $corporationId): array {
         $url = 'https://esi.tech.ccp.is/latest/corporations/' . $corporationId . '/?datasource=tranquility';
 
@@ -138,14 +142,39 @@ var_dump($response);
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
 
-var_dump('getCorporationData');
-var_dump($response);
-
         if( !empty($response) ){
             $corporationData = (new namespace\Mapper\Corporation($response))->getData();
             $corporationData['id'] = $corporationId;
         }
 
         return $corporationData;
+    }
+
+    /**
+     * @param int $allianceId
+     * @return array
+     */
+    public function getAllianceData(int $allianceId): array {
+        $url = 'https://esi.tech.ccp.is/latest/alliances/' . $allianceId . '/?datasource=tranquility';
+
+        $allianceData = [];
+
+        $requestOptions = [
+            'timeout' => 4,
+            'method' => 'GET',
+            'user_agent' => $this->getUserAgent(),
+            'header' => [
+                'Accept: application/json'
+            ]
+        ];
+
+        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+
+        if( !empty($response) ){
+            $allianceData = (new namespace\Mapper\Alliance($response))->getData();
+            $allianceData['id'] = $allianceId;
+        }
+
+        return $allianceData;
     }
 }
