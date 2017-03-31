@@ -35,6 +35,30 @@ class ESI implements ApiInterface {
         $this->userAgent = $userAgent;
     }
 
+    public function getCharacterAffiliationData(array $characterIds){
+        $url = 'https://esi.tech.ccp.is/latest/characters/affiliation/?datasource=tranquility';
+
+        $characterAffiliationData = [];
+
+        $requestOptions = [
+            'timeout' => 4,
+            'method' => 'POST',
+            'user_agent' => $this->getUserAgent(),
+            'header' => [
+                'Accept: application/json'
+            ],
+            'content' => json_encode($characterIds, JSON_UNESCAPED_SLASHES)
+        ];
+
+        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+
+        var_dump('getCharacterAffiliationData');
+        var_dump($requestOptions);
+        var_dump($response);
+
+        return $characterAffiliationData;
+    }
+
     public function getCharacterData(int $characterId){
         $url = 'https://esi.tech.ccp.is/latest/characters/1946320202/?datasource=tranquility';
 

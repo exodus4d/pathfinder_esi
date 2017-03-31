@@ -16,6 +16,6 @@ class Character extends mapper\AbstractIterator {
     protected static $map = [
         'name' => 'name',
 
-        'corporation_id' => ['corp' => 'id'],
+        'corporation_id' => ['corporation' => 'id']
     ];
 }
