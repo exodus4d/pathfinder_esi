@@ -51,8 +51,7 @@ class ESI implements ApiInterface {
         ];
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-var_dump('reeeee');
-var_dump($response);
+
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
@@ -63,7 +62,7 @@ var_dump($response);
     }
 
     public function getCharacterData(int $characterId){
-        $url = 'https://esi.tech.ccp.is/latest/characters/1946320202/?datasource=tranquility';
+        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/?datasource=tranquility';
 
         $characterData = [];
 
@@ -98,7 +97,7 @@ var_dump($response);
      * @return array
      */
     public function getCharacterLocationData( $characterId, $accessToken){
-        $url = 'https://esi.tech.ccp.is/latest/characters/1946320202/location/?datasource=tranquility';
+        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
         $locationData = [];
 
@@ -120,8 +119,26 @@ var_dump($response);
         var_dump($response);
 
 
-
-
         return $locationData;
+    }
+
+    public function getCorporationData(int $corporationId){
+        $url = 'https://esi.tech.ccp.is/latest/corporations/' . $corporationId . '/?datasource=tranquility';
+
+        $requestOptions = [
+            'timeout' => 4,
+            'method' => 'GET',
+            'user_agent' => $this->getUserAgent(),
+            'header' => [
+                'Accept: application/json'
+            ]
+        ];
+
+        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+
+var_dump('getCorporationData');
+var_dump($response);
+
+
     }
 }
