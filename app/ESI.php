@@ -112,6 +112,7 @@ var_dump($response);
 
         $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
 
+        var_dump('getCharacterLocationData');
         var_dump($requestOptions);
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
