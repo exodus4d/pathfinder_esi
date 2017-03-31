@@ -27,7 +27,7 @@ interface ApiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @return mixed
+     * @return array
      */
     public function getCharacterLocationData($characterId, $accessToken);
 }
