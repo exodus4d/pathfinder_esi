@@ -35,7 +35,7 @@ class ESI implements ApiInterface {
         $this->userAgent = $userAgent;
     }
 
-    public function getCharacterData($characterId){
+    public function getCharacterData(int $characterId){
         $url = 'https://esi.tech.ccp.is/latest/characters/1946320202/?datasource=tranquility';
 
         $characterData = [];
@@ -50,8 +50,14 @@ class ESI implements ApiInterface {
         ];
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+var_dump($response);
+        if( !empty($response) ){
+            $esiCharacterData = (new namespace\Mapper\Character($response))->getData();
 
-        var_dump($response);
+            var_dump('$esiCharacterData:');
+            var_dump($esiCharacterData);
+        }
+
         var_dump('end');
         die();
 

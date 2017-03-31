@@ -125,27 +125,30 @@ class WebClient extends \Web {
     public function request($url,array $options = null){
 
         $response = parent::request($url, $options);
+var_dump($response);
+        $responseHeaders    = (array)$response['headers'];
+        $responseBody       = json_decode($response['body']);
 
-        // check response headers
-        $this->checkResponseHeaders($response['headers'], $url);
+        if( !empty($responseHeaders)){
+            // check response headers
+            $this->checkResponseHeaders($responseHeaders, $url);
+            $statusCode = $this->getStatusCodeFromHeaders($responseHeaders);
+            $statusType = $this->getStatusType($statusCode);
 
-
-        $statusCode = $this->getStatusCodeFromHeaders($response['headers']);
-        $statusType = $this->getStatusType($statusCode);
-
-        switch($statusType){
-            case 'err_client':
-                $errorMsg = $this->getErrorMessageFromJsonResponse(
-                    $statusCode,
-                    $options['method'],
-                    $url,
-                    json_decode($response['body'])
-                );
-                $this->getLogger($statusType)->write($errorMsg);
-                break;
-            default:
+            switch($statusType){
+                case 'err_client':
+                    $errorMsg = $this->getErrorMessageFromJsonResponse(
+                        $statusCode,
+                        $options['method'],
+                        $url,
+                        $responseBody
+                    );
+                    $this->getLogger($statusType)->write($errorMsg);
+                    break;
+                default:
+            }
         }
 
-        return $response;
+        return $responseBody;
     }
 }
