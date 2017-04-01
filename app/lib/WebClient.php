@@ -153,7 +153,12 @@ class WebClient extends \Web {
 var_dump('reggg');
 var_dump($responseBody);
         // make sure return type is correct
-        $responseBody       = ($responseBody instanceof \stdClass) ? $responseBody : null;
+        if(
+            !is_array($responseBody) &&
+            !($responseBody instanceof \stdClass)
+        ){
+            $responseBody = null;
+        }
 
         if( !empty($responseHeaders)){
             // check response headers
