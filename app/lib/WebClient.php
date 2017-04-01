@@ -15,6 +15,7 @@ class WebClient extends \Web {
     const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
 
+    const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
     /**
      * end of line
      * @var string
@@ -125,12 +126,33 @@ class WebClient extends \Web {
         }
     }
 
-    public function request($url,array $options = null){
+    /**
+     * check whether a HTTP request method is valid/given
+     * @param $method
+     * @return bool
+     */
+    public function checkRequestMethod($method): bool {
+      $valid = false;
+      if( in_array($method, self::REQUEST_METHODS) ){
+          $valid = true;
+      }
+      return $valid;
+    }
+
+    /**
+     * @param string $url
+     * @param array|null $options
+     * @return null|\stdClass
+     */
+    public function request(string  $url, $options = null){
 
         $response = parent::request($url, $options);
 
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
+
+        // make sure return type is correct
+        $responseBody       = ($responseBody instanceof \stdClass) ? $responseBody : null;
 
         if( !empty($responseHeaders)){
             // check response headers

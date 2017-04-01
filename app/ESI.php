@@ -14,6 +14,7 @@ class ESI implements ApiInterface {
     const ESI_CHARACTERS_LOCATION               = '/characters/%s/location/';
 
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
+    const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
 
     private $userAgent = '';
 
@@ -147,7 +148,7 @@ var_dump($response);
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
 
-        $this->request($url, 'GET', $accessToken);
+        $this->request($url, 'get', $accessToken);
 
         if( !empty($response) ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
@@ -217,11 +218,14 @@ var_dump($response);
 
         $webClient = namespace\Lib\WebClient::instance();
 
-        if( !\Audit::instance()->url($url) ){
+        if( \Audit::instance()->url($url) ){
+            if( $webClient->checkRequestMethod($method) ){
 
+            }else{
+                $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
+            }
         }else{
             $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));
-
         }
 
     }
