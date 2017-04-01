@@ -10,6 +10,7 @@ namespace Exodus4D\ESI;
 
 class ESI implements ApiInterface {
 
+    const ESI_TIMEOUT                           = 3;
     const ESI_URL                               = 'https://esi.tech.ccp.is';
     const ESI_CHARACTERS_LOCATION               = '/characters/%s/location/';
 
@@ -147,9 +148,11 @@ var_dump($response);
         $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-
-        $this->request($url, 'get', $accessToken);
-
+var_dump('1:');
+var_dump($response);
+        $lala = $this->request($url, 'GET', $accessToken);
+var_dump('2:');
+var_dump($lala);
         if( !empty($response) ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
         }
@@ -214,13 +217,36 @@ var_dump($response);
         return $allianceData;
     }
 
-    protected function request($url, $method, $accessToken = '', $content = []): \stdClass {
+    /**
+     * @param string $url
+     * @param string $method
+     * @param string $accessToken
+     * @param array $content
+     * @return null|array|\stdClass
+     */
+    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $content = []) {
+        $responseBody = null;
+        $method = strtoupper($method);
 
         $webClient = namespace\Lib\WebClient::instance();
 
         if( \Audit::instance()->url($url) ){
             if( $webClient->checkRequestMethod($method) ){
+                $requestOptions = [
+                    'timeout' => self::ESI_TIMEOUT,
+                    'method' => $method,
+                    'user_agent' => $this->getUserAgent(),
+                    'header' => [
+                        'Accept: application/json'
+                    ]
+                ];
 
+                // add auth token if available (required for some endpoints)
+                if( !empty($accessToken) ){
+                    $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+                }
+
+                $responseBody = $webClient->request($url, $requestOptions);
             }else{
                 $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
             }
@@ -228,5 +254,6 @@ var_dump($response);
             $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));
         }
 
+        return $responseBody;
     }
 }

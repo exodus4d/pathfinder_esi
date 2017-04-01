@@ -142,7 +142,7 @@ class WebClient extends \Web {
     /**
      * @param string $url
      * @param array|null $options
-     * @return null|\stdClass
+     * @return null|array|\stdClass
      */
     public function request( $url, array $options = null){
 
