@@ -96,7 +96,7 @@ var_dump($response);
      * @param string $accessToken
      * @return array
      */
-    public function getCharacterLocationData( $characterId, $accessToken){
+    public function getCharacterLocationData(int $characterId, string $accessToken): array{
         $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
         $locationData = [];
@@ -120,6 +120,36 @@ var_dump($response);
 
 
         return $locationData;
+    }
+
+    /**
+     * @param $characterId
+     * @param $accessToken
+     * @return array
+     */
+    public function getCharacterShipData($characterId, $accessToken): array{
+      $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/ship/?datasource=tranquility';
+
+      $shipData = [];
+
+        $requestOptions = [
+            'timeout' => 4,
+            'method' => 'GET',
+            'user_agent' => $this->getUserAgent(),
+            'header' => [
+                'Accept: application/json'
+            ]
+        ];
+
+        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+
+        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+
+        if( !empty($response) ){
+            $shipData = (new namespace\Mapper\Ship($response))->getData();
+        }
+
+      return $shipData;
     }
 
     /**
