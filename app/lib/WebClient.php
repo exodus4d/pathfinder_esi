@@ -144,7 +144,7 @@ class WebClient extends \Web {
      * @param array|null $options
      * @return null|\stdClass
      */
-    public function request(string  $url, $options = null){
+    public function request( $url, array $options = null){
 
         $response = parent::request($url, $options);
 
