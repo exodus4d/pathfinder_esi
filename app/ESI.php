@@ -70,27 +70,12 @@ class ESI implements ApiInterface {
 
         $characterData = [];
 
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'GET',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ]
-        ];
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+        $response = $this->request($url, 'GET');
+var_dump('getCharacterData');
 var_dump($response);
         if( !empty($response) ){
-            $esiCharacterData = (new namespace\Mapper\Character($response))->getData();
-
-            var_dump('$esiCharacterData:');
-            var_dump($esiCharacterData);
+            $characterData = (new namespace\Mapper\Character($response))->getData();
         }
-
-        var_dump('end');
-        die();
-
 
         return $characterData;
     }
@@ -105,23 +90,11 @@ var_dump($response);
 
         $locationData = [];
 
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'GET',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ]
-        ];
-
-        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+        $response = $this->request($url, 'GET', $accessToken);
 
         if( !empty($response) ){
             $locationData = (new namespace\Mapper\Location($response))->getData();
         }
-
 
         return $locationData;
     }
@@ -132,33 +105,17 @@ var_dump($response);
      * @return array
      */
     public function getCharacterShipData(int $characterId, string $accessToken): array{
-      $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/ship/?datasource=tranquility';
+        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/ship/?datasource=tranquility';
 
-      $shipData = [];
+        $shipData = [];
 
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'GET',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ]
-        ];
+        $response = $this->request($url, 'GET', $accessToken);
 
-        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-var_dump('1:');
-var_dump($response);
-        $lala = $this->request($url, 'GET', $accessToken);
-var_dump('2:');
-var_dump($lala);
         if( !empty($response) ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
         }
 
-
-      return $shipData;
+        return $shipData;
     }
 
     /**
@@ -170,16 +127,7 @@ var_dump($lala);
 
         $corporationData = [];
 
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'GET',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ]
-        ];
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+        $response = $this->request($url, 'GET');
 
         if( !empty($response) ){
             $corporationData = (new namespace\Mapper\Corporation($response))->getData();
@@ -198,16 +146,7 @@ var_dump($lala);
 
         $allianceData = [];
 
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'GET',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ]
-        ];
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
+        $response = $this->request($url, 'GET');
 
         if( !empty($response) ){
             $allianceData = (new namespace\Mapper\Alliance($response))->getData();
