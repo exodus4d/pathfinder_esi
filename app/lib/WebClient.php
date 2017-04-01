@@ -89,8 +89,11 @@ class WebClient extends \Web {
      * @param string $statusType
      * @return \Log
      */
-    protected function getLogger(string $statusType): \Log{
+    public function getLogger(string $statusType): \Log{
         switch($statusType){
+            case 'err_server':
+                $logfile = 'esi.error.server';
+                break;
             case 'err_client':
                 $logfile = 'esi.error.client';
                 break;

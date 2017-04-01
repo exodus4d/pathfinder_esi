@@ -13,6 +13,8 @@ class ESI implements ApiInterface {
     const ESI_URL                               = 'https://esi.tech.ccp.is';
     const ESI_CHARACTERS_LOCATION               = '/characters/%s/location/';
 
+    const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
+
     private $userAgent = '';
 
     /**
@@ -127,7 +129,7 @@ var_dump($response);
      * @param $accessToken
      * @return array
      */
-    public function getCharacterShipData($characterId, $accessToken): array{
+    public function getCharacterShipData(int $characterId, string $accessToken): array{
       $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/ship/?datasource=tranquility';
 
       $shipData = [];
@@ -145,9 +147,12 @@ var_dump($response);
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
 
+        $this->request($url, 'GET', $accessToken);
+
         if( !empty($response) ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
         }
+
 
       return $shipData;
     }
@@ -206,5 +211,18 @@ var_dump($response);
         }
 
         return $allianceData;
+    }
+
+    protected function request($url, $method, $accessToken = '', $content = []): \stdClass {
+
+        $webClient = namespace\Lib\WebClient::instance();
+
+        if( !\Audit::instance()->url($url) ){
+
+        }else{
+            $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));
+
+        }
+
     }
 }

@@ -44,6 +44,13 @@ interface ApiInterface {
     public function getCharacterLocationData(int $characterId, string $accessToken): array;
 
     /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @return array
+     */
+    public function getCharacterShipData(int $characterId, string $accessToken): array;
+
+    /**
      * @param int $corporationId
      * @return array
      */
