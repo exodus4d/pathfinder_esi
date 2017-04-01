@@ -150,8 +150,7 @@ class WebClient extends \Web {
 
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
-var_dump('reggg');
-var_dump($responseBody);
+
         // make sure return type is correct
         if(
             !is_array($responseBody) &&

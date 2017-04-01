@@ -54,8 +54,7 @@ class ESI implements ApiInterface {
         ];
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-var_dump('$response');
-var_dump($response);
+
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
