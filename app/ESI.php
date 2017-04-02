@@ -17,12 +17,15 @@ class ESI implements ApiInterface {
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
     const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
 
+    private $f3 = null;
     private $userAgent = '';
 
     /**
      * ESI constructor.
+     * @param \Base $f3
      */
-    public function __construct(){
+    public function __construct(\Base $f3){
+        $this->f3 = $f3;
     }
 
     /**
@@ -95,6 +98,11 @@ var_dump($response);
         if( !empty($response) ){
             $locationData = (new namespace\Mapper\Location($response))->getData();
         }
+
+        var_dump('getCharacterLocationData');
+        var_dump($locationData);
+
+
 
         return $locationData;
     }
