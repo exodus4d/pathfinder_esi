@@ -116,23 +116,13 @@ var_dump($response);
      * @return array
      */
     public function getCharacterLocationData(int $characterId, string $accessToken): array{
-
         $url = $this->getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
-
-        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
-
         $locationData = [];
-
         $response = $this->request($url, 'GET', $accessToken);
 
         if( !empty($response) ){
             $locationData = (new namespace\Mapper\Location($response))->getData();
         }
-
-        var_dump('getCharacterLocationData');
-        var_dump($locationData);
-
-
 
         return $locationData;
     }
@@ -209,11 +199,6 @@ var_dump($response);
             ];
             $url .= '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986 );
         }
-        var_dump('fff: getEndpointURL');
-        var_dump($url);
-        var_dump($this->getEsiUrl());
-        var_dump($this->getEsiDatasource());
-
 
         return $url;
     }
