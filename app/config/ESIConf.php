@@ -14,10 +14,10 @@ class ESIConf extends \Prefab {
     public static $swaggerSpec = [
         'characters' => [
             'location' => [
-                'GET' => '/characters/{character_id}/location/'
+                'GET' => '/characters/{x}/location/'
             ],
             'ship' => [
-                'GET' => '/characters/{character_id}/ship/'
+                'GET' => '/characters/{x}/ship/'
             ]
         ]
     ];
@@ -35,6 +35,11 @@ class ESIConf extends \Prefab {
         if(is_string($tmp)){
             // replace vars
             var_dump('rep');
+            var_dump($tmp);
+            $placeholder = '/{x}/';
+            foreach($params as $param){
+                $tmp = preg_replace($placeholder, $param, $tmp, 1);
+            }
             var_dump($tmp);
         }
 
