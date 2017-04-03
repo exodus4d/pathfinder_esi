@@ -19,6 +19,10 @@ class ESIConf extends \Prefab {
             'GET' => '/v3/corporations/{x}/'
         ],
         'characters' => [
+            'GET' => ' /v4/characters/{x}/',
+            'affiliation' => [
+                'POST' => '/v1/characters/affiliation/'
+            ],
             'location' => [
                 'GET' => '/v1/characters/{x}/location/'
             ],

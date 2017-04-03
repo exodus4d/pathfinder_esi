@@ -70,10 +70,18 @@ class ESI implements ApiInterface {
     }
 
     public function getCharacterAffiliationData(array $characterIds): array {
-        $url = 'https://esi.tech.ccp.is/latest/characters/affiliation/?datasource=tranquility';
-
+        $url = $this->getEndpointURL(['characters', 'affiliation', 'POST']);
+       // $url = 'https://esi.tech.ccp.is/latest/characters/affiliation/?datasource=tranquility';
         $characterAffiliationData = [];
 
+        $additionalOptions = [
+            'content' => $characterIds
+        ];
+        $response = $this->request($url, 'POST', '', $additionalOptions);
+
+        var_dump('getCharacterAffiliationData');
+        var_dump($response);
+       /*
         $requestOptions = [
             'timeout' => 4,
             'method' => 'POST',
@@ -85,24 +93,25 @@ class ESI implements ApiInterface {
         ];
 
         $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-
+*/
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
             }
         }
-
+        var_dump($characterAffiliationData);
         return $characterAffiliationData;
     }
 
-    public function getCharacterData(int $characterId){
-        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/?datasource=tranquility';
-
+    /**
+     * @param int $characterId
+     * @return array
+     */
+    public function getCharacterData(int $characterId): array{
+        $url = $this->getEndpointURL(['characters', 'GET'], [$characterId]);
         $characterData = [];
-
         $response = $this->request($url, 'GET');
-var_dump('getCharacterData');
-var_dump($response);
+
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
         }
@@ -203,10 +212,10 @@ var_dump($response);
      * @param string $url
      * @param string $method
      * @param string $accessToken
-     * @param array $content
+     * @param array $additionalOptions
      * @return null|array|\stdClass
      */
-    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $content = []) {
+    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []) {
         $responseBody = null;
         $method = strtoupper($method);
 
@@ -228,7 +237,12 @@ var_dump($response);
                     $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
                 }
 
-                $responseBody = $webClient->request($url, $requestOptions);
+                if( !empty($additionalOptions['content']) ){
+                    $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
+                    unset($additionalOptions['content']);
+                }
+
+                $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
             }else{
                 $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
             }

@@ -34,7 +34,7 @@ interface ApiInterface {
      * @param int $characterId
      * @return array
      */
-    public function getCharacterData(int $characterId);
+    public function getCharacterData(int $characterId): array;
 
     /**
      * @param int $characterId
