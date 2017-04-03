@@ -36,7 +36,7 @@ class ESIConf extends \Prefab {
             // replace vars
             var_dump('rep');
             var_dump($tmp);
-            $placeholder = '/{x}/';
+            $placeholder = '/\{x\}/';
             foreach($params as $param){
                 $tmp = preg_replace($placeholder, $param, $tmp, 1);
             }
