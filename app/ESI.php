@@ -133,10 +133,8 @@ var_dump($response);
      * @return array
      */
     public function getCharacterShipData(int $characterId, string $accessToken): array{
-        $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/ship/?datasource=tranquility';
-
+        $url = $this->getEndpointURL(['characters', 'ship', 'GET'], [$characterId]);
         $shipData = [];
-
         $response = $this->request($url, 'GET', $accessToken);
 
         if( !empty($response) ){
@@ -151,10 +149,8 @@ var_dump($response);
      * @return array
      */
     public function getCorporationData(int $corporationId): array {
-        $url = 'https://esi.tech.ccp.is/latest/corporations/' . $corporationId . '/?datasource=tranquility';
-
+        $url = $this->getEndpointURL(['corporations', 'GET'], [$corporationId]);
         $corporationData = [];
-
         $response = $this->request($url, 'GET');
 
         if( !empty($response) ){
@@ -170,10 +166,8 @@ var_dump($response);
      * @return array
      */
     public function getAllianceData(int $allianceId): array {
-        $url = 'https://esi.tech.ccp.is/latest/alliances/' . $allianceId . '/?datasource=tranquility';
-
+        $url = $this->getEndpointURL(['alliances', 'GET'], [$allianceId]);
         $allianceData = [];
-
         $response = $this->request($url, 'GET');
 
         if( !empty($response) ){

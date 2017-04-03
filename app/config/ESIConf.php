@@ -12,6 +12,12 @@ namespace Exodus4D\ESI\Config;
 class ESIConf extends \Prefab {
 
     const SWAGGER_SPEC  = [
+        'alliances' => [
+            'GET' => '/v2/alliances/{x}/'
+        ],
+        'corporations' => [
+            'GET' => '/v3/corporations/{x}/'
+        ],
         'characters' => [
             'location' => [
                 'GET' => '/v1/characters/{x}/location/'
