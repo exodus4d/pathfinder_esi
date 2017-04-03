@@ -11,21 +11,27 @@ namespace Exodus4D\ESI\Config;
 
 class ESIConf extends \Prefab {
 
-    public static $swaggerSpec = [
+    const SWAGGER_SPEC  = [
         'characters' => [
             'location' => [
-                'GET' => '/characters/{x}/location/'
+                'GET' => '/v1/characters/{x}/location/'
             ],
             'ship' => [
-                'GET' => '/characters/{x}/ship/'
+                'GET' => '/v1/characters/{x}/ship/'
             ]
         ]
     ];
 
-    static function getEndpointURL($path = [], $params = []): string{
+    /**
+     * get an ESI endpoint path
+     * @param array $path
+     * @param array $params
+     * @return string
+     */
+    static function getEndpoint($path = [], $params = []): string{
         $endpoint = '';
 
-        $tmp = self::$swaggerSpec;
+        $tmp = self::SWAGGER_SPEC;
         foreach($path as $key){
             if(array_key_exists($key, $tmp)){
                 $tmp = $tmp[$key];
@@ -34,13 +40,12 @@ class ESIConf extends \Prefab {
 
         if(is_string($tmp)){
             // replace vars
-            var_dump('rep');
-            var_dump($tmp);
             $placeholder = '/\{x\}/';
             foreach($params as $param){
                 $tmp = preg_replace($placeholder, $param, $tmp, 1);
             }
-            var_dump($tmp);
+
+            $endpoint =  $tmp;
         }
 
         return $endpoint;

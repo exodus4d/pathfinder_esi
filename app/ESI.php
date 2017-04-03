@@ -13,28 +13,32 @@ use Exodus4D\ESI\Config;
 class ESI implements ApiInterface {
 
     const ESI_TIMEOUT                           = 3;
-    const ESI_URL                               = 'https://esi.tech.ccp.is';
-    const ESI_CHARACTERS_LOCATION               = '/characters/%s/location/';
 
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
     const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
 
-    private $f3 = null;
-    private $userAgent = '';
+    private $esiUrl                             = '';
+    private $esiDatasource                      = '';
+    private $userAgent                          = '';
 
     /**
      * ESI constructor.
-     * @param \Base $f3
      */
-    public function __construct(\Base $f3){
-        $this->f3 = $f3;
+    public function __construct(){
     }
 
     /**
-     * @return string
+     * @param string $esiUrl
      */
-    public function getUserAgent(): string{
-        return $this->userAgent;
+    public function setEsiUrl(string $esiUrl){
+        $this->esiUrl = $esiUrl;
+    }
+
+    /**
+     * @param string $esiDatasource
+     */
+    public function setEsiDatasource(string $esiDatasource){
+        $this->esiDatasource = $esiDatasource;
     }
 
     /**
@@ -42,6 +46,27 @@ class ESI implements ApiInterface {
      */
     public function setUserAgent(string $userAgent){
         $this->userAgent = $userAgent;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEsiUrl(): string{
+        return $this->esiUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEsiDatasource(): string{
+        return $this->esiDatasource;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent(): string{
+        return $this->userAgent;
     }
 
     public function getCharacterAffiliationData(array $characterIds): array {
@@ -92,7 +117,7 @@ var_dump($response);
      */
     public function getCharacterLocationData(int $characterId, string $accessToken): array{
 
-        $url = Config\ESIConf::getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
+        $url = $this->getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
 
         $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
@@ -167,6 +192,18 @@ var_dump($response);
         }
 
         return $allianceData;
+    }
+
+    protected function getEndpointURL($path = [], $params = []): string{
+        $url = Config\ESIConf::getEndpoint($path, $params);
+
+        var_dump('fff: getEndpointURL');
+        var_dump($url);
+        var_dump($this->getEsiUrl());
+        var_dump($this->getEsiDatasource());
+
+
+        return $url;
     }
 
     /**
