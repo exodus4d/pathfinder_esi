@@ -92,7 +92,7 @@ var_dump($response);
      */
     public function getCharacterLocationData(int $characterId, string $accessToken): array{
 
-        $url = Config\ESIConf::getEndpointURL(['characters', 'location', 'GET'], []);
+        $url = Config\ESIConf::getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
 
         $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
