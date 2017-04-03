@@ -7,7 +7,7 @@
  * Time: 20:32
  */
 
-namespace Exodus4D\ESI\Conf;
+namespace Exodus4D\ESI\Config;
 
 class ESIConf extends \Prefab {
 

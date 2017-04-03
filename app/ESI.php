@@ -8,7 +8,7 @@
 
 namespace Exodus4D\ESI;
 
-use Exodus4D\ESI\Conf;
+use Exodus4D\ESI\Config;
 
 class ESI implements ApiInterface {
 
@@ -92,7 +92,7 @@ var_dump($response);
      */
     public function getCharacterLocationData(int $characterId, string $accessToken): array{
 
-        $url = Conf\ESIConf::getEndpointURL(['characters', 'location', 'GET'], []);
+        $url = Config\ESIConf::getEndpointURL(['characters', 'location', 'GET'], []);
 
         $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
