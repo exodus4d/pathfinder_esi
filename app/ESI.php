@@ -8,6 +8,8 @@
 
 namespace Exodus4D\ESI;
 
+use Exodus4D\ESI\Conf;
+
 class ESI implements ApiInterface {
 
     const ESI_TIMEOUT                           = 3;
@@ -89,6 +91,9 @@ var_dump($response);
      * @return array
      */
     public function getCharacterLocationData(int $characterId, string $accessToken): array{
+
+        $url = Conf\ESIConf::getEndpointURL(['characters', 'location', 'GET'], []);
+
         $url = 'https://esi.tech.ccp.is/latest/characters/' . $characterId . '/location/?datasource=tranquility';
 
         $locationData = [];
