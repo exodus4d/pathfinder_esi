@@ -16,11 +16,18 @@ class WebClient extends \Web {
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
+
+    /**
+     * max number of CREST curls for a single endpoint until giving up...
+     * this is because CREST is not very stable
+     */
+    const RETRY_COUNT_MAX                       = 3;
+
     /**
      * end of line
      * @var string
      */
-    private $eol = "\r\n";
+    private $eol                                = "\r\n";
 
     /**
      * @param array $headers
@@ -142,9 +149,13 @@ class WebClient extends \Web {
     /**
      * @param string $url
      * @param array|null $options
-     * @return null|array|\stdClass
+     * @param array $additionalOptions
+     * @param int $retryCount
+     * @return mixed|null
      */
-    public function request( $url, array $options = null){
+    public function request( $url, array $options = null, $additionalOptions = [], $retryCount = 0){
+        // retry same request until request limit is reached
+        $retry = false;
 
         $response = parent::request($url, $options);
 
@@ -175,7 +186,34 @@ class WebClient extends \Web {
                     );
                     $this->getLogger($statusType)->write($errorMsg);
                     break;
+                case 'err_server':
+                    $retry = true;
+
+                    if( $retryCount == self::RETRY_COUNT_MAX ){
+                        $errorMsg = $this->getErrorMessageFromJsonResponse(
+                            $statusCode,
+                            $options['method'],
+                            $url,
+                            $responseBody
+                        );
+                        $this->getLogger($statusType)->write($errorMsg);
+
+                        // trigger error
+                        if($additionalOptions['suppressHTTPErrors'] !== true){
+                            $f3 = \Base::instance();
+                            $f3->error($statusCode, $errorMsg);
+                        }
+                    }
+                    break;
                 default:
+            }
+
+            if(
+                $retry &&
+                $retryCount < self::RETRY_COUNT_MAX
+            ){
+                $retryCount++;
+                $this->request($url, $options, $additionalOptions, $retryCount);
             }
         }
 

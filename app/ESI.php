@@ -113,12 +113,13 @@ var_dump($response);
     /**
      * @param int $characterId
      * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken): array{
+    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
         $locationData = [];
-        $response = $this->request($url, 'GET', $accessToken);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         if( !empty($response) ){
             $locationData = (new namespace\Mapper\Location($response))->getData();
@@ -128,14 +129,15 @@ var_dump($response);
     }
 
     /**
-     * @param $characterId
-     * @param $accessToken
+     * @param int $characterId
+     * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken): array{
+    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['characters', 'ship', 'GET'], [$characterId]);
         $shipData = [];
-        $response = $this->request($url, 'GET', $accessToken);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         if( !empty($response) ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
