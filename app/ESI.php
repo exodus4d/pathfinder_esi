@@ -194,9 +194,21 @@ var_dump($response);
         return $allianceData;
     }
 
+    /**
+     * get/build endpoint URL
+     * @param array $path
+     * @param array $params
+     * @return string
+     */
     protected function getEndpointURL($path = [], $params = []): string{
-        $url = Config\ESIConf::getEndpoint($path, $params);
+        $url = $this->getEsiUrl() . Config\ESIConf::getEndpoint($path, $params);
 
+        if( !empty($datasource = $this->getEsiDatasource()) ){
+            $params = [
+                'datasource' => $datasource
+            ];
+            $url .= '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986 );
+        }
         var_dump('fff: getEndpointURL');
         var_dump($url);
         var_dump($this->getEsiUrl());
