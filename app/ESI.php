@@ -12,7 +12,7 @@ use Exodus4D\ESI\Config;
 
 class ESI implements ApiInterface {
 
-    const ESI_TIMEOUT                           = 3;
+    const ESI_TIMEOUT                           = 4;
 
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
     const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
