@@ -18,7 +18,7 @@ class ESIConf extends \Prefab {
         'corporations' => [
             'GET' => '/v3/corporations/{x}/',
             'npccorps' => [
-                'GET' => 'v1/corporations/npccorps/'
+                'GET' => '/v1/corporations/npccorps/'
             ]
         ],
         'characters' => [
