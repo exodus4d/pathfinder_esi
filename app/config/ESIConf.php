@@ -19,7 +19,7 @@ class ESIConf extends \Prefab {
             'GET' => '/v3/corporations/{x}/'
         ],
         'characters' => [
-            'GET' => ' /v4/characters/{x}/',
+            'GET' => '/v4/characters/{x}/',
             'affiliation' => [
                 'POST' => '/v1/characters/affiliation/'
             ],
@@ -55,7 +55,7 @@ class ESIConf extends \Prefab {
                 $tmp = preg_replace($placeholder, $param, $tmp, 1);
             }
 
-            $endpoint =  $tmp;
+            $endpoint =  trim($tmp);
         }
 
         return $endpoint;
