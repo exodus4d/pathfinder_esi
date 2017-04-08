@@ -102,6 +102,7 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
+            $characterData['id'] = $characterId;
         }
 
         return $characterData;
