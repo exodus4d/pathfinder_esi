@@ -69,9 +69,12 @@ class ESI implements ApiInterface {
         return $this->userAgent;
     }
 
+    /**
+     * @param array $characterIds
+     * @return array
+     */
     public function getCharacterAffiliationData(array $characterIds): array {
         $url = $this->getEndpointURL(['characters', 'affiliation', 'POST']);
-       // $url = 'https://esi.tech.ccp.is/latest/characters/affiliation/?datasource=tranquility';
         $characterAffiliationData = [];
 
         $additionalOptions = [
@@ -79,27 +82,12 @@ class ESI implements ApiInterface {
         ];
         $response = $this->request($url, 'POST', '', $additionalOptions);
 
-        var_dump('getCharacterAffiliationData');
-        var_dump($response);
-       /*
-        $requestOptions = [
-            'timeout' => 4,
-            'method' => 'POST',
-            'user_agent' => $this->getUserAgent(),
-            'header' => [
-                'Accept: application/json'
-            ],
-            'content' => json_encode($characterIds, JSON_UNESCAPED_SLASHES)
-        ];
-
-        $response = namespace\Lib\WebClient::instance()->request($url, $requestOptions);
-*/
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
             }
         }
-        var_dump($characterAffiliationData);
+
         return $characterAffiliationData;
     }
 
