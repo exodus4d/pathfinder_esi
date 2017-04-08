@@ -178,6 +178,24 @@ class ESI implements ApiInterface {
         return $allianceData;
     }
 
+    public function isNpcCorporation(int $corporationId): bool {
+        $isNPC = false;
+
+        $npcCorporations = $this->getNpcCorporations();
+
+        return $isNPC;
+    }
+
+    protected function getNpcCorporations(): array{
+        $url = $this->getEndpointURL(['corporations', 'npccorps', 'GET']);
+
+        $response = $this->request($url, 'GET');
+
+        var_dump($response);
+
+        return [];
+    }
+
     /**
      * get/build endpoint URL
      * @param array $path

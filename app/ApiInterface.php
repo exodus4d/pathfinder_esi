@@ -64,4 +64,9 @@ interface ApiInterface {
      */
     public function getAllianceData(int $allianceId): array;
 
+    /**
+     * @param int $corporationId
+     * @return bool
+     */
+    public function isNpcCorporation(int $corporationId): bool;
 }
