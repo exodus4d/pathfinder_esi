@@ -25,6 +25,8 @@ class Character extends mapper\AbstractIterator {
 
         'ancestry_id'       => ['ancestry' => 'id'],
 
-        'corporation_id'    => ['corporation' => 'id']
+        'corporation_id'    => ['corporation' => 'id'],
+
+        'alliance_id'       => ['alliance' => 'id']
     ];
 }
