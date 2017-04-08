@@ -14,8 +14,17 @@ use data\mapper;
 class Character extends mapper\AbstractIterator {
 
     protected static $map = [
-        'name' => 'name',
+        'name'              => 'name',
+        'birthday'          => 'birthday',
+        'gender'            => 'gender',
+        'security_status'   => 'securityStatus',
 
-        'corporation_id' => ['corporation' => 'id']
+        'race_id'           => ['race' => 'id'],
+
+        'bloodline_id'      => ['bloodline' => 'id'],
+
+        'ancestry_id'       => ['ancestry' => 'id'],
+
+        'corporation_id'    => ['corporation' => 'id']
     ];
 }
