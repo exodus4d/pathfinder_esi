@@ -159,14 +159,15 @@ class WebClient extends \Web {
 
         $response = parent::request($url, $options);
 
-        if( strpos($url, 'ui/autopilot/waypoint') !== false){
-var_dump('hhh');
-var_dump($response);
-        }
-
-
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
+
+        if( strpos($url, 'ui/autopilot/waypoint') !== false){
+            var_dump('hhh');
+            var_dump($response);
+            var_dump($responseHeaders);
+            var_dump($responseBody);
+        }
 
         // make sure return type is correct
         if(
