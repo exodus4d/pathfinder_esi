@@ -65,6 +65,12 @@ interface ApiInterface {
     public function getAllianceData(int $allianceId): array;
 
     /**
+     * @param array $universeIds
+     * @return array
+     */
+    public function getUniverseNamesData(array $universeIds): array;
+
+    /**
      * @param int $corporationId
      * @return bool
      */

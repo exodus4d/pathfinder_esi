@@ -178,6 +178,19 @@ class ESI implements ApiInterface {
         return $allianceData;
     }
 
+    public function getUniverseNamesData(array $universeIds): array {
+        $url = $this->getEndpointURL(['universe', 'names', 'POST']);
+
+        $additionalOptions = [
+            'content' => $universeIds
+        ];
+        $response = $this->request($url, 'POST', '', $additionalOptions);
+
+        var_dump($response);
+
+        return [];
+    }
+
     /**
      * @param int $corporationId
      * @return bool
