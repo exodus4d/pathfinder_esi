@@ -16,6 +16,8 @@ class ESI implements ApiInterface {
 
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
     const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
+    const ERROR_ESI_WAYPOINT                    = 'Could not set waypoint.';
+
 
     private $esiUrl                             = '';
     private $esiDatasource                      = '';
@@ -178,6 +180,12 @@ class ESI implements ApiInterface {
         return $allianceData;
     }
 
+    /**
+     * @param int $systemId
+     * @param string $accessToken
+     * @param array $options
+     * @return array
+     */
     public function setWaypoint(int $systemId, string $accessToken, array $options = []): array{
         $urlParams = [
             'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
@@ -195,8 +203,10 @@ class ESI implements ApiInterface {
 
         $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
 
-        var_dump('ggg');
-        var_dump($response);
+        // "null" === success => There is no response body send...
+        if( !is_null($response) ){
+            $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
+        }
 
         return $waypointData;
     }
