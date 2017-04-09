@@ -181,8 +181,8 @@ class ESI implements ApiInterface {
     public function setWaypoint(int $systemId, string $accessToken, array $options = []): array{
         $urlParams = [
             'destination_id'        => $systemId,
-            'add_to_beginning'      => (bool)$options['addToBeginning'],
-            'clear_other_waypoints' => (bool)$options['clearOtherWaypoints']
+            'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
+            'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true)
         ];
 
         $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
