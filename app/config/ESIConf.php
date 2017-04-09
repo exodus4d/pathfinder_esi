@@ -32,6 +32,11 @@ class ESIConf extends \Prefab {
             'ship' => [
                 'GET' => '/v1/characters/{x}/ship/'
             ]
+        ],
+        'universe' => [
+            'names' => [
+                'POST' => '/v2/universe/names/'
+            ]
         ]
     ];
 
