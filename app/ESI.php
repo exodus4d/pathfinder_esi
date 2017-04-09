@@ -252,13 +252,22 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function openWindow(int $targetId, string $accessToken): array{
-        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST']);
+        $urlParams = [
+            'target_id' => $targetId
+        ];
+
+        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST'], [], $urlParams);
         $return = [];
 var_dump('openWin');
 var_dump($url);
 var_dump($targetId);
 var_dump($accessToken);
-        $response = $this->request($url, 'POST', $accessToken);
+        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
+        $additionalOptions = [
+            'content' => $urlParams
+        ];
+
+        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
         var_dump($response);
 
         return $return;
