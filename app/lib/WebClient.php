@@ -184,7 +184,14 @@ class WebClient extends \Web {
             $statusType = $this->getStatusType($statusCode);
 
             switch($statusType){
-                case 'err_client':
+                case 'info':                                                // HTTP 1xx
+                case 'ok':                                                  // HTTP 2xx
+
+                    if($statusCode !== 200){
+                        \Base::instance()->status($statusCode);
+                    }
+                    break;
+                case 'err_client':                                          // HTTP 4xx
                     $errorMsg = $this->getErrorMessageFromJsonResponse(
                         $statusCode,
                         $options['method'],
@@ -193,7 +200,7 @@ class WebClient extends \Web {
                     );
                     $this->getLogger($statusType)->write($errorMsg);
                     break;
-                case 'err_server':
+                case 'err_server':                                          // HTTP 5xx
                     $retry = true;
 
                     if( $retryCount == self::RETRY_COUNT_MAX ){
