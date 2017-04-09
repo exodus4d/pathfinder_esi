@@ -185,7 +185,8 @@ class ESI implements ApiInterface {
             'destination_id'        => $systemId
         ];
 
-        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
+        //$url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
+        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST']);
         $waypointData = [];
 
         var_dump('setWaypoi');
