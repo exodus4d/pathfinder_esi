@@ -79,6 +79,13 @@ interface ApiInterface {
     public function getUniverseNamesData(array $universeIds): array;
 
     /**
+     * @param int $targetId
+     * @param string $accessToken
+     * @return array
+     */
+    public function openWindow(int $targetId, string $accessToken): array;
+
+    /**
      * @param int $corporationId
      * @return bool
      */

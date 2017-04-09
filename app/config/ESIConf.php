@@ -43,6 +43,11 @@ class ESIConf extends \Prefab {
                 'waypoint' => [
                     'POST' => '/v2/ui/autopilot/waypoint/'
                 ]
+            ],
+            'openwindow' => [
+                'information' => [
+                    'POST' => '/v1/ui/openwindow/information/'
+                ]
             ]
         ]
     ];
