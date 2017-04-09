@@ -252,12 +252,15 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function openWindow(int $targetId, string $accessToken): array{
-        $url = $this->getEndpointURL(['corporations', 'npccorps', 'GET']);
+        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST']);
         $return = [];
 var_dump('openWin');
 var_dump($url);
 var_dump($targetId);
 var_dump($accessToken);
+        $response = $this->request($url, 'POST', $accessToken);
+        var_dump($response);
+
         return $return;
     }
 
