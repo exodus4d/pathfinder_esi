@@ -162,13 +162,6 @@ class WebClient extends \Web {
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
 
-        if( strpos($url, 'ui/autopilot/waypoint') !== false){
-            var_dump('hhh');
-            var_dump($response);
-            var_dump($responseHeaders);
-            var_dump($responseBody);
-        }
-
         // make sure return type is correct
         if(
             !is_array($responseBody) &&
@@ -186,10 +179,6 @@ class WebClient extends \Web {
             switch($statusType){
                 case 'info':                                                // HTTP 1xx
                 case 'ok':                                                  // HTTP 2xx
-
-                    if($statusCode !== 200){
-                        \Base::instance()->status($statusCode);
-                    }
                     break;
                 case 'err_client':                                          // HTTP 4xx
                     $errorMsg = $this->getErrorMessageFromJsonResponse(
