@@ -197,6 +197,16 @@ class ESI implements ApiInterface {
  var_dump('stat');
  var_dump($test);
                         break;
+                    case 'solar_system':
+                        $test= (new namespace\Mapper\System($data))->getData();
+                        var_dump('solar_system');
+                        var_dump($test);
+                        break;
+                    case 'inventory_type':
+                        $test= (new namespace\Mapper\InventoryType($data))->getData();
+                        var_dump('inventory_type');
+                        var_dump($test);
+                        break;
                 }
             }
         }
