@@ -186,20 +186,16 @@ class ESI implements ApiInterface {
         ];
 
         $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
-        //$url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST']);
         $waypointData = [];
 
-        var_dump('setWaypoi');
-        var_dump($url);
-
+        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
         $additionalOptions = [
             'content' => $urlParams
         ];
 
-
-        //$response = $this->request($url, 'POST', $accessToken);
         $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
 
+        var_dump('ggg');
         var_dump($response);
 
         return $waypointData;
