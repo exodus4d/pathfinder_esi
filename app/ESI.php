@@ -205,7 +205,8 @@ class ESI implements ApiInterface {
                         $categoryData = [];
                 }
 
-                $universeData = array_merge_recursive ($universeData, $categoryData);
+                //$universeData = array_merge_recursive ($universeData, $categoryData);
+                $universeData += $categoryData;
             }
         }
 
