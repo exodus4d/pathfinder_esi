@@ -197,8 +197,8 @@ class ESI implements ApiInterface {
         ];
 
 
-        $response = $this->request($url, 'POST', $accessToken);
-        //$response = $this->request($url, 'POST', $accessToken, $additionalOptions);
+        //$response = $this->request($url, 'POST', $accessToken);
+        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
 
         var_dump($response);
 
