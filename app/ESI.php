@@ -180,15 +180,30 @@ class ESI implements ApiInterface {
 
     public function getUniverseNamesData(array $universeIds): array {
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
+        $universeData = [];
 
         $additionalOptions = [
             'content' => $universeIds
         ];
         $response = $this->request($url, 'POST', '', $additionalOptions);
 
+        if( !empty($response) ){
+            foreach((array)$response as $data){
+               // $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
+
+                switch($data->category){
+                    case 'station':
+                        $test= (new namespace\Mapper\Station($data))->getData();
+ var_dump('stat');
+ var_dump($test);
+                        break;
+                }
+            }
+        }
+
         var_dump($response);
 
-        return [];
+        return $universeData;
     }
 
     /**
