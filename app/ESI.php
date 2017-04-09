@@ -178,6 +178,10 @@ class ESI implements ApiInterface {
         return $allianceData;
     }
 
+    /**
+     * @param array $universeIds
+     * @return array
+     */
     public function getUniverseNamesData(array $universeIds): array {
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
         $universeData = [];
@@ -189,8 +193,6 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             foreach((array)$response as $data){
-               // $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
-
                 switch($data->category){
                     case 'station':
                         $categoryData = (new namespace\Mapper\Station($data))->getData();
@@ -206,12 +208,8 @@ class ESI implements ApiInterface {
                 }
 
                 $universeData += $categoryData;
-                $universeData += [];
             }
         }
-
-        var_dump('4445');
-        var_dump($universeData);
 
         return $universeData;
     }
