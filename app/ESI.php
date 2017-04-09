@@ -178,6 +178,26 @@ class ESI implements ApiInterface {
         return $allianceData;
     }
 
+    public function setWaypoint(int $systemId, string $accessToken, array $options = []): array{
+        $urlParams = [
+            'destination_id'        => $systemId,
+            'add_to_beginning'      => (bool)$options['addToBeginning'],
+            'clear_other_waypoints' => (bool)$options['clearOtherWaypoints']
+        ];
+
+        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
+        $waypointData = [];
+
+        var_dump('setWaypoi');
+        var_dump($url);
+
+        $response = $this->request($url, 'POST', $accessToken);
+
+        var_dump($response);
+
+        return $waypointData;
+    }
+
     /**
      * @param array $universeIds
      * @return array
@@ -206,7 +226,6 @@ class ESI implements ApiInterface {
                     default:
                         $categoryData = [];
                 }
-
                 $universeData += $categoryData;
             }
         }
@@ -241,16 +260,20 @@ class ESI implements ApiInterface {
     /**
      * get/build endpoint URL
      * @param array $path
+     * @param array $placeholders
      * @param array $params
      * @return string
      */
-    protected function getEndpointURL($path = [], $params = []): string{
-        $url = $this->getEsiUrl() . Config\ESIConf::getEndpoint($path, $params);
+    protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []): string{
+        $url = $this->getEsiUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
+        // add "datasource" parameter (SISI, TQ)
         if( !empty($datasource = $this->getEsiDatasource()) ){
-            $params = [
-                'datasource' => $datasource
-            ];
+            $params['datasource'] = $datasource;
+        }
+
+        if( !empty($params) ){
+            // add URL params
             $url .= '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986 );
         }
 

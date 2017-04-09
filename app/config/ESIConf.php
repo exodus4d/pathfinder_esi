@@ -37,16 +37,23 @@ class ESIConf extends \Prefab {
             'names' => [
                 'POST' => '/v2/universe/names/'
             ]
+        ],
+        'ui' => [
+            'autopilot' => [
+                'waypoint' => [
+                    'POST' => '/v2/ui/autopilot/waypoint/'
+                ]
+            ]
         ]
     ];
 
     /**
      * get an ESI endpoint path
      * @param array $path
-     * @param array $params
+     * @param array $placeholders
      * @return string
      */
-    static function getEndpoint($path = [], $params = []): string{
+    static function getEndpoint($path = [], $placeholders = []): string{
         $endpoint = '';
 
         $tmp = self::SWAGGER_SPEC;
@@ -58,9 +65,9 @@ class ESIConf extends \Prefab {
 
         if(is_string($tmp)){
             // replace vars
-            $placeholder = '/\{x\}/';
-            foreach($params as $param){
-                $tmp = preg_replace($placeholder, $param, $tmp, 1);
+            $pattern = '/\{x\}/';
+            foreach($placeholders as $placeholder){
+                $tmp = preg_replace($pattern, $placeholder, $tmp, 1);
             }
 
             $endpoint =  trim($tmp);

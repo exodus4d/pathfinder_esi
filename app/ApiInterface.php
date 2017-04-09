@@ -65,6 +65,14 @@ interface ApiInterface {
     public function getAllianceData(int $allianceId): array;
 
     /**
+     * @param int $systemId
+     * @param string $accessToken
+     * @param array $options
+     * @return array
+     */
+    public function setWaypoint(int $systemId, string $accessToken, array $options = []): array;
+
+    /**
      * @param array $universeIds
      * @return array
      */
