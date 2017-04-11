@@ -79,6 +79,9 @@ class ESI implements ApiInterface {
 
         var_dump('getServerStatus');
         var_dump($response);
+        if( !empty($response) ){
+            $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
+        }
 
         return $serverStatus;
     }

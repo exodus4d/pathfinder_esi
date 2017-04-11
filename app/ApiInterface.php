@@ -24,6 +24,11 @@ interface ApiInterface {
     public function getUserAgent();
 
     /**
+     * @return array
+     */
+    public function getServerStatus(): array;
+
+    /**
      * get corporation/alliance ids by characterIds
      * @param array $characterIds
      * @return array
