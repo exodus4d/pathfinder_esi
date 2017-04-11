@@ -17,6 +17,7 @@ class ESI implements ApiInterface {
     const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
     const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
     const ERROR_ESI_WAYPOINT                    = 'Could not set waypoint.';
+    const ERROR_ESI_WINDOW                      = 'Could not open client window.';
 
 
     private $esiUrl                             = '';
@@ -258,17 +259,18 @@ class ESI implements ApiInterface {
 
         $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST'], [], $urlParams);
         $return = [];
-var_dump('openWin');
-var_dump($url);
-var_dump($targetId);
-var_dump($accessToken);
+
         // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
         $additionalOptions = [
             'content' => $urlParams
         ];
 
         $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
-        var_dump($response);
+
+        // "null" === success => There is no response body send...
+        if( !is_null($response) ){
+            $return['error'] = self::ERROR_ESI_WINDOW;
+        }
 
         return $return;
     }
