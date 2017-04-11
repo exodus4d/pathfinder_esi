@@ -72,13 +72,14 @@ class ESI implements ApiInterface {
         return $this->userAgent;
     }
 
+    /**
+     * @return array
+     */
     public function getServerStatus(): array{
         $url = $this->getEndpointURL(['status', 'GET']);
         $serverStatus = [];
         $response = $this->request($url, 'GET');
 
-        var_dump('getServerStatus');
-        var_dump($response);
         if( !empty($response) ){
             $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
         }
