@@ -262,14 +262,44 @@ class ESI implements ApiInterface {
         return $universeData;
     }
 
+    /**
+     * @return array
+     */
     public function getUniverseJumps(): array{
         $url = $this->getEndpointURL(['universe', 'system_jumps', 'GET']);
         $systemJumps = [];
 
         $response = $this->request($url, 'GET');
-       var_dump('getUniverseJumps');
-       var_dump($response);
+
+        if( !empty($response) ){
+            foreach((array)$response as $jumpData){
+                $systemJumps[$jumpData->system_id]['jumps'] = (int)$jumpData->ship_jumps;
+            }
+        }
+
         return $systemJumps;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUniverseKills(): array{
+        $url = $this->getEndpointURL(['universe', 'system_kills', 'GET']);
+        $systemKills = [];
+
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            foreach((array)$response as $killData){
+                $systemKills[$killData->system_id] = [
+                    'npc_kills' => (int)$killData->npc_kills,
+                    'pod_kills' => (int)$killData->pod_kills,
+                    'ship_kills' => (int)$killData->ship_kills
+                ];
+            }
+        }
+
+        return $systemKills;
     }
 
     /**

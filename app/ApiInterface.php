@@ -84,6 +84,16 @@ interface ApiInterface {
     public function getUniverseNamesData(array $universeIds): array;
 
     /**
+     * @return array
+     */
+    public function getUniverseJumps(): array;
+
+    /**
+     * @return array
+     */
+    public function getUniverseKills(): array;
+
+    /**
      * @param int $targetId
      * @param string $accessToken
      * @return array
