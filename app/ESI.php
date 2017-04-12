@@ -91,7 +91,7 @@ class ESI implements ApiInterface {
      * @param array $characterIds
      * @return array
      */
-    public function getCharacterAffiliationData(array $characterIds): array {
+    public function getCharacterAffiliationData(array $characterIds): array{
         $url = $this->getEndpointURL(['characters', 'affiliation', 'POST']);
         $characterAffiliationData = [];
 
@@ -166,7 +166,7 @@ class ESI implements ApiInterface {
      * @param int $corporationId
      * @return array
      */
-    public function getCorporationData(int $corporationId): array {
+    public function getCorporationData(int $corporationId): array{
         $url = $this->getEndpointURL(['corporations', 'GET'], [$corporationId]);
         $corporationData = [];
         $response = $this->request($url, 'GET');
@@ -183,7 +183,7 @@ class ESI implements ApiInterface {
      * @param int $allianceId
      * @return array
      */
-    public function getAllianceData(int $allianceId): array {
+    public function getAllianceData(int $allianceId): array{
         $url = $this->getEndpointURL(['alliances', 'GET'], [$allianceId]);
         $allianceData = [];
         $response = $this->request($url, 'GET');
@@ -231,7 +231,7 @@ class ESI implements ApiInterface {
      * @param array $universeIds
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds): array {
+    public function getUniverseNamesData(array $universeIds): array{
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
         $universeData = [];
 
@@ -260,6 +260,16 @@ class ESI implements ApiInterface {
         }
 
         return $universeData;
+    }
+
+    public function getUniverseJumps(): array{
+        $url = $this->getEndpointURL(['universe', 'system_jumps', 'GET']);
+        $systemJumps = [];
+
+        $response = $this->request($url, 'GET');
+       var_dump('getUniverseJumps');
+       var_dump($response);
+        return $systemJumps;
     }
 
     /**
@@ -294,7 +304,7 @@ class ESI implements ApiInterface {
      * @param int $corporationId
      * @return bool
      */
-    public function isNpcCorporation(int $corporationId): bool {
+    public function isNpcCorporation(int $corporationId): bool{
         $npcCorporations = $this->getNpcCorporations();
         return in_array($corporationId, $npcCorporations);
     }
@@ -344,7 +354,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return null|array|\stdClass
      */
-    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []) {
+    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []){
         $responseBody = null;
         $method = strtoupper($method);
 
