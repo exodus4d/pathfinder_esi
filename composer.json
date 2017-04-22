@@ -9,6 +9,12 @@
       "email": "pathfinder@exodus4d.de"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/exodus4d/pathfinder_esi"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "Exodus4D\\ESI\\": "app/"
