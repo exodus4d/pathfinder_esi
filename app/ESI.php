@@ -407,6 +407,9 @@ class ESI implements ApiInterface {
                 }
 
                 if( !empty($additionalOptions['content']) ){
+                    // "Content-Type" Header is required for POST requests
+                    $requestOptions['header'][] = 'Content-Type: application/json';
+
                     $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
                     unset($additionalOptions['content']);
                 }
