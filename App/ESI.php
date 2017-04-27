@@ -31,17 +31,17 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param string $esiUrl
+     * @param string $url
      */
-    public function setEsiUrl(string $esiUrl){
-        $this->esiUrl = $esiUrl;
+    public function setUrl(string $url){
+        $this->esiUrl = $url;
     }
 
     /**
-     * @param string $esiDatasource
+     * @param string $datasource
      */
-    public function setEsiDatasource(string $esiDatasource){
-        $this->esiDatasource = $esiDatasource;
+    public function setDatasource(string $datasource){
+        $this->esiDatasource = $datasource;
     }
 
     /**
@@ -54,14 +54,14 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
-    public function getEsiUrl(): string{
+    public function getUrl(): string{
         return $this->esiUrl;
     }
 
     /**
      * @return string
      */
-    public function getEsiDatasource(): string{
+    public function getDatasource(): string{
         return $this->esiDatasource;
     }
 
@@ -362,10 +362,10 @@ class ESI implements ApiInterface {
      * @return string
      */
     protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []): string{
-        $url = $this->getEsiUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
+        $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
         // add "datasource" parameter (SISI, TQ)
-        if( !empty($datasource = $this->getEsiDatasource()) ){
+        if( !empty($datasource = $this->getDatasource()) ){
             $params['datasource'] = $datasource;
         }
 
