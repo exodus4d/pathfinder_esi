@@ -228,7 +228,7 @@ class ESI implements ApiInterface {
     }
 
     public function getCorporationRoles(int $corporationId, string $accessToken): array{
-        $url = $this->getEndpointURL(['corporations', 'npccorps', 'GET']);
+        $url = $this->getEndpointURL(['corporations', 'roles', 'GET']);
         $rolesData = [];
         $response = $this->request($url, 'GET', $accessToken);
         var_dump('getCorporationRoles');
