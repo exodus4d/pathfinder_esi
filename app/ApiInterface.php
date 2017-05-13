@@ -78,6 +78,13 @@ interface ApiInterface {
     public function setWaypoint(int $systemId, string $accessToken, array $options = []): array;
 
     /**
+     * @param int $corporationId
+     * @param string $accessToken
+     * @return array
+     */
+    public function getCorporationRoles(int $corporationId, string $accessToken): array;
+
+    /**
      * @param array $universeIds
      * @return array
      */
