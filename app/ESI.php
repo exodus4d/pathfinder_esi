@@ -227,16 +227,21 @@ class ESI implements ApiInterface {
         return $waypointData;
     }
 
+    /**
+     * @param int $corporationId
+     * @param string $accessToken
+     * @return array
+     */
     public function getCorporationRoles(int $corporationId, string $accessToken): array{
         $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
         $response = $this->request($url, 'GET', $accessToken);
-        var_dump('getCorporationRoles');
-        var_dump($url);
+
         if( !empty($response) ){
-            var_dump($response);
+            foreach((array)$response as $characterRuleData){
+                $rolesData[(int)$characterRuleData->character_id] = $characterRuleData->roles;
+            }
         }
-        die();
 
         return $rolesData;
     }
