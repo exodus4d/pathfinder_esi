@@ -239,7 +239,7 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             foreach((array)$response as $characterRuleData){
-                $rolesData[(int)$characterRuleData->character_id] = $characterRuleData->roles;
+                $rolesData[(int)$characterRuleData->character_id] = array_map('strtolower', $characterRuleData->roles);
             }
         }
 
