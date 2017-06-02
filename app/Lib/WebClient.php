@@ -172,6 +172,7 @@ class WebClient extends \Web {
         // make sure return type is correct
         if(
             !is_array($responseBody) &&
+            !is_bool($responseBody) &&
             !($responseBody instanceof \stdClass)
         ){
             $responseBody = null;
