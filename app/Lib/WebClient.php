@@ -159,6 +159,13 @@ class WebClient extends \Web {
 
         $response = parent::request($url, $options);
 
+        if($url == 'https://esi.tech.ccp.is/v1/characters/1946320202/online/?datasource=tranquility'){
+            var_dump('request()');
+            var_dump($response);
+            var_dump(json_decode($response['body']));
+            var_dump( gettype( json_decode($response['body']) ) );
+        }
+
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
 
