@@ -170,8 +170,10 @@ class ESI implements ApiInterface {
     public function getCharacterOnlineData(int $characterId, string $accessToken): array{
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
 
+        $isOnline = $this->request($url, 'GET', $accessToken);
+
         $onlineData = [
-            'online' =>  $this->request($url, 'GET', $accessToken)
+            'online' => is_bool($isOnline) ? $isOnline : null
         ];
 
         return $onlineData;
