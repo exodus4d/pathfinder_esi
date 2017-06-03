@@ -165,12 +165,13 @@ class ESI implements ApiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken): array{
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
 
-        $isOnline = $this->request($url, 'GET', $accessToken);
+        $isOnline = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         $onlineData = [
             'online' => is_bool($isOnline) ? $isOnline : null
@@ -265,15 +266,15 @@ class ESI implements ApiInterface {
 
     /**
      * @param array $universeIds
+     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds): array{
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
         $universeData = [];
 
-        $additionalOptions = [
-            'content' => $universeIds
-        ];
+        $additionalOptions['content'] = $universeIds;
+
         $response = $this->request($url, 'POST', '', $additionalOptions);
 
         if( !empty($response) ){

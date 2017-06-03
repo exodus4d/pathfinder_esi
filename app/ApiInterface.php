@@ -60,9 +60,10 @@ interface ApiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken): array;
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array;
 
     /**
      * @param int $corporationId
@@ -93,9 +94,10 @@ interface ApiInterface {
 
     /**
      * @param array $universeIds
+     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds): array;
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array;
 
     /**
      * @return array
