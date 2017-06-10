@@ -32,6 +32,6 @@ class Online extends mapper\AbstractIterator {
 
         iterator_apply($this, 'self::recursiveIterator', [$this]);
 
-        return iterator_to_array($this, false);
+        return iterator_to_array($this, true);
     }
 }
