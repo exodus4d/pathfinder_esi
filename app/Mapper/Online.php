@@ -14,8 +14,24 @@ class Online extends mapper\AbstractIterator {
 
     protected static $map = [
         'online' => 'online',
-        'last_login' => 'lastLogin',
         'last_logout' => 'lastLogout',
         'logins' => 'logins'
     ];
+
+    /**
+     * map iterator
+     * @return array
+     */
+    public function getData(){
+
+        // "system trueSec" mapping -------------------------------------------
+        self::$map['lastLogin'] = function($iterator){
+            $trueSec = $iterator['last_login'];
+            return $trueSec;
+        };
+
+        iterator_apply($this, 'self::recursiveIterator', [$this]);
+
+        return iterator_to_array($this, false);
+    }
 }
