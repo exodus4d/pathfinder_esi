@@ -24,7 +24,7 @@ class Online extends mapper\AbstractIterator {
     public function getData(){
 
         self::$map['last_login'] = function($iterator){
-            return (new \DateTime($iterator['last_login']))->format('Y-m-d H:i:s');
+            return (new \DateTime($iterator->current()))->format('Y-m-d H:i:s');
         };
 
         self::$map['last_logout'] = function($iterator){
