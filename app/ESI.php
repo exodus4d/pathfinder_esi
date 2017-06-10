@@ -187,20 +187,18 @@ class ESI implements ApiInterface {
      */
     public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
+        $onlineData = [];
 
-        /*
-        $isOnline = $this->request($url, 'GET', $accessToken, $additionalOptions);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         $onlineData = [
-            'online' => is_bool($isOnline) ? $isOnline : null
+            'online' => is_bool($response) ? $response : null
         ];
-        */
-        $onlineData = [];
-        $response = $test = json_decode('{"online": false, "last_login": "2017-05-12T17:30:55Z", "last_logout": "2017-05-12T17:24:34Z", "logins": 1329}');
 
+        /* v2 endpoint (WIP)
         if( !empty($response) ){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
-        }
+        } */
 
         return $onlineData;
     }
