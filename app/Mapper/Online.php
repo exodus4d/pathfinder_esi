@@ -23,14 +23,12 @@ class Online extends mapper\AbstractIterator {
      */
     public function getData(){
 
-        self::$map['last_login'] = function($iterator){
+        $convertTime = function($iterator){
             return (new \DateTime($iterator->current()))->format('Y-m-d H:i:s');
         };
 
-        self::$map['last_logout'] = function($iterator){
-            $trueSec = $iterator['last_logout'] . ' bb';
-            return $trueSec;
-        };
+        self::$map['last_login'] = $convertTime;
+        self::$map['last_logout'] = $convertTime;
 
         $data = parent::getData();
         $data = $this->camelCaseKeys($data);
