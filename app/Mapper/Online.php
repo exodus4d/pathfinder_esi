@@ -14,7 +14,6 @@ class Online extends mapper\AbstractIterator {
 
     protected static $map = [
         'online' => 'online',
-        'last_logout' => 'lastLogout',
         'logins' => 'logins'
     ];
 
@@ -24,12 +23,18 @@ class Online extends mapper\AbstractIterator {
      */
     public function getData(){
 
-        // "system trueSec" mapping -------------------------------------------
         self::$map['last_login'] = function($iterator){
-            $trueSec = $iterator['last_login'] . ' jjj';
+            $trueSec = $iterator['last_login'] . ' aa';
             return $trueSec;
         };
 
-        return parent::getData();
+        self::$map['last_logout'] = function($iterator){
+            $trueSec = $iterator['last_logout'] . ' bb';
+            return $trueSec;
+        };
+
+        $data = parent::getData();
+        $data = $this->camelCaseKeys($data);
+        return $data;
     }
 }
