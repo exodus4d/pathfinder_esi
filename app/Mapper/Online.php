@@ -25,7 +25,7 @@ class Online extends mapper\AbstractIterator {
     public function getData(){
 
         // "system trueSec" mapping -------------------------------------------
-        self::$map['last_login'] = function($iterator){
+        self::$map['lastLogin'] = function($iterator){
             $trueSec = $iterator['last_login'];
             return $trueSec;
         };
