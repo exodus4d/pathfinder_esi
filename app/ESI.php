@@ -12,17 +12,20 @@ use Exodus4D\ESI\Config;
 
 class ESI implements ApiInterface {
 
-    const ESI_TIMEOUT                           = 4;
+    const ESI_TIMEOUT                               = 4;
 
-    const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
-    const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
-    const ERROR_ESI_WAYPOINT                    = 'Could not set waypoint.';
-    const ERROR_ESI_WINDOW                      = 'Could not open client window.';
+    const ERROR_ESI_URL                             = 'Invalid ESI API url. %s';
+    const ERROR_ESI_METHOD                          = 'Invalid ESI API HTTP request method. %s: %s';
+    const ERROR_ESI_WAYPOINT                        = 'Could not set waypoint.';
+    const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
-
-    private $esiUrl                             = '';
-    private $esiDatasource                      = '';
-    private $userAgent                          = '';
+    /**
+     * @var string $esiUrl                          Base ESI Domain (required)
+     * @var string $esiUserAgent                    User-Agent Header (required)
+     * @var string $esiDatasource                   Datasource 'singularity' || 'tranquility'
+     * @var string $endpointVersion                 Overwrite versioned endpoint URL (for testing)
+     */
+    private $esiUrl, $esiUserAgent, $esiDatasource, $endpointVersion   = '';
 
     /**
      * ESI constructor.
@@ -38,6 +41,13 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param string $userAgent
+     */
+    public function setUserAgent(string $userAgent){
+        $this->esiUserAgent = $userAgent;
+    }
+
+    /**
      * @param string $datasource
      */
     public function setDatasource(string $datasource){
@@ -45,10 +55,10 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param string $userAgent
+     * @param string $version
      */
-    public function setUserAgent(string $userAgent){
-        $this->userAgent = $userAgent;
+    public function setVersion(string $version){
+        $this->endpointVersion = $version;
     }
 
     /**
@@ -61,6 +71,13 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
+    public function getUserAgent(): string{
+        return $this->esiUserAgent;
+    }
+
+    /**
+     * @return string
+     */
     public function getDatasource(): string{
         return $this->esiDatasource;
     }
@@ -68,8 +85,8 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
-    public function getUserAgent(): string{
-        return $this->userAgent;
+    public function getVersion(): string{
+        return $this->endpointVersion;
     }
 
     /**
@@ -171,11 +188,19 @@ class ESI implements ApiInterface {
     public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
 
+        /*
         $isOnline = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         $onlineData = [
             'online' => is_bool($isOnline) ? $isOnline : null
         ];
+        */
+        $onlineData = [];
+        $response = $test = json_decode('{"online": false, "last_login": "2017-05-12T17:30:55Z", "last_logout": "2017-05-12T17:24:34Z", "logins": 1329}');
+
+        if( !empty($response) ){
+            $onlineData = (new namespace\Mapper\Online($response))->getData();
+        }
 
         return $onlineData;
     }
@@ -401,9 +426,13 @@ class ESI implements ApiInterface {
     protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []): string{
         $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
-        // add "datasource" parameter (SISI, TQ)
+        // add "datasource" parameter (SISI, TQ) (optional)
         if( !empty($datasource = $this->getDatasource()) ){
             $params['datasource'] = $datasource;
+        }
+        // overwrite endpoint version (debug)
+        if( !empty($endpointVersion = $this->getVersion()) ){
+            $url = preg_replace('/(v[\d]+|latest|dev|legacy)/',$endpointVersion, $url, 1);
         }
 
         if( !empty($params) ){
