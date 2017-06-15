@@ -22,6 +22,9 @@ class ESIConf extends \Prefab {
             'GET' => '/v3/corporations/{x}/',
             'npccorps' => [
                 'GET' => '/v1/corporations/npccorps/'
+            ],
+            'roles' => [
+                'GET' => '/v1/corporations/{x}/roles/'
             ]
         ],
         'characters' => [
@@ -34,6 +37,9 @@ class ESIConf extends \Prefab {
             ],
             'ship' => [
                 'GET' => '/v1/characters/{x}/ship/'
+            ],
+            'online' => [
+                'GET' => '/v1/characters/{x}/online/'
             ]
         ],
         'universe' => [

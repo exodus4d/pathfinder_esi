@@ -58,6 +58,14 @@ interface ApiInterface {
     public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []): array;
 
     /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array;
+
+    /**
      * @param int $corporationId
      * @return array
      */
@@ -78,10 +86,18 @@ interface ApiInterface {
     public function setWaypoint(int $systemId, string $accessToken, array $options = []): array;
 
     /**
-     * @param array $universeIds
+     * @param int $corporationId
+     * @param string $accessToken
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds): array;
+    public function getCorporationRoles(int $corporationId, string $accessToken): array;
+
+    /**
+     * @param array $universeIds
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array;
 
     /**
      * @return array

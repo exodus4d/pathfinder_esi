@@ -12,17 +12,20 @@ use Exodus4D\ESI\Config;
 
 class ESI implements ApiInterface {
 
-    const ESI_TIMEOUT                           = 4;
+    const ESI_TIMEOUT                               = 4;
 
-    const ERROR_ESI_URL                         = 'Invalid ESI API url. %s';
-    const ERROR_ESI_METHOD                      = 'Invalid ESI API HTTP request method. %s: %s';
-    const ERROR_ESI_WAYPOINT                    = 'Could not set waypoint.';
-    const ERROR_ESI_WINDOW                      = 'Could not open client window.';
+    const ERROR_ESI_URL                             = 'Invalid ESI API url. %s';
+    const ERROR_ESI_METHOD                          = 'Invalid ESI API HTTP request method. %s: %s';
+    const ERROR_ESI_WAYPOINT                        = 'Could not set waypoint.';
+    const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
-
-    private $esiUrl                             = '';
-    private $esiDatasource                      = '';
-    private $userAgent                          = '';
+    /**
+     * @var string $esiUrl                          Base ESI Domain (required)
+     * @var string $esiUserAgent                    User-Agent Header (required)
+     * @var string $esiDatasource                   Datasource 'singularity' || 'tranquility'
+     * @var string $endpointVersion                 Overwrite versioned endpoint URL (for testing)
+     */
+    private $esiUrl, $esiUserAgent, $esiDatasource, $endpointVersion   = '';
 
     /**
      * ESI constructor.
@@ -38,6 +41,13 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param string $userAgent
+     */
+    public function setUserAgent(string $userAgent){
+        $this->esiUserAgent = $userAgent;
+    }
+
+    /**
      * @param string $datasource
      */
     public function setDatasource(string $datasource){
@@ -45,10 +55,10 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param string $userAgent
+     * @param string $version
      */
-    public function setUserAgent(string $userAgent){
-        $this->userAgent = $userAgent;
+    public function setVersion(string $version){
+        $this->endpointVersion = $version;
     }
 
     /**
@@ -61,6 +71,13 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
+    public function getUserAgent(): string{
+        return $this->esiUserAgent;
+    }
+
+    /**
+     * @return string
+     */
     public function getDatasource(): string{
         return $this->esiDatasource;
     }
@@ -68,8 +85,8 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
-    public function getUserAgent(): string{
-        return $this->userAgent;
+    public function getVersion(): string{
+        return $this->endpointVersion;
     }
 
     /**
@@ -163,6 +180,30 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array{
+        $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
+        $onlineData = [];
+
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
+
+        $onlineData = [
+            'online' => is_bool($response) ? $response : null
+        ];
+
+        /* v2 endpoint (WIP)
+        if( !empty($response) ){
+            $onlineData = (new namespace\Mapper\Online($response))->getData();
+        } */
+
+        return $onlineData;
+    }
+
+    /**
      * @param int $corporationId
      * @return array
      */
@@ -228,16 +269,35 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param array $universeIds
+     * @param int $corporationId
+     * @param string $accessToken
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds): array{
+    public function getCorporationRoles(int $corporationId, string $accessToken): array{
+        $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
+        $rolesData = [];
+        $response = $this->request($url, 'GET', $accessToken);
+
+        if( !empty($response) ){
+            foreach((array)$response as $characterRuleData){
+                $rolesData[(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
+            }
+        }
+
+        return $rolesData;
+    }
+
+    /**
+     * @param array $universeIds
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array{
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
         $universeData = [];
 
-        $additionalOptions = [
-            'content' => $universeIds
-        ];
+        $additionalOptions['content'] = $universeIds;
+
         $response = $this->request($url, 'POST', '', $additionalOptions);
 
         if( !empty($response) ){
@@ -364,9 +424,13 @@ class ESI implements ApiInterface {
     protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []): string{
         $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
-        // add "datasource" parameter (SISI, TQ)
+        // add "datasource" parameter (SISI, TQ) (optional)
         if( !empty($datasource = $this->getDatasource()) ){
             $params['datasource'] = $datasource;
+        }
+        // overwrite endpoint version (debug)
+        if( !empty($endpointVersion = $this->getVersion()) ){
+            $url = preg_replace('/(v[\d]+|latest|dev|legacy)/',$endpointVersion, $url, 1);
         }
 
         if( !empty($params) ){
