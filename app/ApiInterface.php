@@ -98,6 +98,12 @@ interface ApiInterface {
     public function getRegions(): array;
 
     /**
+     * @param int $regionId
+     * @return array
+     */
+    public function getRegionData(int $regionId): array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
