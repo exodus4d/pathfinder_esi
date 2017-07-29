@@ -302,13 +302,20 @@ class ESI implements ApiInterface {
         return $regionData;
     }
 
+    /**
+     * @param int $regionId
+     * @return array
+     */
     public function getRegionData(int $regionId): array{
         $url = $this->getEndpointURL(['universe', 'regions', 'GET'], [$regionId]);
         $regionData = [];
         $response = $this->request($url, 'GET');
 
-        var_dump($response);
-        return $response;
+        if( !empty($response) ){
+            $regionData = (new namespace\Mapper\Region($response))->getData();
+        }
+
+        return $regionData;
     }
 
     /**
