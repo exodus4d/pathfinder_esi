@@ -288,6 +288,18 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getRegions(): array{
+        $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
+        $regionData = [];
+        $response = $this->request($url, 'GET');
+        $regionData = $response;
+
+        return $regionData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

@@ -93,6 +93,11 @@ interface ApiInterface {
     public function getCorporationRoles(int $corporationId, string $accessToken): array;
 
     /**
+     * @return array
+     */
+    public function getRegions(): array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
