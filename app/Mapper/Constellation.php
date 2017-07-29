@@ -16,10 +16,12 @@ class Constellation extends mapper\AbstractIterator {
         'constellation_id' => 'id',
         'name' => 'name',
         'region_id' => 'regionId',
-        'position' => 'test',
-        'x' => 'x',
-        'y' => 'y',
-        'z' => 'z',
+        'position' => [
+            'x' => 'x',
+            'y' => 'y',
+            'z' => 'z',
+        ],
+
         'systems' => 'systems'
     ];
 }
