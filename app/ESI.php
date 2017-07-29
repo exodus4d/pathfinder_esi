@@ -294,7 +294,10 @@ class ESI implements ApiInterface {
         $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
         $regionData = [];
         $response = $this->request($url, 'GET');
-        $regionData = $response;
+
+        if( !empty($response) ){
+            $regionData = array_unique( array_map('intval', $response) );
+        }
 
         return $regionData;
     }
