@@ -319,6 +319,21 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getConstellations(): array{
+        $url = $this->getEndpointURL(['universe', 'constellations', 'list', 'GET']);
+        $constellationData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $constellationData = array_unique( array_map('intval', $response) );
+        }
+
+        return $constellationData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

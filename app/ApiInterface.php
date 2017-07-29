@@ -104,6 +104,11 @@ interface ApiInterface {
     public function getRegionData(int $regionId): array;
 
     /**
+     * @return array
+     */
+    public function getConstellations(): array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

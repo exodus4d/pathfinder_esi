@@ -57,6 +57,12 @@ class ESIConf extends \Prefab {
                 'list' => [
                     'GET' => '/v1/universe/regions/'
                 ]
+            ],
+            'constellations' => [
+                'GET' => '/v1/universe/constellations/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/constellations/'
+                ]
             ]
         ],
         'ui' => [
