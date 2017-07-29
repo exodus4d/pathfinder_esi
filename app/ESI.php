@@ -307,6 +307,7 @@ class ESI implements ApiInterface {
         $regionData = [];
         $response = $this->request($url, 'GET');
 
+        var_dump($response);
         return $response;
     }
 
