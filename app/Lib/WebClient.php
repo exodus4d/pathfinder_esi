@@ -100,19 +100,19 @@ class WebClient extends \Web {
     public function getLogger(string $statusType): \Log{
         switch($statusType){
             case 'err_server':
-                $logfile = 'esi.error.server';
+                $logfile = 'esi_error_server';
                 break;
             case 'err_client':
-                $logfile = 'esi.error.client';
+                $logfile = 'esi_error_client';
                 break;
             case 'resource_legacy':
-                $logfile = 'esi.resource.legacy';
+                $logfile = 'esi_resource_legacy';
                 break;
             case 'resource_deprecated':
-                $logfile = 'esi.resource.deprecated';
+                $logfile = 'esi_resource_deprecated';
                 break;
             default:
-                $logfile = 'esi.error.unknown';
+                $logfile = 'esi_error_unknown';
         }
         return new \Log($logfile . '.log');
     }
