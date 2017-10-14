@@ -29,6 +29,16 @@ class WebClient extends \Web {
      */
     private $eol                                = "\r\n";
 
+    protected function parseHeaders(array $headers = []): array {
+        var_dump('parseHeaders()');
+        $parsedHeaders = [];
+        foreach($headers as $header){
+            $parts = explode(':', $header, 2);
+            $parsedHeaders[$parts[0]] = isset($parts[1]) ? $parts[1]:  '';
+        }
+        return $parsedHeaders;
+    }
+
     /**
      * @param array $headers
      * @return int
@@ -164,7 +174,7 @@ class WebClient extends \Web {
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
 var_dump($responseHeaders);
-var_dump($responseBody);
+var_dump($this->parseHeaders($responseHeaders));
         // make sure return type is correct
         if(
             !is_array($responseBody) &&
