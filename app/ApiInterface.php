@@ -133,9 +133,10 @@ interface ApiInterface {
 
     /**
      * @param int $typeId
+     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId): array;
+    public function getUniverseTypesData(int $typeId, array $additionalOptions = []): array;
 
     /**
      * @param int $targetId
