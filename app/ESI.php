@@ -425,6 +425,18 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $typeId
+     * @return array
+     */
+    public function getUniverseTypesData(int $typeId): array {
+        $url = $this->getEndpointURL(['universe', 'types', 'GET'], [$typeId]);
+        $typesData = [];
+        $response = $this->request($url, 'GET');
+        var_dump($response);
+        return $typesData;
+    }
+
+    /**
      * @param int $targetId
      * @param string $accessToken
      * @return array

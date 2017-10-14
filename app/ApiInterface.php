@@ -132,6 +132,12 @@ interface ApiInterface {
     public function getUniverseKills(): array;
 
     /**
+     * @param int $typeId
+     * @return array
+     */
+    public function getUniverseTypesData(int $typeId): array;
+
+    /**
      * @param int $targetId
      * @param string $accessToken
      * @return array
