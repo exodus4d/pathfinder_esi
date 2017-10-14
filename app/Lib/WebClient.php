@@ -146,7 +146,12 @@ class WebClient extends \Web {
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
 
-        var_dump(preg_grep('/^X-Esi-/i', $headers));
+        $EsiHeaders = array_filter($headers, function($key){
+            return preg_match('/^x-esi-/i', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        var_dump($headers);
+        var_dump($EsiHeaders);
     }
 
     /**
@@ -177,8 +182,7 @@ class WebClient extends \Web {
 
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
-var_dump($responseHeaders);
-var_dump($this->parseHeaders($responseHeaders));
+
         // make sure return type is correct
         if(
             !is_array($responseBody) &&
@@ -189,8 +193,9 @@ var_dump($this->parseHeaders($responseHeaders));
         }
 
         if( !empty($responseHeaders)){
+            $parsedResponseHeaders = $this->parseHeaders($responseHeaders);
             // check response headers
-            $this->checkResponseHeaders($responseHeaders, $url);
+            $this->checkResponseHeaders($parsedResponseHeaders, $url);
             $statusCode = $this->getStatusCodeFromHeaders($responseHeaders);
             $statusType = $this->getStatusType($statusCode);
 
