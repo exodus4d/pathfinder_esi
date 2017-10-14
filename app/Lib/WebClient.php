@@ -29,12 +29,16 @@ class WebClient extends \Web {
      */
     private $eol                                = "\r\n";
 
+    /**
+     * parse array with HTTP header data
+     * @param array $headers
+     * @return array
+     */
     protected function parseHeaders(array $headers = []): array {
-        var_dump('parseHeaders()');
         $parsedHeaders = [];
         foreach($headers as $header){
             $parts = explode(':', $header, 2);
-            $parsedHeaders[$parts[0]] = isset($parts[1]) ? $parts[1]:  '';
+            $parsedHeaders[strtolower(trim($parts[0]))] = isset($parts[1]) ? trim($parts[1]) :  '';
         }
         return $parsedHeaders;
     }
