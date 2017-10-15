@@ -155,6 +155,8 @@ class WebClient extends \Web {
                 }
                 $errorCount = (int)$esiErrorRate[$normalizedUrl]['count'] + 1;
                 $esiErrorRate[$normalizedUrl]['count'] = $errorCount;
+                $esiErrorRate[$normalizedUrl.'aa']['count'] = 44;
+                $esiErrorRate[$normalizedUrl.'bb']['count'] = 22;
 
                 // sort by error count
                 //arsort($esiErrorRate, SORT_NUMERIC );
