@@ -11,9 +11,13 @@ namespace Exodus4D\ESI\Lib;
 
 class WebClient extends \Web {
 
+    const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
+
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
     const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
+    const ERROR_LIMIT_CRITICAL                  = 'ESI error limit reached critical level. url: %s | errorCount: %s | errorRemainCount: %s';
+    const ERROR_LIMIT_EXCEEDED                  = 'ESI error limit exceeded. We are blocked for (%s seconds)';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -137,58 +141,67 @@ class WebClient extends \Web {
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
 
-
         if($statusCode >= 200 && $statusCode <= 500){
             $esiHeaders = array_filter($headers, function($key){
                 return preg_match('/^x-esi-/i', $key);
             }, ARRAY_FILTER_USE_KEY);
 
+            if(array_key_exists('x-esi-error-limit-reset', $esiHeaders)){
+                // time in seconds until current error limit "windows" reset
+                $esiErrorLimitReset = (int)$esiHeaders['x-esi-error-limit-reset'];
 
-            if(
-                array_key_exists('x-esi-error-limit-remain', $esiHeaders) &&
-                array_key_exists('x-esi-error-limit-reset', $esiHeaders)
-            ){
-                $normalizedUrl = strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?');
+                // block further api calls for this URL until error limit is reset/clear
+                $blockUrl = false;
+
+                // get "normalized" url without params/placeholders
+                $normalizedUrl = $this->getNormalizedUrlPath($url);
+
                 $f3 = \Base::instance();
-                if(!$f3->exists('test_count', $esiErrorRate)){
+                if(!$f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
                     $esiErrorRate = [];
                 }
+                // increase error count for this $url
                 $errorCount = (int)$esiErrorRate[$normalizedUrl]['count'] + 1;
                 $esiErrorRate[$normalizedUrl]['count'] = $errorCount;
 
-                // sort by error count
-                //arsort($esiErrorRate, SORT_NUMERIC );
-var_dump('checkResponseHeaders()');
-var_dump($esiHeaders);
-var_dump($url);
-var_dump(parse_url($url, PHP_URL_PATH));
-var_dump($esiErrorRate);
+                // sort by error count desc
                 uasort($esiErrorRate, function($a, $b) {
                     return $b['count'] <=> $a['count'];
                 });
 
-                if($errorCount > 2){
-                    // to many error, block url until error limit reset
+                if(array_key_exists('x-esi-error-limited', $esiHeaders)){
+                    // we are blocked until new error limit window opens this should never happen
+                    $blockUrl = true;
+                    $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_EXCEEDED, $esiErrorLimitReset));
+                }
+
+                if(array_key_exists('x-esi-error-limit-remain', $esiHeaders)){
+                    // remaining errors left until reset/clear
+                    $esiErrorLimitRemain = (int)$esiHeaders['x-esi-error-limit-remain'];
+
+                    if($errorCount > 2 || $esiErrorLimitRemain < 10){
+                        $blockUrl = true;
+                        $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $normalizedUrl, $errorCount, $esiErrorLimitRemain));
+                    }
+                }
+
+                if($blockUrl){
+                    // to many error, block uri until error limit reset
                     $esiErrorRate[$normalizedUrl]['blocked'] = true;
                 }
-var_dump($esiErrorRate);
 
-                $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
+                $f3->set(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate, $esiErrorLimitReset);
             }
-/*
-            if(array_key_exists('x-esi-error-limited', $esiHeaders)){
-                // we are blocked until new error limit window opens
-            }elseif(
-                isset($esiHeaders['x-esi-error-limit-reset']) &&
-                isset($esiHeaders['x-esi-error-limit-remain']) &&
-                (int)$esiHeaders['x-esi-error-limit-remain'] > 0 &&
-                (int)$esiHeaders['x-esi-error-limit-remain'] < 3 &&
-            ){
-
-            } */
-
         }
+    }
 
+    /**
+     * get URL path from $url, removes path IDs, parameters, scheme and domain
+     * @param $url
+     * @return string
+     */
+    protected function getNormalizedUrlPath($url): string {
+        return parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH);
     }
 
     /**
