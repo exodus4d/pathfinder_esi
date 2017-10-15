@@ -232,26 +232,24 @@ class WebClient extends \Web {
       return $valid;
     }
 
+    /**
+     * check API url against blocked API endpoints blacklist
+     * @param string $url
+     * @return bool
+     */
     public function isBlockedUrl(string $url): bool {
         $isBlocked = false;
         $f3 = \Base::instance();
         if($f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
-
+            // check url path if blocked
             $urlPath = $this->getNormalizedUrlPath($url);
-
             $esiErrorData = array_filter($esiErrorRate, function($value, $key) use (&$urlPath){
-                return ($key === $urlPath && !$value['blocked']);
+                return ($key === $urlPath && $value['blocked']);
             }, ARRAY_FILTER_USE_BOTH);
 
             if(!empty($esiErrorData)){
-                var_dump('isBlockedUrl()');
-                var_dump($esiErrorRate);
-                var_dump($url);
-                var_dump($urlPath);
-
-                var_dump($esiErrorData);
+                $isBlocked = true;
             }
-
         }
 
         return $isBlocked;
