@@ -158,7 +158,7 @@ class WebClient extends \Web {
 var_dump($esiHeaders);
 var_dump($esiErrorRate);
 var_dump($url);
-var_dump( preg_replace('/\/(\d+)\//', '{x}', $url) );
+var_dump( preg_replace('/\/(\d+)\//', '/{x}/', $url) );
                 $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
             }
 /*
