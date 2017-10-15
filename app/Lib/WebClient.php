@@ -50,8 +50,8 @@ class WebClient extends \Web {
     protected function getStatusCodeFromHeaders(array $headers = []): int {
         $statusCode = 0;
 
-        foreach($headers as $header){
-            if(preg_match('/HTTP\/1\.\d (\d{3}?)/', $header, $matches)){
+        foreach($headers as $key => $value){
+            if(preg_match('/HTTP\/1\.\d (\d{3}?)/', $key, $matches)){
                 $statusCode = (int)$matches[1];
                 break;
             }
