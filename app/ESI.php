@@ -28,6 +28,12 @@ class ESI implements ApiInterface {
     private $esiUrl, $esiUserAgent, $esiDatasource, $endpointVersion   = '';
 
     /**
+     * debugLevel
+     * @var int
+     */
+    private $debugLevel = 0;
+
+    /**
      * ESI constructor.
      */
     public function __construct(){
@@ -52,6 +58,13 @@ class ESI implements ApiInterface {
      */
     public function setDatasource(string $datasource){
         $this->esiDatasource = $datasource;
+    }
+
+    /**
+     * @param int $debug
+     */
+    public function setDebugLevel(int $debug){
+        $this->debugLevel = $debug;
     }
 
     /**
@@ -80,6 +93,13 @@ class ESI implements ApiInterface {
      */
     public function getDatasource(): string{
         return $this->esiDatasource;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDebugLevel(): int {
+        return $this->debugLevel;
     }
 
     /**
@@ -531,7 +551,7 @@ class ESI implements ApiInterface {
         $responseBody = null;
         $method = strtoupper($method);
 
-        $webClient = namespace\Lib\WebClient::instance();
+        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel());
 
         if( \Audit::instance()->url($url) ){
             // check if url is blocked (error limit exceeded)

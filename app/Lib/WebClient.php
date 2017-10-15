@@ -31,6 +31,12 @@ class WebClient extends \Web {
     // ->this is because CREST is not very stable
     const RETRY_COUNT_MAX                       = 2;
 
+    public function __construct($a, $b){
+        var_dump('__construct');
+        var_dump($a);
+        var_dump($b);
+    }
+
     /**
      * parse array with HTTP header data
      * @param array $headers
