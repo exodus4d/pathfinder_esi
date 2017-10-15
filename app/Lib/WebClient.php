@@ -47,8 +47,12 @@ class WebClient extends \Web {
      * @param array $headers
      * @return int
      */
-    protected function getStatusCodeFromHeaders($headers = []){
+    protected function getStatusCodeFromHeaders(array $headers = []): int {
         $statusCode = 0;
+
+        $test = preg_grep('/HTTP\/1\.\d (\d{3}?)/i', array_keys($headers));
+        var_dump('getStatus..');
+        var_dump($test);
 
         if(
         preg_match(
@@ -137,7 +141,8 @@ class WebClient extends \Web {
      * @param string $url
      */
     protected function checkResponseHeaders(array $headers, string $url){
-        $headers = (array)$headers;
+
+        $statusCode = $this->getStatusCodeFromHeaders($headers);
 
         if( preg_grep('/^Warning: 199/i', $headers) ){
             $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url));
