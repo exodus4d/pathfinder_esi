@@ -155,21 +155,19 @@ class WebClient extends \Web {
                 }
                 $errorCount = (int)$esiErrorRate[$normalizedUrl]['count'] + 1;
                 $esiErrorRate[$normalizedUrl]['count'] = $errorCount;
-                $esiErrorRate[$normalizedUrl.'aa']['count'] = 44;
-                $esiErrorRate[$normalizedUrl.'bb']['count'] = 22;
 
                 // sort by error count
                 //arsort($esiErrorRate, SORT_NUMERIC );
 var_dump('checkResponseHeaders()');
 var_dump($esiHeaders);
+var_dump($url);
+var_dump(parse_url($url, PHP_URL_PATH));
 var_dump($esiErrorRate);
                 uasort($esiErrorRate, function($a, $b) {
                     return $b['count'] <=> $a['count'];
                 });
-                var_dump($esiErrorRate);
-                var_dump($errorCount);
-                var_dump('----fff');
-                if($errorCount > 22){
+
+                if($errorCount > 2){
                     // to many error, block url until error limit reset
                     $esiErrorRate[$normalizedUrl]['blocked'] = true;
                 }
