@@ -16,8 +16,8 @@ class WebClient extends \Web {
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
     const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
-    const ERROR_LIMIT_CRITICAL                  = 'ESI error limit reached critical level. url: %s | errorCount: %s | errorRemainCount: %s';
-    const ERROR_LIMIT_EXCEEDED                  = 'ESI error limit exceeded. We are blocked for (%s seconds)';
+    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
+    const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -169,7 +169,7 @@ class WebClient extends \Web {
                     return $b['count'] <=> $a['count'];
                 });
 
-                if(array_key_exists('x-esi-error-limited', $esiHeaders)){
+                if(!array_key_exists('x-esi-error-limited', $esiHeaders)){
                     // we are blocked until new error limit window opens this should never happen
                     $blockUrl = true;
                     $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_EXCEEDED, $esiErrorLimitReset));
