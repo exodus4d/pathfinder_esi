@@ -145,26 +145,41 @@ class WebClient extends \Web {
 
 
         if($statusCode >= 200 && $statusCode <= 500){
-            $f3 = \Base::instance();
-
-            if(!$f3->exists('test_count', $esiErrorRate)){
-                $esiErrorRate = [];
-            }
-
-            $esiErrorRate[$url] = (int)$esiErrorRate[$url]++;
-
-            $EsiHeaders = array_filter($headers, function($key){
+            $esiHeaders = array_filter($headers, function($key){
                 return preg_match('/^x-esi-/i', $key);
             }, ARRAY_FILTER_USE_KEY);
 
-            var_dump($EsiHeaders);
 
-            $f3->set('test_count', $esiErrorRate, 30 );
+            if(
+                array_key_exists('x-esi-error-limit-remain', $esiHeaders) &&
+                array_key_exists('x-esi-error-limit-reset', $esiHeaders)
+            ){
+                $f3 = \Base::instance();
+                if(!$f3->exists('test_count', $esiErrorRate)){
+                    $esiErrorRate = [];
+                }
+                $esiErrorRate[$url] = (int)$esiErrorRate[$url]++;
+                $esiErrorRate[$url . 'fds'] = 32;
+                $esiErrorRate[$url . 'dss'] = 4;
+
+                asort($esiErrorRate, SORT_NUMERIC );
+var_dump($esiErrorRate);
+                $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
+            }
+/*
+            if(array_key_exists('x-esi-error-limited', $esiHeaders)){
+                // we are blocked until new error limit window opens
+            }elseif(
+                isset($esiHeaders['x-esi-error-limit-reset']) &&
+                isset($esiHeaders['x-esi-error-limit-remain']) &&
+                (int)$esiHeaders['x-esi-error-limit-remain'] > 0 &&
+                (int)$esiHeaders['x-esi-error-limit-remain'] < 3 &&
+            ){
+
+            } */
+
         }
 
-
-       // var_dump($headers);
-        //var_dump($EsiHeaders);
     }
 
     /**
