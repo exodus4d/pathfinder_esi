@@ -239,9 +239,9 @@ class WebClient extends \Web {
 
             $urlPath = $this->getNormalizedUrlPath($url);
 
-            $esiErrorData = array_filter($esiErrorRate, function($key) use (&$urlPath){
-                return $key === $urlPath;
-            }, ARRAY_FILTER_USE_KEY);
+            $esiErrorData = array_filter($esiErrorRate, function($value, $key) use (&$urlPath){
+                return ($key === $urlPath && $value['blocked']);
+            }, ARRAY_FILTER_USE_BOTH);
 
             if(!empty($esiErrorData)){
                 var_dump('isBlockedUrl()');
