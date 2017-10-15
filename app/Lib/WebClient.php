@@ -152,7 +152,7 @@ class WebClient extends \Web {
 
             $current = (int)$current;
             $current++;
-            $f3->set('test_count', $current );
+            $f3->set('test_count', $current, 30 );
         }
 
 
