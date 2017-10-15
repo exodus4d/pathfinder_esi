@@ -164,7 +164,7 @@ var_dump('checkResponseHeaders()');
 var_dump($esiHeaders);
 var_dump($esiErrorRate);
                 uasort($esiErrorRate, function($a, $b) {
-                    return $a['count'] <=> $b['count'];
+                    return $b['count'] <=> $a['count'];
                 });
                 var_dump($esiErrorRate);
                 var_dump($errorCount);
