@@ -18,7 +18,7 @@ class WebClient extends \Web {
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. (%s)';
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
-    const DEBUG_URI_BLOCKED                     = 'Debug: API url blocked by Pathfinder. url: %s seconds: %s';
+    const DEBUG_URI_BLOCKED                     = 'Debug url blocked by Pathfinder. url: %s seconds: %s';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -261,6 +261,7 @@ class WebClient extends \Web {
             if(!empty($esiErrorData)){
                 $isBlocked = true;
                 if($this->debugLevel === 3){
+                    var_dump($ttl);
                     $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttl));
                 }
             }
