@@ -49,24 +49,11 @@ class WebClient extends \Web {
      */
     protected function getStatusCodeFromHeaders(array $headers = []): int {
         $statusCode = 0;
-
         foreach($headers as $key => $value){
-            if(preg_match('/HTTP\/1\.\d (\d{3}?)/i', $key, $matches)){
+            if(preg_match('/http\/1\.\d (\d{3}?)/i', $key, $matches)){
                 $statusCode = (int)$matches[1];
                 break;
             }
-        }
-        var_dump('getStatus..');
-        var_dump($statusCode);
-
-        if(
-        preg_match(
-            '/HTTP\/1\.\d (\d{3}?)/',
-            implode($this->eol, (array)$headers),
-            $matches
-        )
-        ){
-            $statusCode = (int)$matches[1];
         }
         return $statusCode;
     }
@@ -156,12 +143,21 @@ class WebClient extends \Web {
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
 
-        $EsiHeaders = array_filter($headers, function($key){
-            return preg_match('/^x-esi-/i', $key);
-        }, ARRAY_FILTER_USE_KEY);
+        $f3 = \Base::instance();
+        var_dump($current = $f3->get('test_count') );
+        if($statusCode >= 200 && $statusCode <= 500){
+            $EsiHeaders = array_filter($headers, function($key){
+                return preg_match('/^x-esi-/i', $key);
+            }, ARRAY_FILTER_USE_KEY);
 
-        var_dump($headers);
-        var_dump($EsiHeaders);
+            $current = (int)$current;
+            $current++;
+            $f3->set('test_count', $current );
+        }
+
+
+       // var_dump($headers);
+        //var_dump($EsiHeaders);
     }
 
     /**
