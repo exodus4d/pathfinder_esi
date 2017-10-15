@@ -21,13 +21,7 @@ class WebClient extends \Web {
      * max number of CREST curls for a single endpoint until giving up...
      * this is because CREST is not very stable
      */
-    const RETRY_COUNT_MAX                       = 3;
-
-    /**
-     * end of line
-     * @var string
-     */
-    private $eol                                = "\r\n";
+    const RETRY_COUNT_MAX                       = 2;
 
     /**
      * parse array with HTTP header data
@@ -163,6 +157,8 @@ class WebClient extends \Web {
                 arsort($esiErrorRate, SORT_NUMERIC );
 var_dump($esiHeaders);
 var_dump($esiErrorRate);
+var_dump($url);
+var_dump( preg_replace('/\/(\d+)\//', '{x}', $url) );
                 $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
             }
 /*
