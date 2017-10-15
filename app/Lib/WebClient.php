@@ -161,7 +161,7 @@ class WebClient extends \Web {
 var_dump('checkResponseHeaders()');
 var_dump($esiHeaders);
 var_dump($esiErrorRate);
-                usort($esiErrorRate, function($a, $b) {
+                uasort($esiErrorRate, function($a, $b) {
                     return $a['count'] <=> $b['count'];
                 });
                 var_dump($esiErrorRate);
