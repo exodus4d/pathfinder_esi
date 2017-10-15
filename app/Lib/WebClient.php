@@ -251,7 +251,7 @@ class WebClient extends \Web {
     public function isBlockedUrl(string $url): bool {
         $isBlocked = false;
         $f3 = \Base::instance();
-        if($ttl = $f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
+        if($ttlData = $f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
             // check url path if blocked
             $urlPath = $this->getNormalizedUrlPath($url);
             $esiErrorData = array_filter($esiErrorRate, function($value, $key) use (&$urlPath){
@@ -261,8 +261,7 @@ class WebClient extends \Web {
             if(!empty($esiErrorData)){
                 $isBlocked = true;
                 if($this->debugLevel === 3){
-                    var_dump($ttl);
-                    $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttl));
+                    $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttlData[1]));
                 }
             }
         }
