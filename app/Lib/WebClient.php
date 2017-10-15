@@ -165,16 +165,16 @@ class WebClient extends \Web {
                 // block further api calls for this URL until error limit is reset/clear
                 $blockUrl = false;
 
-                // get "normalized" url without params/placeholders
-                $normalizedUrl = $this->getNormalizedUrlPath($url);
+                // get "normalized" url path without params/placeholders
+                $urlPath = $this->getNormalizedUrlPath($url);
 
                 $f3 = \Base::instance();
                 if(!$f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
                     $esiErrorRate = [];
                 }
                 // increase error count for this $url
-                $errorCount = (int)$esiErrorRate[$normalizedUrl]['count'] + 1;
-                $esiErrorRate[$normalizedUrl]['count'] = $errorCount;
+                $errorCount = (int)$esiErrorRate[$urlPath]['count'] + 1;
+                $esiErrorRate[$urlPath]['count'] = $errorCount;
 
                 // sort by error count desc
                 uasort($esiErrorRate, function($a, $b) {
@@ -196,13 +196,13 @@ class WebClient extends \Web {
                         $esiErrorLimitRemain < self::ERROR_COUNT_REMAIN_TOTAL
                     ){
                         $blockUrl = true;
-                        $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $normalizedUrl, $errorCount, $esiErrorLimitRemain));
+                        $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $urlPath, $errorCount, $esiErrorLimitRemain));
                     }
                 }
                 $blockUrl = true;
                 if($blockUrl){
                     // to many error, block uri until error limit reset
-                    $esiErrorRate[$normalizedUrl]['blocked'] = true;
+                    $esiErrorRate[$urlPath]['blocked'] = true;
                 }
 
                 $f3->set(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate, $esiErrorLimitReset);
@@ -236,16 +236,22 @@ class WebClient extends \Web {
         $isBlocked = false;
         $f3 = \Base::instance();
         if($f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
-            var_dump('isBlockedUrl()');
-            var_dump($esiErrorRate);
-            var_dump($url);
-            var_dump($this->getNormalizedUrlPath($url));
 
-            $esiErrorData = array_filter($esiErrorRate, function($key){
-                return preg_match('/^x-esi-/i', $key);
+            $urlPath = $this->getNormalizedUrlPath($url);
+
+            $esiErrorData = array_filter($esiErrorRate, function($key) use (&$urlPath){
+                return $key === $urlPath;
             }, ARRAY_FILTER_USE_KEY);
 
-            var_dump($esiErrorData);
+            if(!empty($esiErrorData)){
+                var_dump('isBlockedUrl()');
+                var_dump($esiErrorRate);
+                var_dump($url);
+                var_dump($urlPath);
+
+                var_dump($esiErrorData);
+            }
+
         }
 
         return $isBlocked;
