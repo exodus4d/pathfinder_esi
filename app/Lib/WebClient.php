@@ -148,17 +148,17 @@ class WebClient extends \Web {
                 array_key_exists('x-esi-error-limit-remain', $esiHeaders) &&
                 array_key_exists('x-esi-error-limit-reset', $esiHeaders)
             ){
+                $normalizedUrl = strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?');
                 $f3 = \Base::instance();
                 if(!$f3->exists('test_count', $esiErrorRate)){
                     $esiErrorRate = [];
                 }
-                $esiErrorRate[$url] = (int)$esiErrorRate[$url] + 1;
+                $esiErrorRate[$normalizedUrl] = (int)$esiErrorRate[$normalizedUrl] + 1;
 
                 arsort($esiErrorRate, SORT_NUMERIC );
 var_dump($esiHeaders);
 var_dump($esiErrorRate);
-var_dump($url);
-var_dump( preg_replace('/\/(\d+)\//', '/{x}/', $url) );
+
                 $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
             }
 /*
