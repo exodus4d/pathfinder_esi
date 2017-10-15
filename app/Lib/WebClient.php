@@ -232,6 +232,25 @@ class WebClient extends \Web {
       return $valid;
     }
 
+    public function isBlockedUrl(string $url): bool {
+        $isBlocked = false;
+        $f3 = \Base::instance();
+        if($f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
+            var_dump('isBlockedUrl()');
+            var_dump($esiErrorRate);
+            var_dump($url);
+            var_dump($this->getNormalizedUrlPath($url));
+
+            $esiErrorData = array_filter($esiErrorRate, function($key){
+                return preg_match('/^x-esi-/i', $key);
+            }, ARRAY_FILTER_USE_KEY);
+
+            var_dump($esiErrorData);
+        }
+
+        return $isBlocked;
+    }
+
     /**
      * @param string $url
      * @param array|null $options

@@ -534,32 +534,35 @@ class ESI implements ApiInterface {
         $webClient = namespace\Lib\WebClient::instance();
 
         if( \Audit::instance()->url($url) ){
-            if( $webClient->checkRequestMethod($method) ){
-                $requestOptions = [
-                    'timeout' => self::ESI_TIMEOUT,
-                    'method' => $method,
-                    'user_agent' => $this->getUserAgent(),
-                    'header' => [
-                        'Accept: application/json'
-                    ]
-                ];
+            // check if url is blocked (error limit exceeded)
+            if(!$webClient->isBlockedUrl($url)){
+                if( $webClient->checkRequestMethod($method) ){
+                    $requestOptions = [
+                        'timeout' => self::ESI_TIMEOUT,
+                        'method' => $method,
+                        'user_agent' => $this->getUserAgent(),
+                        'header' => [
+                            'Accept: application/json'
+                        ]
+                    ];
 
-                // add auth token if available (required for some endpoints)
-                if( !empty($accessToken) ){
-                    $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+                    // add auth token if available (required for some endpoints)
+                    if( !empty($accessToken) ){
+                        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+                    }
+
+                    if( !empty($additionalOptions['content']) ){
+                        // "Content-Type" Header is required for POST requests
+                        $requestOptions['header'][] = 'Content-Type: application/json';
+
+                        $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
+                        unset($additionalOptions['content']);
+                    }
+
+                    $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
+                }else{
+                    $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
                 }
-
-                if( !empty($additionalOptions['content']) ){
-                    // "Content-Type" Header is required for POST requests
-                    $requestOptions['header'][] = 'Content-Type: application/json';
-
-                    $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
-                    unset($additionalOptions['content']);
-                }
-
-                $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-            }else{
-                $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
             }
         }else{
             $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));
