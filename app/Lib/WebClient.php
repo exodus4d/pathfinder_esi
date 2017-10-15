@@ -143,16 +143,23 @@ class WebClient extends \Web {
             $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
         }
 
-        $f3 = \Base::instance();
-        var_dump($current = $f3->get('test_count') );
+
         if($statusCode >= 200 && $statusCode <= 500){
+            $f3 = \Base::instance();
+
+            if(!$f3->exists('test_count', $esiErrorRate)){
+                $esiErrorRate = [];
+            }
+
+            $esiErrorRate[$url] = (int)$esiErrorRate[$url]++;
+
             $EsiHeaders = array_filter($headers, function($key){
                 return preg_match('/^x-esi-/i', $key);
             }, ARRAY_FILTER_USE_KEY);
 
-            $current = (int)$current;
-            $current++;
-            $f3->set('test_count', $current, 30 );
+            var_dump($EsiHeaders);
+
+            $f3->set('test_count', $esiErrorRate, 30 );
         }
 
 
