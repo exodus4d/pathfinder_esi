@@ -150,7 +150,7 @@ class WebClient extends \Web {
                 $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
             }
         }
-
+        $statusCode = 454;
         // check ESI error limits -------------------------------------------------------------------------------------
         if($statusCode >= 400 && $statusCode <= 599){
             // extract ESI related headers
@@ -199,7 +199,7 @@ class WebClient extends \Web {
                         $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $normalizedUrl, $errorCount, $esiErrorLimitRemain));
                     }
                 }
-
+                $blockUrl = true;
                 if($blockUrl){
                     // to many error, block uri until error limit reset
                     $esiErrorRate[$normalizedUrl]['blocked'] = true;
