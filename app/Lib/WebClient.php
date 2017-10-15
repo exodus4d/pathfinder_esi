@@ -14,17 +14,21 @@ class WebClient extends \Web {
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
 
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
-    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
-    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
+    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. (%s)';
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. (%s)';
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
-    /**
-     * max number of CREST curls for a single endpoint until giving up...
-     * this is because CREST is not very stable
-     */
+    // log error when this error count is reached for a single API endpoint in the current error window
+    const ERROR_COUNT_MAX_URL                   = 30;
+
+    // log error if less then this errors remain in current error window (all endpoints)
+    const ERROR_COUNT_REMAIN_TOTAL              = 10;
+
+    // max number of CREST curls for a single endpoint until giving up...
+    // ->this is because CREST is not very stable
     const RETRY_COUNT_MAX                       = 2;
 
     /**
@@ -131,17 +135,25 @@ class WebClient extends \Web {
      * @param string $url
      */
     protected function checkResponseHeaders(array $headers, string $url){
-
         $statusCode = $this->getStatusCodeFromHeaders($headers);
 
-        if( preg_grep('/^Warning: 199/i', $headers) ){
-            $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url));
-        }
-        if( preg_grep('/^Warning: 299/i', $headers) ){
-            $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
+        // check ESI warnings -----------------------------------------------------------------------------------------
+        // extract ESI related headers
+        $warningHeaders = array_filter($headers, function($key){
+            return preg_match('/^warning/i', $key);
+        }, ARRAY_FILTER_USE_KEY);
+        foreach($warningHeaders as $key => $value){
+            if( preg_match('/^199/i', $value) ){
+                $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url, $value));
+            }
+            if( preg_match('/^299/i', $value) ){
+                $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
+            }
         }
 
-        if($statusCode >= 200 && $statusCode <= 500){
+        // check ESI error limits -------------------------------------------------------------------------------------
+        if($statusCode >= 400 && $statusCode <= 599){
+            // extract ESI related headers
             $esiHeaders = array_filter($headers, function($key){
                 return preg_match('/^x-esi-/i', $key);
             }, ARRAY_FILTER_USE_KEY);
@@ -169,7 +181,7 @@ class WebClient extends \Web {
                     return $b['count'] <=> $a['count'];
                 });
 
-                if(!array_key_exists('x-esi-error-limited', $esiHeaders)){
+                if(array_key_exists('x-esi-error-limited', $esiHeaders)){
                     // we are blocked until new error limit window opens this should never happen
                     $blockUrl = true;
                     $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_EXCEEDED, $esiErrorLimitReset));
@@ -179,7 +191,10 @@ class WebClient extends \Web {
                     // remaining errors left until reset/clear
                     $esiErrorLimitRemain = (int)$esiHeaders['x-esi-error-limit-remain'];
 
-                    if($errorCount > 2 || $esiErrorLimitRemain < 10){
+                    if(
+                        $errorCount > self::ERROR_COUNT_MAX_URL ||
+                        $esiErrorLimitRemain < self::ERROR_COUNT_REMAIN_TOTAL
+                    ){
                         $blockUrl = true;
                         $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $normalizedUrl, $errorCount, $esiErrorLimitRemain));
                     }
