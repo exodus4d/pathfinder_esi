@@ -51,7 +51,7 @@ class WebClient extends \Web {
         $statusCode = 0;
 
         foreach($headers as $key => $value){
-            if(preg_match('/HTTP\/1\.\d (\d{3}?)/', $key, $matches)){
+            if(preg_match('/HTTP\/1\.\d (\d{3}?)/i', $key, $matches)){
                 $statusCode = (int)$matches[1];
                 break;
             }
