@@ -153,10 +153,24 @@ class WebClient extends \Web {
                 if(!$f3->exists('test_count', $esiErrorRate)){
                     $esiErrorRate = [];
                 }
-                $esiErrorRate[$normalizedUrl] = (int)$esiErrorRate[$normalizedUrl] + 1;
+                $errorCount = (int)$esiErrorRate[$normalizedUrl]['count'] + 1;
+                $esiErrorRate[$normalizedUrl]['count'] = $errorCount;
 
-                arsort($esiErrorRate, SORT_NUMERIC );
+                // sort by error count
+                //arsort($esiErrorRate, SORT_NUMERIC );
+var_dump('checkResponseHeaders()');
 var_dump($esiHeaders);
+var_dump($esiErrorRate);
+                usort($esiErrorRate, function($a, $b) {
+                    return $a['count'] <=> $b['count'];
+                });
+                var_dump($esiErrorRate);
+                var_dump($errorCount);
+                var_dump('----fff');
+                if($errorCount > 22){
+                    // to many error, block url until error limit reset
+                    $esiErrorRate[$normalizedUrl]['blocked'] = true;
+                }
 var_dump($esiErrorRate);
 
                 $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
