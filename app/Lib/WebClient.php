@@ -159,10 +159,8 @@ class WebClient extends \Web {
                     $esiErrorRate = [];
                 }
                 $esiErrorRate[$url] = (int)$esiErrorRate[$url]++;
-                $esiErrorRate[$url . 'fds'] = 32;
-                $esiErrorRate[$url . 'dss'] = 4;
 
-                asort($esiErrorRate, SORT_NUMERIC );
+                arsort($esiErrorRate, SORT_NUMERIC );
 var_dump($esiErrorRate);
                 $f3->set('test_count', $esiErrorRate, (int)$esiHeaders['x-esi-error-limit-reset']);
             }
