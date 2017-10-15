@@ -18,6 +18,7 @@ class WebClient extends \Web {
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. (%s)';
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
+    const DEBUG_URI_BLOCKED                     = 'Debug: API url blocked by Pathfinder. url: %s seconds: %s';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -31,9 +32,14 @@ class WebClient extends \Web {
     // ->this is because CREST is not very stable
     const RETRY_COUNT_MAX                       = 2;
 
+    /**
+     * debugLevel used for internal error/warning logging
+     * @var int
+     */
+    protected $debugLevel                       = 0;
+
     public function __construct(int $debugLevel = 0){
-        var_dump('__construct');
-        var_dump($debugLevel);
+        $this->debugLevel = $debugLevel;
     }
 
     /**
@@ -245,7 +251,7 @@ class WebClient extends \Web {
     public function isBlockedUrl(string $url): bool {
         $isBlocked = false;
         $f3 = \Base::instance();
-        if($f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
+        if($ttl = $f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
             // check url path if blocked
             $urlPath = $this->getNormalizedUrlPath($url);
             $esiErrorData = array_filter($esiErrorRate, function($value, $key) use (&$urlPath){
@@ -254,6 +260,9 @@ class WebClient extends \Web {
 
             if(!empty($esiErrorData)){
                 $isBlocked = true;
+                if($this->debugLevel === 3){
+                    $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttl));
+                }
             }
         }
 
