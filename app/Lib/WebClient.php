@@ -18,7 +18,7 @@ class WebClient extends \Web {
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. (%s)';
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
-    const DEBUG_URI_BLOCKED                     = 'Debug url blocked by Pathfinder. url: %s seconds: %s';
+    const DEBUG_URI_BLOCKED                     = 'Debug request blocked by Pathfinder. Error limit exceeded. url: %s is blocked for %ss';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
