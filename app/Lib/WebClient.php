@@ -152,7 +152,6 @@ class WebClient extends \Web {
         }
 
         // check ESI error limits -------------------------------------------------------------------------------------
-        $statusCode = 406;
         if($statusCode >= 400 && $statusCode <= 599){
             // extract ESI related headers
             $esiHeaders = array_filter($headers, function($key){
@@ -201,7 +200,6 @@ class WebClient extends \Web {
                     }
                 }
 
-                $blockUrl = true;
                 if($blockUrl){
                     // to many error, block uri until error limit reset
                     $esiErrorRate[$normalizedUrl]['blocked'] = true;
