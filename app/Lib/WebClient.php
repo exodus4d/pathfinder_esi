@@ -261,9 +261,8 @@ class WebClient extends \Web {
             if(!empty($esiErrorData)){
                 $isBlocked = true;
                 if($this->debugLevel === 3){
-                    $test = ' now: '. time() . ' stamp: ' . $ttlData[0] . ' diff: '. ( $ttlData[0] + $ttlData[1] - time() ) . ' s: ' . $ttlData[1];
-                    //$this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttlData[1]));
-                    $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath,$test));
+                    // log debug information
+                    $this->getLogger('err_server')->write(sprintf(self::DEBUG_URI_BLOCKED, $urlPath, $ttlData[0] + $ttlData[1] - time()));
                 }
             }
         }
