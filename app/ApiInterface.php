@@ -93,6 +93,28 @@ interface ApiInterface {
     public function getCorporationRoles(int $corporationId, string $accessToken): array;
 
     /**
+     * @return array
+     */
+    public function getRegions(): array;
+
+    /**
+     * @param int $regionId
+     * @return array
+     */
+    public function getRegionData(int $regionId): array;
+
+    /**
+     * @return array
+     */
+    public function getConstellations(): array;
+
+    /**
+     * @param int $constellationId
+     * @return array
+     */
+    public function getConstellationData(int $constellationId): array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
@@ -108,6 +130,13 @@ interface ApiInterface {
      * @return array
      */
     public function getUniverseKills(): array;
+
+    /**
+     * @param int $typeId
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getUniverseTypesData(int $typeId, array $additionalOptions = []): array;
 
     /**
      * @param int $targetId

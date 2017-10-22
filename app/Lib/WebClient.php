@@ -11,39 +11,62 @@ namespace Exodus4D\ESI\Lib;
 
 class WebClient extends \Web {
 
+    const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
+
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
-    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy.';
-    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated.';
+    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. (%s)';
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. (%s)';
+    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
+    const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
+    const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: %s blocked for %2ss';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
-    /**
-     * max number of CREST curls for a single endpoint until giving up...
-     * this is because CREST is not very stable
-     */
-    const RETRY_COUNT_MAX                       = 3;
+    // log error when this error count is reached for a single API endpoint in the current error window
+    const ERROR_COUNT_MAX_URL                   = 30;
+
+    // log error if less then this errors remain in current error window (all endpoints)
+    const ERROR_COUNT_REMAIN_TOTAL              = 10;
+
+    // max number of CREST curls for a single endpoint until giving up...
+    // ->this is because CREST is not very stable
+    const RETRY_COUNT_MAX                       = 2;
 
     /**
-     * end of line
-     * @var string
+     * debugLevel used for internal error/warning logging
+     * @var int
      */
-    private $eol                                = "\r\n";
+    protected $debugLevel                       = 0;
+
+    public function __construct(int $debugLevel = 0){
+        $this->debugLevel = $debugLevel;
+    }
+
+    /**
+     * parse array with HTTP header data
+     * @param array $headers
+     * @return array
+     */
+    protected function parseHeaders(array $headers = []): array {
+        $parsedHeaders = [];
+        foreach($headers as $header){
+            $parts = explode(':', $header, 2);
+            $parsedHeaders[strtolower(trim($parts[0]))] = isset($parts[1]) ? trim($parts[1]) :  '';
+        }
+        return $parsedHeaders;
+    }
 
     /**
      * @param array $headers
      * @return int
      */
-    protected function getStatusCodeFromHeaders($headers = []){
+    protected function getStatusCodeFromHeaders(array $headers = []): int {
         $statusCode = 0;
-
-        if(
-        preg_match(
-            '/HTTP\/1\.\d (\d{3}?)/',
-            implode($this->eol, (array)$headers),
-            $matches
-        )
-        ){
-            $statusCode = (int)$matches[1];
+        foreach($headers as $key => $value){
+            if(preg_match('/http\/1\.\d (\d{3}?)/i', $key, $matches)){
+                $statusCode = (int)$matches[1];
+                break;
+            }
         }
         return $statusCode;
     }
@@ -100,19 +123,19 @@ class WebClient extends \Web {
     public function getLogger(string $statusType): \Log{
         switch($statusType){
             case 'err_server':
-                $logfile = 'esi.error.server';
+                $logfile = 'esi_error_server';
                 break;
             case 'err_client':
-                $logfile = 'esi.error.client';
+                $logfile = 'esi_error_client';
                 break;
             case 'resource_legacy':
-                $logfile = 'esi.resource.legacy';
+                $logfile = 'esi_resource_legacy';
                 break;
             case 'resource_deprecated':
-                $logfile = 'esi.resource.deprecated';
+                $logfile = 'esi_resource_deprecated';
                 break;
             default:
-                $logfile = 'esi.error.unknown';
+                $logfile = 'esi_error_unknown';
         }
         return new \Log($logfile . '.log');
     }
@@ -123,14 +146,88 @@ class WebClient extends \Web {
      * @param string $url
      */
     protected function checkResponseHeaders(array $headers, string $url){
-        $headers = (array)$headers;
+        $statusCode = $this->getStatusCodeFromHeaders($headers);
 
-        if( preg_grep('/^Warning: 199/i', $headers) ){
-            $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url));
+        // check ESI warnings -----------------------------------------------------------------------------------------
+        // extract ESI related headers
+        $warningHeaders = array_filter($headers, function($key){
+            return preg_match('/^warning/i', $key);
+        }, ARRAY_FILTER_USE_KEY);
+        foreach($warningHeaders as $key => $value){
+            if( preg_match('/^199/i', $value) ){
+                $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url, $value));
+            }
+            if( preg_match('/^299/i', $value) ){
+                $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
+            }
         }
-        if( preg_grep('/^Warning: 299/i', $headers) ){
-            $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url));
+
+        // check ESI error limits -------------------------------------------------------------------------------------
+        if($statusCode >= 400 && $statusCode <= 599){
+            // extract ESI related headers
+            $esiHeaders = array_filter($headers, function($key){
+                return preg_match('/^x-esi-/i', $key);
+            }, ARRAY_FILTER_USE_KEY);
+
+            if(array_key_exists('x-esi-error-limit-reset', $esiHeaders)){
+                // time in seconds until current error limit "windows" reset
+                $esiErrorLimitReset = (int)$esiHeaders['x-esi-error-limit-reset'];
+
+                // block further api calls for this URL until error limit is reset/clear
+                $blockUrl = false;
+
+                // get "normalized" url path without params/placeholders
+                $urlPath = $this->getNormalizedUrlPath($url);
+
+                $f3 = \Base::instance();
+                if(!$f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
+                    $esiErrorRate = [];
+                }
+                // increase error count for this $url
+                $errorCount = (int)$esiErrorRate[$urlPath]['count'] + 1;
+                $esiErrorRate[$urlPath]['count'] = $errorCount;
+
+                // sort by error count desc
+                uasort($esiErrorRate, function($a, $b) {
+                    return $b['count'] <=> $a['count'];
+                });
+
+                if(array_key_exists('x-esi-error-limited', $esiHeaders)){
+                    // we are blocked until new error limit window opens this should never happen
+                    $blockUrl = true;
+                    $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_EXCEEDED, $esiErrorLimitReset));
+                }
+
+                if(array_key_exists('x-esi-error-limit-remain', $esiHeaders)){
+                    // remaining errors left until reset/clear
+                    $esiErrorLimitRemain = (int)$esiHeaders['x-esi-error-limit-remain'];
+
+                    if(
+                        $errorCount > self::ERROR_COUNT_MAX_URL ||
+                        $esiErrorLimitRemain < self::ERROR_COUNT_REMAIN_TOTAL
+                    ){
+                        $blockUrl = true;
+                        $this->getLogger('err_server')->write(sprintf(self::ERROR_LIMIT_CRITICAL, $urlPath, $errorCount, $esiErrorLimitRemain));
+                    }
+                }
+
+                if($blockUrl){
+                    // to many error, block uri until error limit reset
+                    $esiErrorRate[$urlPath]['blocked'] = true;
+                }
+
+                $f3->set(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate, $esiErrorLimitReset);
+            }
         }
+    }
+
+    /**
+     * get URL path from $url, removes path IDs, parameters, scheme and domain
+     * @param $url
+     * @return string
+     */
+    protected function getNormalizedUrlPath($url): string {
+        return parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH);
     }
 
     /**
@@ -144,6 +241,37 @@ class WebClient extends \Web {
           $valid = true;
       }
       return $valid;
+    }
+
+    /**
+     * check API url against blocked API endpoints blacklist
+     * @param string $url
+     * @return bool
+     */
+    public function isBlockedUrl(string $url): bool {
+        $isBlocked = false;
+        $f3 = \Base::instance();
+        if($ttlData = $f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
+            // check url path if blocked
+            $urlPath = $this->getNormalizedUrlPath($url);
+            $esiErrorData = array_filter($esiErrorRate, function($value, $key) use (&$urlPath){
+                return ($key === $urlPath && $value['blocked']);
+            }, ARRAY_FILTER_USE_BOTH);
+
+            if(!empty($esiErrorData)){
+                $isBlocked = true;
+                if($this->debugLevel === 3){
+                    // log debug information
+                    $this->getLogger('err_server')->write(sprintf(
+                        self::DEBUG_URI_BLOCKED,
+                        $urlPath,
+                        round($ttlData[0] + $ttlData[1] - time())
+                    ));
+                }
+            }
+        }
+
+        return $isBlocked;
     }
 
     /**
@@ -172,8 +300,9 @@ class WebClient extends \Web {
         }
 
         if( !empty($responseHeaders)){
+            $parsedResponseHeaders = $this->parseHeaders($responseHeaders);
             // check response headers
-            $this->checkResponseHeaders($responseHeaders, $url);
+            $this->checkResponseHeaders($parsedResponseHeaders, $url);
             $statusCode = $this->getStatusCodeFromHeaders($responseHeaders);
             $statusType = $this->getStatusType($statusCode);
 

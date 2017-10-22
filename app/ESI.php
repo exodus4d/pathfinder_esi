@@ -28,6 +28,12 @@ class ESI implements ApiInterface {
     private $esiUrl, $esiUserAgent, $esiDatasource, $endpointVersion   = '';
 
     /**
+     * debugLevel
+     * @var int
+     */
+    private $debugLevel = 0;
+
+    /**
      * ESI constructor.
      */
     public function __construct(){
@@ -52,6 +58,13 @@ class ESI implements ApiInterface {
      */
     public function setDatasource(string $datasource){
         $this->esiDatasource = $datasource;
+    }
+
+    /**
+     * @param int $debug
+     */
+    public function setDebugLevel(int $debug){
+        $this->debugLevel = $debug;
     }
 
     /**
@@ -80,6 +93,13 @@ class ESI implements ApiInterface {
      */
     public function getDatasource(): string{
         return $this->esiDatasource;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDebugLevel(): int {
+        return $this->debugLevel;
     }
 
     /**
@@ -288,6 +308,68 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getRegions(): array{
+        $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
+        $regionData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $regionData = array_unique( array_map('intval', $response) );
+        }
+
+        return $regionData;
+    }
+
+    /**
+     * @param int $regionId
+     * @return array
+     */
+    public function getRegionData(int $regionId): array{
+        $url = $this->getEndpointURL(['universe', 'regions', 'GET'], [$regionId]);
+        $regionData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $regionData = (new namespace\Mapper\Region($response))->getData();
+        }
+
+        return $regionData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConstellations(): array{
+        $url = $this->getEndpointURL(['universe', 'constellations', 'list', 'GET']);
+        $constellationData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $constellationData = array_unique( array_map('intval', $response) );
+        }
+
+        return $constellationData;
+    }
+
+    /**
+     * @param int $constellationId
+     * @return array
+     */
+    public function getConstellationData(int $constellationId): array{
+        $url = $this->getEndpointURL(['universe', 'constellations', 'GET'], [$constellationId]);
+        $constellationData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $constellationData = (new namespace\Mapper\Constellation($response))->getData();
+        }
+
+        return $constellationData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
@@ -360,6 +442,23 @@ class ESI implements ApiInterface {
         }
 
         return $systemKills;
+    }
+
+    /**
+     * @param int $typeId
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getUniverseTypesData(int $typeId, array $additionalOptions = []): array {
+        $url = $this->getEndpointURL(['universe', 'types', 'GET'], [$typeId]);
+        $typesData = [];
+        $response = $this->request($url, 'GET', '', $additionalOptions);
+
+        if( !empty($response) ){
+            $typesData = (new namespace\Mapper\Universe\Type($response))->getData();
+        }
+
+        return $typesData;
     }
 
     /**
@@ -452,35 +551,38 @@ class ESI implements ApiInterface {
         $responseBody = null;
         $method = strtoupper($method);
 
-        $webClient = namespace\Lib\WebClient::instance();
+        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel());
 
         if( \Audit::instance()->url($url) ){
-            if( $webClient->checkRequestMethod($method) ){
-                $requestOptions = [
-                    'timeout' => self::ESI_TIMEOUT,
-                    'method' => $method,
-                    'user_agent' => $this->getUserAgent(),
-                    'header' => [
-                        'Accept: application/json'
-                    ]
-                ];
+            // check if url is blocked (error limit exceeded)
+            if(!$webClient->isBlockedUrl($url)){
+                if( $webClient->checkRequestMethod($method) ){
+                    $requestOptions = [
+                        'timeout' => self::ESI_TIMEOUT,
+                        'method' => $method,
+                        'user_agent' => $this->getUserAgent(),
+                        'header' => [
+                            'Accept: application/json'
+                        ]
+                    ];
 
-                // add auth token if available (required for some endpoints)
-                if( !empty($accessToken) ){
-                    $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+                    // add auth token if available (required for some endpoints)
+                    if( !empty($accessToken) ){
+                        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
+                    }
+
+                    if( !empty($additionalOptions['content']) ){
+                        // "Content-Type" Header is required for POST requests
+                        $requestOptions['header'][] = 'Content-Type: application/json';
+
+                        $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
+                        unset($additionalOptions['content']);
+                    }
+
+                    $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
+                }else{
+                    $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
                 }
-
-                if( !empty($additionalOptions['content']) ){
-                    // "Content-Type" Header is required for POST requests
-                    $requestOptions['header'][] = 'Content-Type: application/json';
-
-                    $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
-                    unset($additionalOptions['content']);
-                }
-
-                $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-            }else{
-                $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
             }
         }else{
             $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));

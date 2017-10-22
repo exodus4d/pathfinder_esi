@@ -51,6 +51,21 @@ class ESIConf extends \Prefab {
             ],
             'system_kills' => [
                 'GET' => ' /v1/universe/system_kills/'
+            ],
+            'regions' => [
+                'GET' => '/v1/universe/regions/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/regions/'
+                ]
+            ],
+            'constellations' => [
+                'GET' => '/v1/universe/constellations/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/constellations/'
+                ]
+            ],
+            'types' => [
+                'GET' => '/v3/universe/types/{x}/'
             ]
         ],
         'ui' => [
