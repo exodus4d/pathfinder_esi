@@ -445,6 +445,26 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $structureId
+     * @param string $accessToken
+     * @return array
+     */
+    public function getUniverseStructureData(int $structureId, string $accessToken): array {
+        $url = $this->getEndpointURL(['universe', 'structures', 'GET'], [$structureId]);
+        $structureData = [];
+
+        $response = $this->request($url, 'GET', $accessToken);
+
+
+        if( !empty($response) ){
+            $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
+            $structureData['id'] = $structureId;
+        }
+
+        return $structureData;
+    }
+
+    /**
      * @param int $typeId
      * @param array $additionalOptions
      * @return array

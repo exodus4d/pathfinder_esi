@@ -14,7 +14,6 @@ class Station extends mapper\AbstractIterator {
 
     protected static $map = [
         'id' => ['station' => 'id'],
-
         'name' => ['station' => 'name']
     ];
 }
