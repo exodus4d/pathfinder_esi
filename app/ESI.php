@@ -454,7 +454,7 @@ class ESI implements ApiInterface {
         $structureData = [];
 
         $response = $this->request($url, 'GET', $accessToken);
-
+var_dump($response);
 
         if( !empty($response) ){
             $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
