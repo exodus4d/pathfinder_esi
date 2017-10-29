@@ -157,7 +157,9 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
-            $characterData['id'] = $characterId;
+            if( !empty($characterData) ){
+                $characterData['id'] = $characterId;
+            }
         }
 
         return $characterData;
@@ -234,7 +236,9 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             $corporationData = (new namespace\Mapper\Corporation($response))->getData();
-            $corporationData['id'] = $corporationId;
+            if( !empty($corporationData) ){
+                $corporationData['id'] = $corporationId;
+            }
         }
 
         return $corporationData;
@@ -251,7 +255,9 @@ class ESI implements ApiInterface {
 
         if( !empty($response) ){
             $allianceData = (new namespace\Mapper\Alliance($response))->getData();
-            $allianceData['id'] = $allianceId;
+            if( !empty($allianceData) ){
+                $allianceData['id'] = $allianceId;
+            }
         }
 
         return $allianceData;
@@ -447,18 +453,20 @@ class ESI implements ApiInterface {
     /**
      * @param int $structureId
      * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken): array {
+    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []): array {
         $url = $this->getEndpointURL(['universe', 'structures', 'GET'], [$structureId]);
         $structureData = [];
 
-        $response = $this->request($url, 'GET', $accessToken);
-var_dump($response);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
         if( !empty($response) ){
             $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
-            $structureData['id'] = $structureId;
+            if( !empty($structureData) ){
+                $structureData['id'] = $structureId;
+            }
         }
 
         return $structureData;

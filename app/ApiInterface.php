@@ -134,9 +134,10 @@ interface ApiInterface {
     /**
      * @param int $structureId
      * @param string $accessToken
+     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken): array;
+    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []): array;
 
     /**
      * @param int $typeId
