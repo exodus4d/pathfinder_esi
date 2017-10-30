@@ -13,10 +13,10 @@ use data\mapper;
 class Location extends mapper\AbstractIterator {
 
     protected static $map = [
-        'solar_system_id' => ['system' => 'id'],
+        'solar_system_id'   => ['system' => 'id'],
 
-        'station_id' => ['station' => 'id'],
+        'station_id'        => ['station' => 'id'],
 
-        'structure_id' => ['structure' => 'id']
+        'structure_id'      => ['structure' => 'id']
     ];
 }
