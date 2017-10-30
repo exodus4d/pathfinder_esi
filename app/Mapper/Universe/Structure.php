@@ -14,11 +14,10 @@ class Structure extends mapper\AbstractIterator {
 
     protected static $map = [
         'name'              => 'name',
-        'solar_system_id'   => ['system' => 'id'],
-        'type_id'           => ['type' => 'id'],
-        'position' => 'position',
-        'x' => 'x',
-        'y' => 'y',
-        'z' => 'z',
+        'solar_system_id'   => 'systemId',
+        'type_id'           => 'typeId',
+        'x'                 => 'x',
+        'y'                 => 'y',
+        'z'                 => 'z',
     ];
 }
