@@ -16,6 +16,6 @@ class Region extends mapper\AbstractIterator {
         'region_id' => 'id',
         'name' => 'name',
         'description' => 'description',
-        'constellations' => 'constellationIds'
+        'constellations' => 'constellations'
     ];
 }
