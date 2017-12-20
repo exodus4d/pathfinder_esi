@@ -50,7 +50,7 @@ class ESIConf extends \Prefab {
                 'GET' => ' /v1/universe/system_jumps/'
             ],
             'system_kills' => [
-                'GET' => ' /v1/universe/system_kills/'
+                'GET' => ' /v2/universe/system_kills/'
             ],
             'regions' => [
                 'GET' => '/v1/universe/regions/{x}/',
