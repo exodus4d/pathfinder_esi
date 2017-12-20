@@ -212,15 +212,15 @@ class ESI implements ApiInterface {
         $onlineData = [];
 
         $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
-
+/*
         $onlineData = [
             'online' => is_bool($response) ? $response : null
         ];
+*/
 
-        /* v2 endpoint (WIP)
         if( !empty($response) ){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
-        } */
+        }
 
         return $onlineData;
     }

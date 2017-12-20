@@ -39,7 +39,7 @@ class ESIConf extends \Prefab {
                 'GET' => '/v1/characters/{x}/ship/'
             ],
             'online' => [
-                'GET' => '/v1/characters/{x}/online/'
+                'GET' => '/v2/characters/{x}/online/'
             ]
         ],
         'universe' => [
