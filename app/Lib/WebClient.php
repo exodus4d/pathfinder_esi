@@ -162,15 +162,15 @@ class WebClient extends \Web {
      */
     protected function checkResponseHeaders(array $headers, string $url){
         $statusCode = $this->getStatusCodeFromHeaders($headers);
-var_dump($headers);
+
 $headers['warning'] = '299';
-var_dump($headers);
+
         // check ESI warnings -----------------------------------------------------------------------------------------
         // extract ESI related headers
         $warningHeaders = array_filter($headers, function($key){
             return preg_match('/^warning/i', $key);
         }, ARRAY_FILTER_USE_KEY);
-        var_dump($warningHeaders);
+
         if(count($warningHeaders)){
             // get "normalized" url path without params/placeholders
             $urlPath = $this->getNormalizedUrlPath($url);
