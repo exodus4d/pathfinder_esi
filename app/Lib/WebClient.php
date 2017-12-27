@@ -176,10 +176,10 @@ $headers['warning'] = '299';
             $urlPath = $this->getNormalizedUrlPath($url);
             foreach($warningHeaders as $key => $value){
                 if( preg_match('/^199/i', $value) && $this->isLoggable('legacy', $url) ){
-                    $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $urlPath, $url, $value));
+                    $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $urlPath, $url, $key . ': ' . $value));
                 }
                 if( preg_match('/^299/i', $value) && $this->isLoggable('deprecated', $url) ){
-                     $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $urlPath, $url, $value));
+                     $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $urlPath, $url, $key . ': ' . $value));
                 }
             }
         }
