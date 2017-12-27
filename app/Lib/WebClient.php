@@ -264,14 +264,12 @@ class WebClient extends \Web {
 
         $urlPath = $this->getNormalizedUrlPath($url);
 
-        $this->getLogger('resource_deprecated')->write('TEST: ' . $url . ' -- ' . $urlPath);
-
-
         // increase counter
         $count = (int)$loggableLimit[$urlPath][$type]['count'] + 1;
 
         // check  counter for this $url
         if($count <= self::LOGGABLE_COUNT_MAX){
+            $loggable = true;
             $loggableLimit[$urlPath][$type]['count'] = $count;
             $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
         }else{
