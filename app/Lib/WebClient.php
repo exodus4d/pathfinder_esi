@@ -12,6 +12,7 @@ namespace Exodus4D\ESI\Lib;
 class WebClient extends \Web {
 
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
+    const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHE_LOGGABLE_LIMIT';
 
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
     const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. (%s)';
@@ -22,6 +23,9 @@ class WebClient extends \Web {
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
+    // error limits ---------------------------------------------------------------------------------------------------
+    // ESI calls will return special headers in case a client hits a "error limit" for a single endpoint
+
     // log error when this error count is reached for a single API endpoint in the current error window
     const ERROR_COUNT_MAX_URL                   = 30;
 
@@ -31,6 +35,17 @@ class WebClient extends \Web {
     // max number of CREST curls for a single endpoint until giving up...
     // ->this is because CREST is not very stable
     const RETRY_COUNT_MAX                       = 2;
+
+    // loggable limits ------------------------------------------------------------------------------------------------
+    // ESI endpoints that return warning headers (e.g. "resource_legacy", "resource_deprecated") will get logged
+    // To prevent big file I/O on these log files, errors get "throttled" and not all of them get logged
+
+    // Time interval used for error inspection (seconds)
+    const LOGGABLE_COUNT_INTERVAL               = 60;
+
+    // Log first "5" errors on an endpoint that occur within "60" (LOGGABLE_COUNT_INTERVAL) seconds
+    const LOGGABLE_COUNT_MAX                    = 5;
+
 
     /**
      * debugLevel used for internal error/warning logging
@@ -157,7 +172,7 @@ class WebClient extends \Web {
             if( preg_match('/^199/i', $value) ){
                 $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url, $value));
             }
-            if( preg_match('/^299/i', $value) ){
+            if( !preg_match('/^299/i', $value) && $this->isLoggable('deprecated', $url)){
                 $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
             }
         }
@@ -228,6 +243,36 @@ class WebClient extends \Web {
      */
     protected function getNormalizedUrlPath($url): string {
         return parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH);
+    }
+
+    /**
+     * @param string $type
+     * @param string $url
+     * @return bool
+     */
+    protected function isLoggable(string $type, string $url) : bool {
+        $loggable = false;
+
+        $f3 = \Base::instance();
+        if(!$f3->exists(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit)){
+            $loggableLimit = [];
+        }
+
+        $urlPath = $this->getNormalizedUrlPath($url);
+
+        $this->getLogger('resource_deprecated')->write('TEST: ' . $url . ' -- ' . $urlPath);
+
+
+        // increase counter
+        $count = (int)$loggableLimit[$urlPath][$type]['count'] + 1;
+
+        // check  counter for this $url
+        if($count <= self::LOGGABLE_COUNT_MAX){
+            $loggableLimit[$urlPath][$type]['count'] = $count;
+            $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
+        }
+
+        return $loggable;
     }
 
     /**
