@@ -265,13 +265,13 @@ class WebClient extends \Web {
         $urlPath = $this->getNormalizedUrlPath($url);
 
         // increase counter
-        $count = (int)$loggableLimit[$urlPath][$type]['count'] + 1;
+        $count = (int)$loggableLimit[$urlPath][$type]['count']++;
 
         // check counter for given $url
         if($count <= self::LOGGABLE_COUNT_MAX_URL){
             // loggable error count exceeded...
             $loggable = true;
-            $loggableLimit[$urlPath][$type]['count'] = $count;
+            //$loggableLimit[$urlPath][$type]['count'] = $count;
             $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
         }
 
