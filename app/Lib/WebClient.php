@@ -163,6 +163,8 @@ class WebClient extends \Web {
     protected function checkResponseHeaders(array $headers, string $url){
         $statusCode = $this->getStatusCodeFromHeaders($headers);
 var_dump($headers);
+$headers['warning'] = '299';
+var_dump($headers);
         // check ESI warnings -----------------------------------------------------------------------------------------
         // extract ESI related headers
         $warningHeaders = array_filter($headers, function($key){
