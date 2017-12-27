@@ -15,11 +15,11 @@ class WebClient extends \Web {
     const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
 
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
-    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. url: %s | header: %s';
+    const ERROR_RESOURCE_LEGACY                 = 'Resource: \'%s\' has been marked as legacy. url: \'%s\' | header: \'%s\'';
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: \'%s\' has been marked as deprecated. url: \'%s\' | header: \'%s\'';
-    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
+    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: \'%s\' | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
-    const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: %s blocked for %2ss';
+    const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: \'%s\' blocked for %2ss';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
