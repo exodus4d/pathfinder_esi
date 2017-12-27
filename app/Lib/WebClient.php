@@ -12,7 +12,7 @@ namespace Exodus4D\ESI\Lib;
 class WebClient extends \Web {
 
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
-    const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHE_LOGGABLE_LIMIT';
+    const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
 
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
     const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. (%s)';
@@ -43,8 +43,8 @@ class WebClient extends \Web {
     // Time interval used for error inspection (seconds)
     const LOGGABLE_COUNT_INTERVAL               = 60;
 
-    // Log first "5" errors on an endpoint that occur within "60" (LOGGABLE_COUNT_INTERVAL) seconds
-    const LOGGABLE_COUNT_MAX                    = 5;
+    // Log first "2" errors that occur for an endpoint within "60" (LOGGABLE_COUNT_INTERVAL) seconds interval
+    const LOGGABLE_COUNT_MAX_URL                = 2;
 
 
     /**
@@ -267,13 +267,12 @@ class WebClient extends \Web {
         // increase counter
         $count = (int)$loggableLimit[$urlPath][$type]['count'] + 1;
 
-        // check  counter for this $url
-        if($count <= self::LOGGABLE_COUNT_MAX){
+        // check counter for given $url
+        if($count <= self::LOGGABLE_COUNT_MAX_URL){
+            // loggable error count exceeded...
             $loggable = true;
             $loggableLimit[$urlPath][$type]['count'] = $count;
             $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
-        }else{
-            $this->getLogger('resource_deprecated')->write('SKIP ' . $count . ' : ' . $urlPath);
         }
 
         return $loggable;
