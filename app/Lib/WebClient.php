@@ -15,8 +15,8 @@ class WebClient extends \Web {
     const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
 
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
-    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. (%s)';
-    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. [url: %s] [header: %s]';
+    const ERROR_RESOURCE_LEGACY                 = 'Resource: %s has been marked as legacy. url: %s | header: %s';
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource: %s has been marked as deprecated. url: %s | header: %s';
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: %s | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
     const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: %s blocked for %2ss';
@@ -162,7 +162,7 @@ class WebClient extends \Web {
      */
     protected function checkResponseHeaders(array $headers, string $url){
         $statusCode = $this->getStatusCodeFromHeaders($headers);
-
+var_dump($headers);
         // check ESI warnings -----------------------------------------------------------------------------------------
         // extract ESI related headers
         $warningHeaders = array_filter($headers, function($key){
@@ -172,20 +172,14 @@ class WebClient extends \Web {
         if(count($warningHeaders)){
             // get "normalized" url path without params/placeholders
             $urlPath = $this->getNormalizedUrlPath($url);
-
             foreach($warningHeaders as $key => $value){
-                if( preg_match('/^199/i', $value) ){
-                    $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url, $value));
+                if( preg_match('/^199/i', $value) && $this->isLoggable('legacy', $url) ){
+                    $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $urlPath, $url, $value));
                 }
                 if( preg_match('/^299/i', $value) && $this->isLoggable('deprecated', $url) ){
-                    // $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
+                     $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $urlPath, $url, $value));
                 }
             }
-        }
-
-        $urlPath = $this->getNormalizedUrlPath($url);
-        if( $this->isLoggable('deprecated', $urlPath) ){
-            $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $urlPath, $url, $value));
         }
 
         // check ESI error limits -------------------------------------------------------------------------------------
