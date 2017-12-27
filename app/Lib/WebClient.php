@@ -172,9 +172,13 @@ class WebClient extends \Web {
             if( preg_match('/^199/i', $value) ){
                 $this->getLogger('resource_legacy')->write(sprintf(self::ERROR_RESOURCE_LEGACY, $url, $value));
             }
-            if( !preg_match('/^299/i', $value) && $this->isLoggable('deprecated', $url)){
-                $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
+            if( preg_match('/^299/i', $value) && $this->isLoggable('deprecated', $url) ){
+               // $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
             }
+        }
+
+        if( $this->isLoggable('deprecated', $url) ){
+            $this->getLogger('resource_deprecated')->write(sprintf(self::ERROR_RESOURCE_DEPRECATED, $url, $value));
         }
 
         // check ESI error limits -------------------------------------------------------------------------------------
@@ -270,6 +274,8 @@ class WebClient extends \Web {
         if($count <= self::LOGGABLE_COUNT_MAX){
             $loggableLimit[$urlPath][$type]['count'] = $count;
             $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
+        }else{
+            $this->getLogger('resource_deprecated')->write('SKIP ' . $count . ' : ' . $urlPath);
         }
 
         return $loggable;
