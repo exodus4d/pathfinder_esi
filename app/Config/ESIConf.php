@@ -16,10 +16,10 @@ class ESIConf extends \Prefab {
             'GET' => '/v1/status/'
         ],
         'alliances' => [
-            'GET' => '/v2/alliances/{x}/'
+            'GET' => '/v3/alliances/{x}/'
         ],
         'corporations' => [
-            'GET' => '/v3/corporations/{x}/',
+            'GET' => '/v4/corporations/{x}/',
             'npccorps' => [
                 'GET' => '/v1/corporations/npccorps/'
             ],
@@ -39,7 +39,7 @@ class ESIConf extends \Prefab {
                 'GET' => '/v1/characters/{x}/ship/'
             ],
             'online' => [
-                'GET' => '/v1/characters/{x}/online/'
+                'GET' => '/v2/characters/{x}/online/'
             ]
         ],
         'universe' => [
@@ -50,7 +50,7 @@ class ESIConf extends \Prefab {
                 'GET' => ' /v1/universe/system_jumps/'
             ],
             'system_kills' => [
-                'GET' => ' /v1/universe/system_kills/'
+                'GET' => ' /v2/universe/system_kills/'
             ],
             'regions' => [
                 'GET' => '/v1/universe/regions/{x}/',
