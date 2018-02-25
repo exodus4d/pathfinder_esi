@@ -528,32 +528,20 @@ class ESI implements ApiInterface {
         if( !empty($options['flag']) ){
             $urlParams['flag'] = $options['flag'];
         }
-        var_dump('1: $urlParams : ');
-        var_dump($urlParams);
+
         $urlParams = $this->formatUrlParams($urlParams, [
-            'connections' => [',', '|'],
-            'test' => ['&&', '-']
+            'connections' => [',', '|']
         ]);
-        var_dump('2: $urlParams : ');
-        var_dump($urlParams);
+
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
         $response = $this->request($url, 'GET');
-var_dump('ress ');
-var_dump($response);
 
         if($response->error){
             $routeData['error'] = $response->error;
         }else{
             $routeData['route'] = array_unique( array_map('intval', $response) );
         }
-        /*
-        if( !isset($response['error']) ){
-            $routeData = array_unique( array_map('intval', $response) );
-        }else{
-            $return['error'] = $response['error'];
-
-        }*/
 
         return $routeData;
     }
