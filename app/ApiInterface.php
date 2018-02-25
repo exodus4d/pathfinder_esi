@@ -154,6 +154,14 @@ interface ApiInterface {
     public function openWindow(int $targetId, string $accessToken): array;
 
     /**
+     * @param int $sourceId
+     * @param int $targetId
+     * @param array $options
+     * @return array
+     */
+    public function getRouteData(int $sourceId, int $targetId, array $options = []): array;
+
+    /**
      * @param int $corporationId
      * @return bool
      */

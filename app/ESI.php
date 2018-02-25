@@ -512,6 +512,28 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $sourceId
+     * @param int $targetId
+     * @param array $options
+     * @return array
+     */
+    public function getRouteData(int $sourceId, int $targetId, array $options = []): array {
+        $urlParams = [];
+
+        if( !empty($options['flag']) ){
+            $urlParams['flag'] = $options['flag'];
+        }
+
+        $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
+        $routeData = [];
+
+        $response = $this->request($url, 'GET');
+var_dump($response);
+
+        return $routeData;
+    }
+
+    /**
      * @param int $corporationId
      * @return bool
      */
