@@ -536,9 +536,9 @@ var_dump('ress ');
 var_dump($response);
 
         if($response->error){
-            $return['error'] = $response->error;
+            $routeData['error'] = $response->error;
         }else{
-            $routeData = array_unique( array_map('intval', $response) );
+            $routeData['route'] = array_unique( array_map('intval', $response) );
         }
         /*
         if( !isset($response['error']) ){
