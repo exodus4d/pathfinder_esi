@@ -534,8 +534,11 @@ class ESI implements ApiInterface {
         $response = $this->request($url, 'GET');
 var_dump('ress ');
 var_dump($response);
-        if( !empty($response) ){
+        if( !isset($response['error']) ){
             $routeData = array_unique( array_map('intval', $response) );
+        }else{
+            $return['error'] = $response['error'];
+
         }
 
         return $routeData;
