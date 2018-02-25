@@ -349,7 +349,7 @@ class WebClient extends \Web {
             $parsedResponseHeaders = $this->parseHeaders($responseHeaders);
             // check response headers
             $this->checkResponseHeaders($parsedResponseHeaders, $url);
-            $statusCode = $this->getStatusCodeFromHeaders($responseHeaders);
+            $statusCode = $this->getStatusCodeFromHeaders($parsedResponseHeaders);
             $statusType = $this->getStatusType($statusCode);
 
             switch($statusType){
