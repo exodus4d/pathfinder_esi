@@ -530,7 +530,8 @@ class ESI implements ApiInterface {
         }
 
         $urlParams = $this->formatUrlParams($urlParams, [
-            'connections' => [',', '|']
+            'connections' => [',', '|'],
+            'avoid' => [',']
         ]);
 
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
