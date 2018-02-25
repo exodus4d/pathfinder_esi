@@ -532,9 +532,12 @@ class ESI implements ApiInterface {
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         var_dump($url);
         $routeData = [];
-
         $response = $this->request($url, 'GET');
-var_dump($response);
+
+        var_dump($response);
+        if( !empty($response) ){
+            $routeData = array_unique( array_map('intval', $response) );
+        }
 
         return $routeData;
     }
