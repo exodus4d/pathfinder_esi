@@ -528,7 +528,14 @@ class ESI implements ApiInterface {
         if( !empty($options['flag']) ){
             $urlParams['flag'] = $options['flag'];
         }
-
+        var_dump('1: $urlParams : ');
+        var_dump($urlParams);
+        $urlParams = $this->formatUrlParams($urlParams, [
+            'connections' => [',', '|'],
+            'test' => ['&&', '-']
+        ]);
+        var_dump('2: $urlParams : ');
+        var_dump($urlParams);
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
         $response = $this->request($url, 'GET');
@@ -573,6 +580,25 @@ var_dump($response);
         }
 
         return $npcCorporations;
+    }
+
+    protected function formatUrlParams(array $urlParams = [], array $format = []) : array {
+
+        $formatter = function(&$item, $key, $params) use (&$formatter) {
+            $params['depth'] = isset($params['depth']) ? ++$params['depth'] : 0;
+            $params['firstKey'] = isset($params['firstKey']) ? $params['firstKey'] : $key;
+
+            if(is_array($item)){
+                if($delimiter = $params[$params['firstKey']][$params['depth']]){
+                    array_walk($item, $formatter, $params);
+                    $item = implode($delimiter, $item);
+                }
+            }
+        };
+
+        array_walk($urlParams, $formatter, $format);
+
+        return $urlParams;
     }
 
     /**
