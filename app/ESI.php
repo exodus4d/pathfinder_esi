@@ -512,6 +512,42 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $sourceId
+     * @param int $targetId
+     * @param array $options
+     * @return array
+     */
+    public function getRouteData(int $sourceId, int $targetId, array $options = []): array {
+        $urlParams = [];
+        if( !empty($options['avoid']) ){
+            $urlParams['avoid'] = $options['avoid'];
+        }
+        if( !empty($options['connections']) ){
+            $urlParams['connections'] = $options['connections'];
+        }
+        if( !empty($options['flag']) ){
+            $urlParams['flag'] = $options['flag'];
+        }
+
+        $urlParams = $this->formatUrlParams($urlParams, [
+            'connections' => [',', '|'],
+            'avoid' => [',']
+        ]);
+
+        $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
+        $routeData = [];
+        $response = $this->request($url, 'GET');
+
+        if($response->error){
+            $routeData['error'] = $response->error;
+        }else{
+            $routeData['route'] = array_unique( array_map('intval', $response) );
+        }
+
+        return $routeData;
+    }
+
+    /**
      * @param int $corporationId
      * @return bool
      */
@@ -533,6 +569,25 @@ class ESI implements ApiInterface {
         }
 
         return $npcCorporations;
+    }
+
+    protected function formatUrlParams(array $urlParams = [], array $format = []) : array {
+
+        $formatter = function(&$item, $key, $params) use (&$formatter) {
+            $params['depth'] = isset($params['depth']) ? ++$params['depth'] : 0;
+            $params['firstKey'] = isset($params['firstKey']) ? $params['firstKey'] : $key;
+
+            if(is_array($item)){
+                if($delimiter = $params[$params['firstKey']][$params['depth']]){
+                    array_walk($item, $formatter, $params);
+                    $item = implode($delimiter, $item);
+                }
+            }
+        };
+
+        array_walk($urlParams, $formatter, $format);
+
+        return $urlParams;
     }
 
     /**

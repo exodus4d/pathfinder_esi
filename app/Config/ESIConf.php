@@ -71,6 +71,9 @@ class ESIConf extends \Prefab {
                 'GET' => '/v3/universe/types/{x}/'
             ]
         ],
+        'routes' => [
+            'GET' => '/v1/route/{x}/{x}/'
+        ],
         'ui' => [
             'autopilot' => [
                 'waypoint' => [
