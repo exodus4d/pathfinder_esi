@@ -132,6 +132,12 @@ interface ApiInterface {
     public function getUniverseKills(): array;
 
     /**
+     * @param int $categoryId
+     * @return array
+     */
+    public function getUniverseCategoryData(int $categoryId): array;
+
+    /**
      * @param int $structureId
      * @param string $accessToken
      * @param array $additionalOptions

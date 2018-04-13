@@ -67,6 +67,9 @@ class ESIConf extends \Prefab {
             'structures' => [
                 'GET' => '/v1/universe/structures/{x}/',
             ],
+            'categories' => [
+                'GET' => '/v1/universe/categories/{x}/',
+            ],
             'types' => [
                 'GET' => '/v3/universe/types/{x}/'
             ]

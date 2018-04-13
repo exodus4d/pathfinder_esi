@@ -445,6 +445,26 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $categoryId
+     * @return array
+     */
+    public function getUniverseCategoryData(int $categoryId) : array {
+        $url = $this->getEndpointURL(['universe', 'categories', 'GET']);
+        $categoryData = [];
+
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $categoryData = (new namespace\Mapper\Universe\Category($response))->getData();
+            if( !empty($categoryData) ){
+                $categoryData['id'] = $categoryId;
+            }
+        }
+
+        return $categoryData;
+    }
+
+    /**
      * @param int $structureId
      * @param string $accessToken
      * @param array $additionalOptions
