@@ -15,6 +15,6 @@ class Category extends mapper\AbstractIterator {
     protected static $map = [
         'name'              => 'name',
         'published'         => 'published',
-        'groups'            => 'groups'
+        'groupso'            => 'groups'
     ];
 }
