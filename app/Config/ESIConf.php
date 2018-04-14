@@ -70,6 +70,9 @@ class ESIConf extends \Prefab {
             'categories' => [
                 'GET' => '/v1/universe/categories/{x}/',
             ],
+            'groups' => [
+                'GET' => '/v1/universe/groups/{x}/',
+            ],
             'types' => [
                 'GET' => '/v3/universe/types/{x}/'
             ]

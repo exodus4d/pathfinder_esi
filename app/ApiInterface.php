@@ -138,6 +138,12 @@ interface ApiInterface {
     public function getUniverseCategoryData(int $categoryId): array;
 
     /**
+     * @param int $groupId
+     * @return array
+     */
+    public function getUniverseGroupData(int $groupId): array;
+
+    /**
      * @param int $structureId
      * @param string $accessToken
      * @param array $additionalOptions

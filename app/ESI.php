@@ -465,6 +465,26 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $groupId
+     * @return array
+     */
+    public function getUniverseGroupData(int $groupId) : array {
+        $url = $this->getEndpointURL(['universe', 'groups', 'GET'], [$groupId]);
+        $groupData = [];
+
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $groupData = (new namespace\Mapper\Universe\Group($response))->getData();
+            if( !empty($groupData) ){
+                $groupData['id'] = $groupId;
+            }
+        }
+
+        return $groupData;
+    }
+
+    /**
      * @param int $structureId
      * @param string $accessToken
      * @param array $additionalOptions
