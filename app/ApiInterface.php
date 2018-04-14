@@ -134,18 +134,18 @@ interface ApiInterface {
     /**
      * @return array
      */
-    public function getCategories(): array;
-
-    /**
-     * @return array
-     */
-    public function getGroups(): array;
+    public function getUniverseCategories(): array;
 
     /**
      * @param int $categoryId
      * @return array
      */
     public function getUniverseCategoryData(int $categoryId): array;
+
+    /**
+     * @return array
+     */
+    public function getUniverseGroups(): array;
 
     /**
      * @param int $groupId

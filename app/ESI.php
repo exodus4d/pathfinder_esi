@@ -447,7 +447,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getCategories(): array{
+    public function getUniverseCategories(): array{
         $url = $this->getEndpointURL(['universe', 'categories', 'list', 'GET']);
         $categoryData = [];
         $response = $this->request($url, 'GET');
@@ -482,7 +482,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getGroups(): array{
+    public function getUniverseGroups(): array{
         $url = $this->getEndpointURL(['universe', 'groups', 'list', 'GET']);
         $groupData = [];
         $response = $this->request($url, 'GET');
