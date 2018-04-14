@@ -445,6 +445,21 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getCategories(): array{
+        $url = $this->getEndpointURL(['universe', 'categories', 'list', 'GET']);
+        $categoryData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $categoryData = array_unique( array_map('intval', $response) );
+        }
+
+        return $categoryData;
+    }
+
+    /**
      * @param int $categoryId
      * @return array
      */
@@ -462,6 +477,21 @@ class ESI implements ApiInterface {
         }
 
         return $categoryData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getGroups(): array{
+        $url = $this->getEndpointURL(['universe', 'groups', 'list', 'GET']);
+        $groupData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $groupData = array_unique( array_map('intval', $response) );
+        }
+
+        return $groupData;
     }
 
     /**
