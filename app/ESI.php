@@ -356,6 +356,12 @@ class ESI implements ApiInterface {
         }elseif( !empty($response) ){
             foreach((array)$response as $data){
                 switch($data->category){
+                    case 'alliance':
+                        $categoryData = (new namespace\Mapper\Alliance($data))->getData();
+                        break;
+                    case 'corporation':
+                        $categoryData = (new namespace\Mapper\Corporation($data))->getData();
+                        break;
                     case 'station':
                         $categoryData = (new namespace\Mapper\Station($data))->getData();
                         break;
