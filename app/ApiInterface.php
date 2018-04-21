@@ -26,28 +26,20 @@ interface ApiInterface {
     /**
      * @return array
      */
-    public function getServerStatus(): array;
+    public function getServerStatus() : array;
 
     /**
      * get corporation/alliance ids by characterIds
      * @param array $characterIds
      * @return array
      */
-    public function getCharacterAffiliationData(array $characterIds): array;
+    public function getCharacterAffiliationData(array $characterIds) : array;
 
     /**
      * @param int $characterId
      * @return array
      */
-    public function getCharacterData(int $characterId): array;
-
-    /**
-     * @param int $characterId
-     * @param string $accessToken
-     * @param array $additionalOptions
-     * @return array
-     */
-    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []): array;
+    public function getCharacterData(int $characterId) : array;
 
     /**
      * @param int $characterId
@@ -55,7 +47,7 @@ interface ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []): array;
+    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
 
     /**
      * @param int $characterId
@@ -63,95 +55,95 @@ interface ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array;
+    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+
+    /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @param array $additionalOptions
+     * @return array
+     */
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
 
     /**
      * @param int $corporationId
      * @return array
      */
-    public function getCorporationData(int $corporationId): array;
+    public function getCorporationData(int $corporationId) : array;
 
     /**
      * @param int $allianceId
      * @return array
      */
-    public function getAllianceData(int $allianceId): array;
-
-    /**
-     * @param int $systemId
-     * @param string $accessToken
-     * @param array $options
-     * @return array
-     */
-    public function setWaypoint(int $systemId, string $accessToken, array $options = []): array;
+    public function getAllianceData(int $allianceId) : array;
 
     /**
      * @param int $corporationId
      * @param string $accessToken
      * @return array
      */
-    public function getCorporationRoles(int $corporationId, string $accessToken): array;
+    public function getCorporationRoles(int $corporationId, string $accessToken) : array;
 
     /**
      * @return array
      */
-    public function getRegions(): array;
+    public function getRegions() : array;
 
     /**
      * @param int $regionId
      * @return array
      */
-    public function getRegionData(int $regionId): array;
+    public function getRegionData(int $regionId) : array;
 
     /**
      * @return array
      */
-    public function getConstellations(): array;
+    public function getConstellations() : array;
 
     /**
      * @param int $constellationId
      * @return array
      */
-    public function getConstellationData(int $constellationId): array;
+    public function getConstellationData(int $constellationId) : array;
 
     /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array;
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array;
 
     /**
      * @return array
      */
-    public function getUniverseJumps(): array;
+    public function getUniverseJumps() : array;
 
     /**
      * @return array
      */
-    public function getUniverseKills(): array;
+    public function getUniverseKills() : array;
 
     /**
      * @return array
      */
-    public function getUniverseCategories(): array;
+    public function getUniverseCategories() : array;
 
     /**
      * @param int $categoryId
      * @return array
      */
-    public function getUniverseCategoryData(int $categoryId): array;
+    public function getUniverseCategoryData(int $categoryId) : array;
 
     /**
      * @return array
      */
-    public function getUniverseGroups(): array;
+    public function getUniverseGroups() : array;
 
     /**
      * @param int $groupId
      * @return array
      */
-    public function getUniverseGroupData(int $groupId): array;
+    public function getUniverseGroupData(int $groupId) : array;
 
     /**
      * @param int $structureId
@@ -159,21 +151,14 @@ interface ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []): array;
+    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array;
 
     /**
      * @param int $typeId
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId, array $additionalOptions = []): array;
-
-    /**
-     * @param int $targetId
-     * @param string $accessToken
-     * @return array
-     */
-    public function openWindow(int $targetId, string $accessToken): array;
+    public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array;
 
     /**
      * @param int $sourceId
@@ -181,11 +166,34 @@ interface ApiInterface {
      * @param array $options
      * @return array
      */
-    public function getRouteData(int $sourceId, int $targetId, array $options = []): array;
+    public function getRouteData(int $sourceId, int $targetId, array $options = []) : array;
+    
+    /**
+     * @param int $systemId
+     * @param string $accessToken
+     * @param array $options
+     * @return array
+     */
+    public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array;
+    
+    /**
+     * @param int $targetId
+     * @param string $accessToken
+     * @return array
+     */
+    public function openWindow(int $targetId, string $accessToken) : array;
 
     /**
+     * @param array $categories
+     * @param string $search
+     * @param bool $strict
+     * @return array
+     */
+    public function search(array $categories, string $search, bool $strict = false) : array;
+
+        /**
      * @param int $corporationId
      * @return bool
      */
-    public function isNpcCorporation(int $corporationId): bool;
+    public function isNpcCorporation(int $corporationId) : bool;
 }

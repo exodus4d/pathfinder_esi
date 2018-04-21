@@ -97,6 +97,9 @@ class ESIConf extends \Prefab {
                     'POST' => '/v1/ui/openwindow/information/'
                 ]
             ]
+        ],
+        'search' => [
+            'GET' => '/v2/search/'
         ]
     ];
 

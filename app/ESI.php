@@ -77,42 +77,42 @@ class ESI implements ApiInterface {
     /**
      * @return string
      */
-    public function getUrl(): string{
+    public function getUrl() : string{
         return $this->esiUrl;
     }
 
     /**
      * @return string
      */
-    public function getUserAgent(): string{
+    public function getUserAgent() : string{
         return $this->esiUserAgent;
     }
 
     /**
      * @return string
      */
-    public function getDatasource(): string{
+    public function getDatasource() : string{
         return $this->esiDatasource;
     }
 
     /**
      * @return int
      */
-    public function getDebugLevel(): int {
+    public function getDebugLevel() : int {
         return $this->debugLevel;
     }
 
     /**
      * @return string
      */
-    public function getVersion(): string{
+    public function getVersion() : string{
         return $this->endpointVersion;
     }
 
     /**
      * @return array
      */
-    public function getServerStatus(): array{
+    public function getServerStatus() : array {
         $url = $this->getEndpointURL(['status', 'GET']);
         $serverStatus = [];
         $response = $this->request($url, 'GET');
@@ -128,7 +128,7 @@ class ESI implements ApiInterface {
      * @param array $characterIds
      * @return array
      */
-    public function getCharacterAffiliationData(array $characterIds): array{
+    public function getCharacterAffiliationData(array $characterIds) : array {
         $url = $this->getEndpointURL(['characters', 'affiliation', 'POST']);
         $characterAffiliationData = [];
 
@@ -150,7 +150,7 @@ class ESI implements ApiInterface {
      * @param int $characterId
      * @return array
      */
-    public function getCharacterData(int $characterId): array{
+    public function getCharacterData(int $characterId) : array {
         $url = $this->getEndpointURL(['characters', 'GET'], [$characterId]);
         $characterData = [];
         $response = $this->request($url, 'GET');
@@ -171,7 +171,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []): array{
+    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
         $locationData = [];
         $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
@@ -189,7 +189,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []): array{
+    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['characters', 'ship', 'GET'], [$characterId]);
         $shipData = [];
         $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
@@ -207,7 +207,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []): array{
+    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
         $onlineData = [];
         $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
@@ -223,7 +223,7 @@ class ESI implements ApiInterface {
      * @param int $corporationId
      * @return array
      */
-    public function getCorporationData(int $corporationId): array{
+    public function getCorporationData(int $corporationId) : array {
         $url = $this->getEndpointURL(['corporations', 'GET'], [$corporationId]);
         $corporationData = [];
         $response = $this->request($url, 'GET');
@@ -242,7 +242,7 @@ class ESI implements ApiInterface {
      * @param int $allianceId
      * @return array
      */
-    public function getAllianceData(int $allianceId): array{
+    public function getAllianceData(int $allianceId) : array {
         $url = $this->getEndpointURL(['alliances', 'GET'], [$allianceId]);
         $allianceData = [];
         $response = $this->request($url, 'GET');
@@ -258,42 +258,11 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param int $systemId
-     * @param string $accessToken
-     * @param array $options
-     * @return array
-     */
-    public function setWaypoint(int $systemId, string $accessToken, array $options = []): array{
-        $urlParams = [
-            'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
-            'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
-            'destination_id'        => $systemId
-        ];
-
-        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
-        $waypointData = [];
-
-        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
-        $additionalOptions = [
-            'content' => $urlParams
-        ];
-
-        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
-
-        // "null" === success => There is no response body send...
-        if( !is_null($response) ){
-            $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
-        }
-
-        return $waypointData;
-    }
-
-    /**
      * @param int $corporationId
      * @param string $accessToken
      * @return array
      */
-    public function getCorporationRoles(int $corporationId, string $accessToken): array{
+    public function getCorporationRoles(int $corporationId, string $accessToken) : array {
         $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
         $response = $this->request($url, 'GET', $accessToken);
@@ -310,7 +279,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getRegions(): array{
+    public function getRegions() : array {
         $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
         $regionData = [];
         $response = $this->request($url, 'GET');
@@ -326,7 +295,7 @@ class ESI implements ApiInterface {
      * @param int $regionId
      * @return array
      */
-    public function getRegionData(int $regionId): array{
+    public function getRegionData(int $regionId) : array {
         $url = $this->getEndpointURL(['universe', 'regions', 'GET'], [$regionId]);
         $regionData = [];
         $response = $this->request($url, 'GET');
@@ -341,7 +310,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getConstellations(): array{
+    public function getConstellations() : array{
         $url = $this->getEndpointURL(['universe', 'constellations', 'list', 'GET']);
         $constellationData = [];
         $response = $this->request($url, 'GET');
@@ -357,7 +326,7 @@ class ESI implements ApiInterface {
      * @param int $constellationId
      * @return array
      */
-    public function getConstellationData(int $constellationId): array{
+    public function getConstellationData(int $constellationId) : array {
         $url = $this->getEndpointURL(['universe', 'constellations', 'GET'], [$constellationId]);
         $constellationData = [];
         $response = $this->request($url, 'GET');
@@ -374,7 +343,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []): array{
+    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['universe', 'names', 'POST']);
         $universeData = [];
 
@@ -407,7 +376,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getUniverseJumps(): array{
+    public function getUniverseJumps() : array {
         $url = $this->getEndpointURL(['universe', 'system_jumps', 'GET']);
         $systemJumps = [];
 
@@ -425,7 +394,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getUniverseKills(): array{
+    public function getUniverseKills() : array {
         $url = $this->getEndpointURL(['universe', 'system_kills', 'GET']);
         $systemKills = [];
 
@@ -447,7 +416,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getUniverseCategories(): array{
+    public function getUniverseCategories() : array {
         $url = $this->getEndpointURL(['universe', 'categories', 'list', 'GET']);
         $categoryData = [];
         $response = $this->request($url, 'GET');
@@ -482,7 +451,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getUniverseGroups(): array{
+    public function getUniverseGroups() : array {
         $url = $this->getEndpointURL(['universe', 'groups', 'list', 'GET']);
         $groupData = [];
         $response = $this->request($url, 'GET');
@@ -520,7 +489,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []): array {
+    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['universe', 'structures', 'GET'], [$structureId]);
         $structureData = [];
 
@@ -541,7 +510,7 @@ class ESI implements ApiInterface {
      * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId, array $additionalOptions = []): array {
+    public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['universe', 'types', 'GET'], [$typeId]);
         $typesData = [];
         $response = $this->request($url, 'GET', '', $additionalOptions);
@@ -554,40 +523,12 @@ class ESI implements ApiInterface {
     }
 
     /**
-     * @param int $targetId
-     * @param string $accessToken
-     * @return array
-     */
-    public function openWindow(int $targetId, string $accessToken): array{
-        $urlParams = [
-            'target_id' => $targetId
-        ];
-
-        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST'], [], $urlParams);
-        $return = [];
-
-        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
-        $additionalOptions = [
-            'content' => $urlParams
-        ];
-
-        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
-
-        // "null" === success => There is no response body send...
-        if( !is_null($response) ){
-            $return['error'] = self::ERROR_ESI_WINDOW;
-        }
-
-        return $return;
-    }
-
-    /**
      * @param int $sourceId
      * @param int $targetId
      * @param array $options
      * @return array
      */
-    public function getRouteData(int $sourceId, int $targetId, array $options = []): array {
+    public function getRouteData(int $sourceId, int $targetId, array $options = []) : array {
         $urlParams = [];
         if( !empty($options['avoid']) ){
             $urlParams['avoid'] = $options['avoid'];
@@ -618,10 +559,94 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $systemId
+     * @param string $accessToken
+     * @param array $options
+     * @return array
+     */
+    public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array {
+        $urlParams = [
+            'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
+            'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
+            'destination_id'        => $systemId
+        ];
+
+        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
+        $waypointData = [];
+
+        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
+        $additionalOptions = [
+            'content' => $urlParams
+        ];
+
+        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
+
+        // "null" === success => There is no response body send...
+        if( !is_null($response) ){
+            $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
+        }
+
+        return $waypointData;
+    }
+
+    /**
+     * @param int $targetId
+     * @param string $accessToken
+     * @return array
+     */
+    public function openWindow(int $targetId, string $accessToken) : array {
+        $urlParams = [
+            'target_id' => $targetId
+        ];
+
+        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST'], [], $urlParams);
+        $return = [];
+
+        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
+        $additionalOptions = [
+            'content' => $urlParams
+        ];
+
+        $response = $this->request($url, 'POST', $accessToken, $additionalOptions);
+
+        // "null" === success => There is no response body send...
+        if( !is_null($response) ){
+            $return['error'] = self::ERROR_ESI_WINDOW;
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param array $categories
+     * @param string $search
+     * @param bool $strict
+     * @return array
+     */
+    public function search(array $categories, string $search, bool $strict = false) : array {
+        $urlParams = [
+            'categories '           => $categories,
+            'search '               => $search,
+            'strict'                => var_export( (bool)$strict, true),
+        ];
+
+        $url = $this->getEndpointURL(['search', 'GET'], [], $urlParams);
+
+        $searchData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+           // $searchData = (new namespace\Mapper\Universe\Type($response))->getData();
+        }
+
+        return $searchData;
+    }
+
+    /**
      * @param int $corporationId
      * @return bool
      */
-    public function isNpcCorporation(int $corporationId): bool{
+    public function isNpcCorporation(int $corporationId) : bool {
         $npcCorporations = $this->getNpcCorporations();
         return in_array($corporationId, $npcCorporations);
     }
@@ -629,7 +654,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    protected function getNpcCorporations(): array{
+    protected function getNpcCorporations() : array {
         $url = $this->getEndpointURL(['corporations', 'npccorps', 'GET']);
         $npcCorporations = [];
         $response = $this->request($url, 'GET');
@@ -667,7 +692,7 @@ class ESI implements ApiInterface {
      * @param array $params
      * @return string
      */
-    protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []): string{
+    protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []) : string {
         $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
         // add "datasource" parameter (SISI, TQ) (optional)
