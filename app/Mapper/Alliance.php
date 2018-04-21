@@ -13,6 +13,7 @@ use data\mapper;
 class Alliance extends mapper\AbstractIterator {
 
     protected static $map = [
+        'id' => 'id',
         'name' => 'name'
     ];
 }
