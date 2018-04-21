@@ -639,8 +639,10 @@ class ESI implements ApiInterface {
         $searchData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
-           // $searchData = (new namespace\Mapper\Universe\Type($response))->getData();
+        if($response->error){
+            $searchData['error'] = $response->error;
+        }else{
+            $searchData = (new namespace\Mapper\Search($response))->getData();
         }
 
         return $searchData;
