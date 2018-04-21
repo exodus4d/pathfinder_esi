@@ -14,7 +14,14 @@ class Search extends mapper\AbstractIterator {
 
     protected static $map = [
         'agent'             => 'agent',
+        'alliance'          => 'alliance',
         'character'         => 'character',
-        'corporation'       => 'corporation'
+        'constellation'     => 'constellation',
+        'corporation'       => 'corporation',
+        'faction'           => 'faction',
+        'inventory_type'    => 'inventoryType',
+        'region'            => 'region',
+        'solar_system'      => 'solarSystem',
+        'station'           => 'station'
     ];
 }
