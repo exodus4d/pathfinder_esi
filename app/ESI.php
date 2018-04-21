@@ -374,7 +374,9 @@ class ESI implements ApiInterface {
                     default:
                         $categoryData = [];
                 }
-                $universeData += $categoryData;
+                if( !empty($categoryData) ){
+                    $universeData[$data->category][] = $categoryData;
+                }
             }
         }
 
