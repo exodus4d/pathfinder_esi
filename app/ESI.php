@@ -625,8 +625,8 @@ class ESI implements ApiInterface {
      */
     public function search(array $categories, string $search, bool $strict = false) : array {
         $urlParams = [
-            'categories '           => $categories,
-            'search '               => $search,
+            'categories'            => $categories,
+            'search'                => $search,
             'strict'                => var_export( (bool)$strict, true),
         ];
 
