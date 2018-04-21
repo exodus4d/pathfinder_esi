@@ -351,7 +351,9 @@ class ESI implements ApiInterface {
 
         $response = $this->request($url, 'POST', '', $additionalOptions);
 
-        if( !empty($response) ){
+        if($response->error){
+            $universeData['error'] = $response->error;
+        }elseif( !empty($response) ){
             foreach((array)$response as $data){
                 switch($data->category){
                     case 'station':
