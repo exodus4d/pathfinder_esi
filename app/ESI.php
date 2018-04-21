@@ -630,6 +630,10 @@ class ESI implements ApiInterface {
             'strict'                => var_export( (bool)$strict, true),
         ];
 
+        $urlParams = $this->formatUrlParams($urlParams, [
+            'categories' => [',']
+        ]);
+
         $url = $this->getEndpointURL(['search', 'GET'], [], $urlParams);
 
         $searchData = [];
