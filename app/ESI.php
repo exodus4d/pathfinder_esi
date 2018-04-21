@@ -355,7 +355,9 @@ class ESI implements ApiInterface {
             $universeData['error'] = $response->error;
         }elseif( !empty($response) ){
             foreach((array)$response as $data){
-                switch($data->category){
+                // store category because $data get changed in Mappers
+                $category = $data->category;
+                switch($category){
                     case 'alliance':
                         $categoryData = (new namespace\Mapper\Alliance($data))->getData();
                         break;
@@ -375,7 +377,7 @@ class ESI implements ApiInterface {
                         $categoryData = [];
                 }
                 if( !empty($categoryData) ){
-                    $universeData[$data->category][] = $categoryData;
+                    $universeData[$category][] = $categoryData;
                 }
             }
         }
