@@ -14,6 +14,7 @@ use data\mapper;
 class Character extends mapper\AbstractIterator {
 
     protected static $map = [
+        'id'                => 'id',
         'name'              => 'name',
         'birthday'          => 'birthday',
         'gender'            => 'gender',
