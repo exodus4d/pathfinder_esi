@@ -13,7 +13,7 @@ use data\mapper;
 class InventoryType extends mapper\AbstractIterator {
 
     protected static $map = [
-        'id'                => ['ship' => 'typeId'],
-        'name'              => ['ship' => 'typeName']
+        'id'                => 'id',
+        'name'              => 'name'
     ];
 }
