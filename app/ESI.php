@@ -358,6 +358,9 @@ class ESI implements ApiInterface {
                 // store category because $data get changed in Mappers
                 $category = $data->category;
                 switch($category){
+                    case 'character':
+                        $categoryData = (new namespace\Mapper\Character($data))->getData();
+                        break;
                     case 'alliance':
                         $categoryData = (new namespace\Mapper\Alliance($data))->getData();
                         break;
