@@ -656,7 +656,7 @@ class ESI implements ApiInterface {
 
         if($response->error){
             $searchData['error'] = $response->error;
-        }else{
+        }elseif( !empty($response) ){
             $searchData = (new namespace\Mapper\Search($response))->getData();
         }
 
