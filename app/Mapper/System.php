@@ -13,7 +13,7 @@ use data\mapper;
 class System extends mapper\AbstractIterator {
 
     protected static $map = [
-        'id'                => ['system' => 'id'],
-        'name'              => ['system' => 'name']
+        'id'                => 'id',
+        'name'              => 'name'
     ];
 }
