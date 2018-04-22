@@ -755,7 +755,8 @@ class ESI implements ApiInterface {
                         'method' => $method,
                         'user_agent' => $this->getUserAgent(),
                         'header' => [
-                            'Accept: application/json'
+                            'Accept: application/json',
+                            'Expect:'
                         ]
                     ];
 
