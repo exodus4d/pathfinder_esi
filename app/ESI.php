@@ -344,7 +344,7 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['universe', 'names', 'POST']);
+        $url = $this->getEndpointURL(['universe', 'names', 'POST'], [], $universeIds);
         $universeData = [];
 
         $additionalOptions['content'] = $universeIds;
