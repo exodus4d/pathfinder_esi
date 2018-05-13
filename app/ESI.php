@@ -279,7 +279,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getRegions() : array {
+    public function getUniverseRegions() : array {
         $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
         $regionData = [];
         $response = $this->request($url, 'GET');
@@ -295,7 +295,7 @@ class ESI implements ApiInterface {
      * @param int $regionId
      * @return array
      */
-    public function getRegionData(int $regionId) : array {
+    public function getUniverseRegionData(int $regionId) : array {
         $url = $this->getEndpointURL(['universe', 'regions', 'GET'], [$regionId]);
         $regionData = [];
         $response = $this->request($url, 'GET');
@@ -310,7 +310,7 @@ class ESI implements ApiInterface {
     /**
      * @return array
      */
-    public function getConstellations() : array{
+    public function getUniverseConstellations() : array{
         $url = $this->getEndpointURL(['universe', 'constellations', 'list', 'GET']);
         $constellationData = [];
         $response = $this->request($url, 'GET');
@@ -326,7 +326,7 @@ class ESI implements ApiInterface {
      * @param int $constellationId
      * @return array
      */
-    public function getConstellationData(int $constellationId) : array {
+    public function getUniverseConstellationData(int $constellationId) : array {
         $url = $this->getEndpointURL(['universe', 'constellations', 'GET'], [$constellationId]);
         $constellationData = [];
         $response = $this->request($url, 'GET');

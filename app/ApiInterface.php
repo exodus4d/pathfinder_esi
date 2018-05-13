@@ -87,24 +87,24 @@ interface ApiInterface {
     /**
      * @return array
      */
-    public function getRegions() : array;
+    public function getUniverseRegions() : array;
 
     /**
      * @param int $regionId
      * @return array
      */
-    public function getRegionData(int $regionId) : array;
+    public function getUniverseRegionData(int $regionId) : array;
 
     /**
      * @return array
      */
-    public function getConstellations() : array;
+    public function getUniverseConstellations() : array;
 
     /**
      * @param int $constellationId
      * @return array
      */
-    public function getConstellationData(int $constellationId) : array;
+    public function getUniverseConstellationData(int $constellationId) : array;
 
     /**
      * @param array $universeIds
