@@ -339,6 +339,37 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getUniverseSystems() : array{
+        $url = $this->getEndpointURL(['universe', 'systems', 'list', 'GET']);
+        $systemData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $systemData = array_unique( array_map('intval', $response) );
+        }
+
+        return $systemData;
+    }
+
+    /**
+     * @param int $systemId
+     * @return array
+     */
+    public function getUniverseSystemData(int $systemId) : array {
+        $url = $this->getEndpointURL(['universe', 'systems', 'GET'], [$systemId]);
+        $systemData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $systemData = (new namespace\Mapper\System($response))->getData();
+        }
+
+        return $systemData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

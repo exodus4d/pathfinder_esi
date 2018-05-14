@@ -107,6 +107,17 @@ interface ApiInterface {
     public function getUniverseConstellationData(int $constellationId) : array;
 
     /**
+     * @return array
+     */
+    public function getUniverseSystems() : array;
+
+    /**
+     * @param int $systemId
+     * @return array
+     */
+    public function getUniverseSystemData(int $systemId) : array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
