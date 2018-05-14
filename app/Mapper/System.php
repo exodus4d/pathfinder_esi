@@ -14,6 +14,8 @@ class System extends mapper\AbstractIterator {
 
     protected static $map = [
         'id'                => 'id',
-        'name'              => 'name'
+        'system_id'         => 'id',
+        'name'              => 'name',
+        'constellation_id'  => 'constellationId'
     ];
 }
