@@ -401,6 +401,25 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $starId
+     * @return array
+     */
+    public function getUniverseStarData(int $starId) : array {
+        $url = $this->getEndpointURL(['universe', 'stars', 'GET'], [$starId]);
+        $starData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $starData = (new namespace\Mapper\Universe\Star($response))->getData();
+            if( !empty($starData) ){
+                $starData['id'] = $starId;
+            }
+        }
+
+        return $starData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

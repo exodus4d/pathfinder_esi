@@ -118,6 +118,12 @@ interface ApiInterface {
     public function getUniverseSystemData(int $systemId) : array;
 
     /**
+     * @param int $starId
+     * @return array
+     */
+    public function getUniverseStarData(int $starId) : array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

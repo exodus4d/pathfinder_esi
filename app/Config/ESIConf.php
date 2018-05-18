@@ -70,6 +70,9 @@ class ESIConf extends \Prefab {
                     'GET' => '/v1/universe/systems/'
                 ]
             ],
+            'stars' => [
+                'GET' => '/v1/universe/stars/{x}/'
+            ],
             'structures' => [
                 'GET' => '/v1/universe/structures/{x}/'
             ],
