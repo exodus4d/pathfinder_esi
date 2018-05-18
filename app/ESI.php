@@ -420,6 +420,22 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $planetId
+     * @return array
+     */
+    public function getUniversePlanetData(int $planetId) : array {
+        $url = $this->getEndpointURL(['universe', 'planets', 'GET'], [$planetId]);
+        $planetData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $planetData = (new namespace\Mapper\Universe\Planet($response))->getData();
+        }
+
+        return $planetData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
