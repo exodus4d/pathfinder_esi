@@ -16,6 +16,12 @@ class System extends mapper\AbstractIterator {
         'id'                => 'id',
         'system_id'         => 'id',
         'name'              => 'name',
-        'constellation_id'  => 'constellationId'
+        'constellation_id'  => 'constellationId',
+        'position'          => 'position',
+        'x'                 => 'x',
+        'y'                 => 'y',
+        'z'                 => 'z',
+        'security_class'    => 'securityClass',
+        'security_status'   => 'securityStatus',
     ];
 }

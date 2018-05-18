@@ -20,6 +20,16 @@ class ESI implements ApiInterface {
     const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
     /**
+     * default debug level
+     */
+    const DEFAULT_DEBUG_LEVEL                       = 0;
+
+    /**
+     * default for: log any ESI request to log file
+     */
+    const DEFAULT_DEBUG_LOG_REQUESTS                = false;
+
+    /**
      * @var string $esiUrl                          Base ESI Domain (required)
      * @var string $esiUserAgent                    User-Agent Header (required)
      * @var string $esiDatasource                   Datasource 'singularity' || 'tranquility'
@@ -31,7 +41,13 @@ class ESI implements ApiInterface {
      * debugLevel
      * @var int
      */
-    private $debugLevel = 0;
+    private $debugLevel = self::DEFAULT_DEBUG_LEVEL;
+
+    /**
+     * log requests
+     * @var bool
+     */
+    private $debugLogRequests = self::DEFAULT_DEBUG_LOG_REQUESTS;
 
     /**
      * ESI constructor.
@@ -63,8 +79,16 @@ class ESI implements ApiInterface {
     /**
      * @param int $debug
      */
-    public function setDebugLevel(int $debug){
+    public function setDebugLevel(int $debug = self::DEFAULT_DEBUG_LEVEL){
         $this->debugLevel = $debug;
+    }
+
+    /**
+     * log any requests to log file
+     * @param bool $logRequests
+     */
+    public function setDebugLogRequests(bool $logRequests = self::DEFAULT_DEBUG_LOG_REQUESTS){
+        $this->debugLogRequests = $logRequests;
     }
 
     /**
@@ -100,6 +124,13 @@ class ESI implements ApiInterface {
      */
     public function getDebugLevel() : int {
         return $this->debugLevel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getDebugLogRequests() : bool {
+        return $this->debugLogRequests;
     }
 
     /**
@@ -775,7 +806,7 @@ class ESI implements ApiInterface {
         $responseBody = null;
         $method = strtoupper($method);
 
-        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel());
+        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->setDebugLogRequests());
 
         if( \Audit::instance()->url($url) ){
             // check if url is blocked (error limit exceeded)
