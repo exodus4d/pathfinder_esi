@@ -806,7 +806,7 @@ class ESI implements ApiInterface {
         $responseBody = null;
         $method = strtoupper($method);
 
-        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->setDebugLogRequests());
+        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
 
         if( \Audit::instance()->url($url) ){
             // check if url is blocked (error limit exceeded)
