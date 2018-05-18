@@ -23,6 +23,7 @@ class System extends mapper\AbstractIterator {
         'planets'           => 'planets',
         'planet_id'         => 'planetId',
         'moons'             => 'moons',
+        'asteroid_belts'    => 'asteroidBelts',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',
