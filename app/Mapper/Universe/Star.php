@@ -14,7 +14,7 @@ class Star extends mapper\AbstractIterator {
 
     protected static $map = [
         'name'              => 'name',
-        'type_id'           => 'typeI',
+        'type_id'           => 'typeId',
         'age'               => 'age',
         'luminosity'        => 'luminosity',
         'radius'            => 'radius',
