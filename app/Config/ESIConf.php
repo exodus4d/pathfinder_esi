@@ -76,6 +76,9 @@ class ESIConf extends \Prefab {
             'planets' => [
                 'GET' => '/v1/universe/planets/{x}/'
             ],
+            'stargates' => [
+                'GET' => '/v1/universe/stargates/{x}/'
+            ],
             'structures' => [
                 'GET' => '/v1/universe/structures/{x}/'
             ],
