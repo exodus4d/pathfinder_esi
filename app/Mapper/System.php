@@ -24,6 +24,7 @@ class System extends mapper\AbstractIterator {
         'planet_id'         => 'planetId',
         'moons'             => 'moons',
         'asteroid_belts'    => 'asteroidBelts',
+        'stargates'         => 'stargates',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',
