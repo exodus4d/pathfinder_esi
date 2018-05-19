@@ -130,6 +130,12 @@ interface ApiInterface {
     public function getUniversePlanetData(int $planetId) : array;
 
     /**
+     * @param int $stargateId
+     * @return array
+     */
+    public function getUniverseStargateData(int $stargateId) : array;
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array

@@ -436,6 +436,22 @@ class ESI implements ApiInterface {
     }
 
     /**
+     * @param int $stargateId
+     * @return array
+     */
+    public function getUniverseStargateData(int $stargateId) : array {
+        $url = $this->getEndpointURL(['universe', 'stargates', 'GET'], [$stargateId]);
+        $stargateData = [];
+        $response = $this->request($url, 'GET');
+
+        if( !empty($response) ){
+            $stargateData = (new namespace\Mapper\Universe\Stargate($response))->getData();
+        }
+
+        return $stargateData;
+    }
+
+    /**
      * @param array $universeIds
      * @param array $additionalOptions
      * @return array
