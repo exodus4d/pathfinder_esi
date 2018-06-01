@@ -16,6 +16,7 @@ class Structure extends mapper\AbstractIterator {
         'name'              => 'name',
         'solar_system_id'   => 'systemId',
         'type_id'           => 'typeId',
+        'owner_id'          => 'ownerId',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',

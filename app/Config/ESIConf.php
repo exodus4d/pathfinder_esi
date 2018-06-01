@@ -65,7 +65,7 @@ class ESIConf extends \Prefab {
                 ]
             ],
             'systems' => [
-                'GET' => '/v3/universe/systems/{x}/',
+                'GET' => '/v4/universe/systems/{x}/',
                 'list' => [
                     'GET' => '/v1/universe/systems/'
                 ]
@@ -80,7 +80,7 @@ class ESIConf extends \Prefab {
                 'GET' => '/v1/universe/stargates/{x}/'
             ],
             'structures' => [
-                'GET' => '/v1/universe/structures/{x}/'
+                'GET' => '/v2/universe/structures/{x}/'
             ],
             'categories' => [
                 'GET' => '/v1/universe/categories/{x}/',
