@@ -13,8 +13,21 @@ use data\mapper;
 class System extends mapper\AbstractIterator {
 
     protected static $map = [
-        'id' => ['system' => 'id'],
-
-        'name' => ['system' => 'name']
+        'id'                => 'id',
+        'system_id'         => 'id',
+        'name'              => 'name',
+        'constellation_id'  => 'constellationId',
+        'security_class'    => 'securityClass',
+        'security_status'   => 'securityStatus',
+        'star_id'           => 'starId',
+        'planets'           => 'planets',
+        'planet_id'         => 'planetId',
+        'moons'             => 'moons',
+        'asteroid_belts'    => 'asteroidBelts',
+        'stargates'         => 'stargates',
+        'position'          => 'position',
+        'x'                 => 'x',
+        'y'                 => 'y',
+        'z'                 => 'z'
     ];
 }

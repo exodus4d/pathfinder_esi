@@ -2,24 +2,25 @@
 /**
  * Created by PhpStorm.
  * User: exodu
- * Date: 14.10.2017
- * Time: 15:40
+ * Date: 19.05.2018
+ * Time: 03:47
  */
 
 namespace Exodus4D\ESI\Mapper\Universe;
 
 use data\mapper;
 
-class Structure extends mapper\AbstractIterator {
+class Stargate extends mapper\AbstractIterator {
 
     protected static $map = [
+        'stargate_id'       => 'id',
         'name'              => 'name',
-        'solar_system_id'   => 'systemId',
+        'system_id'         => 'systemId',
         'type_id'           => 'typeId',
-        'owner_id'          => 'ownerId',
+        'destination'       => 'destination',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',
-        'z'                 => 'z',
+        'z'                 => 'z'
     ];
 }

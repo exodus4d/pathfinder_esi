@@ -64,8 +64,35 @@ class ESIConf extends \Prefab {
                     'GET' => '/v1/universe/constellations/'
                 ]
             ],
+            'systems' => [
+                'GET' => '/v4/universe/systems/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/systems/'
+                ]
+            ],
+            'stars' => [
+                'GET' => '/v1/universe/stars/{x}/'
+            ],
+            'planets' => [
+                'GET' => '/v1/universe/planets/{x}/'
+            ],
+            'stargates' => [
+                'GET' => '/v1/universe/stargates/{x}/'
+            ],
             'structures' => [
-                'GET' => '/v1/universe/structures/{x}/',
+                'GET' => '/v2/universe/structures/{x}/'
+            ],
+            'categories' => [
+                'GET' => '/v1/universe/categories/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/categories/'
+                ]
+            ],
+            'groups' => [
+                'GET' => '/v1/universe/groups/{x}/',
+                'list' => [
+                    'GET' => '/v1/universe/groups/'
+                ]
             ],
             'types' => [
                 'GET' => '/v3/universe/types/{x}/'
@@ -85,6 +112,9 @@ class ESIConf extends \Prefab {
                     'POST' => '/v1/ui/openwindow/information/'
                 ]
             ]
+        ],
+        'search' => [
+            'GET' => '/v2/search/'
         ]
     ];
 

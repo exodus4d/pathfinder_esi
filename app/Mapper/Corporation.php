@@ -13,6 +13,9 @@ use data\mapper;
 class Corporation extends mapper\AbstractIterator {
 
     protected static $map = [
-        'name' => 'name'
+        'id'                => 'id',
+        'name'              => 'name',
+        'member_count'      => 'memberCount',
+        'ticker'            => 'ticker'
     ];
 }

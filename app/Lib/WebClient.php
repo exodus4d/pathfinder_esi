@@ -9,6 +9,8 @@
 
 namespace Exodus4D\ESI\Lib;
 
+use Exodus4D\ESI\ESI;
+
 class WebClient extends \Web {
 
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
@@ -20,6 +22,7 @@ class WebClient extends \Web {
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount. url: \'%s\' | errorCount: %s | errorRemainCount: %s';
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
     const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: \'%s\' blocked for %2ss';
+    const DEBUG_REQUEST                         = 'Debug request. url: \'%s\' data: %s';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -51,10 +54,17 @@ class WebClient extends \Web {
      * debugLevel used for internal error/warning logging
      * @var int
      */
-    protected $debugLevel                       = 0;
+    protected $debugLevel                       = ESI::DEFAULT_DEBUG_LEVEL;
 
-    public function __construct(int $debugLevel = 0){
+    /**
+     * if true any ESI requests gets logged in log file
+     * @var bool
+     */
+    protected $debugLogRequests                 = ESI::DEFAULT_DEBUG_LOG_REQUESTS;
+
+    public function __construct(int $debugLevel = ESI::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = ESI::DEFAULT_DEBUG_LOG_REQUESTS){
         $this->debugLevel = $debugLevel;
+        $this->debugLogRequests = $debugLogRequests;
     }
 
     /**
@@ -148,6 +158,9 @@ class WebClient extends \Web {
                 break;
             case 'resource_deprecated':
                 $logfile = 'esi_resource_deprecated';
+                break;
+            case 'debug_request':
+                $logfile = 'esi_debug_request';
                 break;
             default:
                 $logfile = 'esi_error_unknown';
@@ -321,6 +334,17 @@ class WebClient extends \Web {
     }
 
     /**
+     * write request information into logfile
+     * @param string $url
+     * @param $response
+     */
+    protected function logRequest(string $url, $response){
+        if($this->debugLogRequests){
+            $this->getLogger('debug_request')->write(sprintf(self::DEBUG_REQUEST, $url, print_r($response, true)));
+        }
+    }
+
+    /**
      * @param string $url
      * @param array|null $options
      * @param array $additionalOptions
@@ -332,6 +356,8 @@ class WebClient extends \Web {
         $retry = false;
 
         $response = parent::request($url, $options);
+
+        $this->logRequest($url, $response);
 
         $responseHeaders    = (array)$response['headers'];
         $responseBody       = json_decode($response['body']);
