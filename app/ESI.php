@@ -484,9 +484,11 @@ class ESI implements ApiInterface {
                         $categoryData = (new namespace\Mapper\Station($data))->getData();
                         break;
                     case 'solar_system':
+                        $category = 'solarSystem';
                         $categoryData = (new namespace\Mapper\System($data))->getData();
                         break;
                     case 'inventory_type':
+                        $category = 'inventoryType';
                         $categoryData = (new namespace\Mapper\InventoryType($data))->getData();
                         break;
                     default:
