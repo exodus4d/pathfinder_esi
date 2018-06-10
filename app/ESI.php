@@ -294,13 +294,18 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function getCorporationRoles(int $corporationId, string $accessToken) : array {
+        // 403 'Character cannot grant roles' error
+        $additionalOptions['suppressHTTPLogging'] = [403];
+
         $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
-        $response = $this->request($url, 'GET', $accessToken);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
-        if( !empty($response) ){
+        if($response->error){
+            $rolesData['error'] = $response->error;
+        }elseif( !empty($response) ){
             foreach((array)$response as $characterRuleData){
-                $rolesData[(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
+                $rolesData['roles'][(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
             }
         }
 
