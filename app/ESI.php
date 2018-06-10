@@ -659,6 +659,9 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array {
+        // 404 'No route found' error
+        $additionalOptions['suppressHTTPLogging'] = [404];
+
         $urlParams = [];
         if( !empty($options['avoid']) ){
             $urlParams['avoid'] = $options['avoid'];
@@ -677,7 +680,7 @@ class ESI implements ApiInterface {
 
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
-        $response = $this->request($url, 'GET');
+        $response = $this->request($url, 'GET', '', $additionalOptions);
 
         if($response->error){
             $routeData['error'] = $response->error;
