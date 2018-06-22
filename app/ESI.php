@@ -320,7 +320,7 @@ class ESI implements ApiInterface {
         $regionData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $regionData = array_unique( array_map('intval', $response) );
         }
 
@@ -336,7 +336,7 @@ class ESI implements ApiInterface {
         $regionData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $regionData = (new namespace\Mapper\Region($response))->getData();
         }
 
@@ -351,7 +351,7 @@ class ESI implements ApiInterface {
         $constellationData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $constellationData = array_unique( array_map('intval', $response) );
         }
 
@@ -367,7 +367,7 @@ class ESI implements ApiInterface {
         $constellationData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $constellationData = (new namespace\Mapper\Constellation($response))->getData();
         }
 
@@ -382,7 +382,7 @@ class ESI implements ApiInterface {
         $systemData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $systemData = array_unique( array_map('intval', $response) );
         }
 
@@ -414,7 +414,7 @@ class ESI implements ApiInterface {
         $starData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $starData = (new namespace\Mapper\Universe\Star($response))->getData();
             if( !empty($starData) ){
                 $starData['id'] = $starId;
@@ -433,7 +433,7 @@ class ESI implements ApiInterface {
         $planetData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $planetData = (new namespace\Mapper\Universe\Planet($response))->getData();
         }
 
@@ -449,7 +449,7 @@ class ESI implements ApiInterface {
         $stargateData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $stargateData = (new namespace\Mapper\Universe\Stargate($response))->getData();
         }
 
