@@ -398,7 +398,7 @@ class ESI implements ApiInterface {
         $systemData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $systemData = (new namespace\Mapper\System($response))->getData();
         }
 
