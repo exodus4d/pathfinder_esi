@@ -383,13 +383,15 @@ class WebClient extends \Web {
                 case 'ok':                                                  // HTTP 2xx
                     break;
                 case 'err_client':                                          // HTTP 4xx
-                    $errorMsg = $this->getErrorMessageFromJsonResponse(
-                        $statusCode,
-                        $options['method'],
-                        $url,
-                        $responseBody
-                    );
-                    $this->getLogger($statusType)->write($errorMsg);
+                    if( !in_array($statusCode, (array)$additionalOptions['suppressHTTPLogging']) ){
+                        $errorMsg = $this->getErrorMessageFromJsonResponse(
+                            $statusCode,
+                            $options['method'],
+                            $url,
+                            $responseBody
+                        );
+                        $this->getLogger($statusType)->write($errorMsg);
+                    }
                     break;
                 case 'err_server':                                          // HTTP 5xx
                     $retry = true;

@@ -294,13 +294,18 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function getCorporationRoles(int $corporationId, string $accessToken) : array {
+        // 403 'Character cannot grant roles' error
+        $additionalOptions['suppressHTTPLogging'] = [403];
+
         $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
-        $response = $this->request($url, 'GET', $accessToken);
+        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
 
-        if( !empty($response) ){
+        if($response->error){
+            $rolesData['error'] = $response->error;
+        }elseif( !empty($response) ){
             foreach((array)$response as $characterRuleData){
-                $rolesData[(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
+                $rolesData['roles'][(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
             }
         }
 
@@ -315,7 +320,7 @@ class ESI implements ApiInterface {
         $regionData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $regionData = array_unique( array_map('intval', $response) );
         }
 
@@ -331,7 +336,7 @@ class ESI implements ApiInterface {
         $regionData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $regionData = (new namespace\Mapper\Region($response))->getData();
         }
 
@@ -346,7 +351,7 @@ class ESI implements ApiInterface {
         $constellationData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $constellationData = array_unique( array_map('intval', $response) );
         }
 
@@ -362,7 +367,7 @@ class ESI implements ApiInterface {
         $constellationData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $constellationData = (new namespace\Mapper\Constellation($response))->getData();
         }
 
@@ -377,7 +382,7 @@ class ESI implements ApiInterface {
         $systemData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $systemData = array_unique( array_map('intval', $response) );
         }
 
@@ -393,7 +398,7 @@ class ESI implements ApiInterface {
         $systemData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $systemData = (new namespace\Mapper\System($response))->getData();
         }
 
@@ -409,7 +414,7 @@ class ESI implements ApiInterface {
         $starData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $starData = (new namespace\Mapper\Universe\Star($response))->getData();
             if( !empty($starData) ){
                 $starData['id'] = $starId;
@@ -428,7 +433,7 @@ class ESI implements ApiInterface {
         $planetData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $planetData = (new namespace\Mapper\Universe\Planet($response))->getData();
         }
 
@@ -444,7 +449,7 @@ class ESI implements ApiInterface {
         $stargateData = [];
         $response = $this->request($url, 'GET');
 
-        if( !empty($response) ){
+        if( !$response->error && !empty($response) ){
             $stargateData = (new namespace\Mapper\Universe\Stargate($response))->getData();
         }
 
@@ -659,6 +664,9 @@ class ESI implements ApiInterface {
      * @return array
      */
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array {
+        // 404 'No route found' error
+        $additionalOptions['suppressHTTPLogging'] = [404];
+
         $urlParams = [];
         if( !empty($options['avoid']) ){
             $urlParams['avoid'] = $options['avoid'];
@@ -677,7 +685,7 @@ class ESI implements ApiInterface {
 
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
-        $response = $this->request($url, 'GET');
+        $response = $this->request($url, 'GET', '', $additionalOptions);
 
         if($response->error){
             $routeData['error'] = $response->error;
