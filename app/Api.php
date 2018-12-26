@@ -85,7 +85,7 @@ abstract class Api implements ApiInterface {
             return $key . ': ' . $val;
         };
 
-        return array_map($combine, range(0, count($headers)), array_keys($headers), array_values($headers));
+        return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
@@ -131,6 +131,9 @@ abstract class Api implements ApiInterface {
 
 
         var_dump('Header ----');
-        var_dump($this->formatHeaders($requestOptions['header']));
+        if( !empty($requestOptions['header']) ){
+            $requestOptions['header'] = $this->formatHeaders($requestOptions['header']);
+        }
+        var_dump($requestOptions);
     }
 }
