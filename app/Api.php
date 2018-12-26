@@ -80,6 +80,14 @@ abstract class Api implements ApiInterface {
         return $merged;
     }
 
+    protected function formatHeaders(array $headers) : array {
+        $combine = function($oldVal, $key, $val){
+            return $key . ': ' . $val;
+        };
+
+        return array_map($combine, range(0, count($headers)), array_keys($headers), array_values($headers));
+    }
+
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
         $method = strtoupper($method);
 
@@ -121,18 +129,8 @@ abstract class Api implements ApiInterface {
         var_dump('Merge ----');
         var_dump($requestOptions);
 
-        $combine = function($val, $key, $test){
-            var_dump('==');
-            var_dump($val);
-            var_dump($key);
-            var_dump($test);
-            return 11;
-        };
-
-        $test = range(0, count($requestOptions['header']));
-        $testHeader = array_map($combine, $test, array_keys($requestOptions['header']), $requestOptions['header']);
 
         var_dump('Header ----');
-        var_dump($testHeader);
+        var_dump($this->formatHeaders($requestOptions['header']));
     }
 }
