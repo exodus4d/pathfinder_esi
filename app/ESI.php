@@ -10,7 +10,7 @@ namespace Exodus4D\ESI;
 
 use Exodus4D\ESI\Config;
 
-class ESI implements ApiInterface {
+class ESI extends Api implements EsiInterface {
 
     const ESI_TIMEOUT                               = 4;
 
@@ -690,7 +690,7 @@ class ESI implements ApiInterface {
         if($response->error){
             $routeData['error'] = $response->error;
         }else{
-            $routeData['route'] = array_unique( array_map('intval', $response) );
+            $routeData['route'] = array_unique( array_map('intval', (array)$response) );
         }
 
         return $routeData;
