@@ -114,11 +114,25 @@ abstract class Api implements ApiInterface {
             unset($requestOptions['content']);
         }
 
-        var_dump('LALA----');
+        var_dump('LALA ----');
         var_dump($requestOptions);
         var_dump($options);
 
-        var_dump('Merge----');
+        var_dump('Merge ----');
         var_dump($requestOptions);
+
+        $combine = function($val, $key, $test){
+            var_dump('==');
+            var_dump($val);
+            var_dump($key);
+            var_dump($test);
+            return 11;
+        };
+
+        $test = range(0, count($requestOptions['header']));
+        $testHeader = array_map($combine, $test, array_keys($requestOptions['header']), $requestOptions['header']);
+
+        var_dump('Header ----');
+        var_dump($testHeader);
     }
 }
