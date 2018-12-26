@@ -295,11 +295,7 @@ class WebClient extends \Web {
      * @return bool
      */
     public function checkRequestMethod($method): bool {
-      $valid = false;
-      if( in_array($method, self::REQUEST_METHODS) ){
-          $valid = true;
-      }
-      return $valid;
+      return in_array($method, self::REQUEST_METHODS);
     }
 
     /**
