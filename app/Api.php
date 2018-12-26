@@ -61,6 +61,25 @@ abstract class Api implements ApiInterface {
         return $this->userAgent;
     }
 
+    /**
+     * same as PHP´s array_merge_recursive() function except of "distinct" array values in return
+     * -> works like jQuery extend()
+     * @param array $array1
+     * @param array $array2
+     * @return array
+     */
+    protected static function array_merge_recursive_distinct(array &$array1, array &$array2) : array {
+        $merged = $array1;
+        foreach($array2 as $key => &$value){
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])){
+                $merged[$key] = self::array_merge_recursive_distinct($merged[$key], $value);
+            }else{
+                $merged[$key] = $value;
+            }
+        }
+        return $merged;
+    }
+
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
         $method = strtoupper($method);
 
@@ -68,31 +87,38 @@ abstract class Api implements ApiInterface {
             'timeout' => $this->getTimeout(),
             'method' => $method,
             'user_agent' => $this->getUserAgent(),
+            /*
             'header' => [
-                'Accept: application/json',
-                'Expect:',
-                'Content-Type' => 'abvddd',
-            ]
+                'Accept' => 'application/json',
+                'Expect' => ''
+            ] */
         ];
+
+        $requestOptions = self::array_merge_recursive_distinct($requestOptions, $options);
+
+        if( !empty($requestOptions['content']) ){
+            if( !empty($contentType = $requestOptions['header']['Content-Type'])){
+                $contentType = 'application/json';
+                $requestOptions['header']['Content-Type'] = $contentType;
+            }
+
+            switch($contentType){
+                case 'application/x-www-form-urlencoded':
+                    $requestOptions['content'] =  http_build_query($requestOptions['content']);
+                    break;
+                case 'application/json':
+                default:
+                    $requestOptions['content'] =  json_encode($requestOptions['content'], JSON_UNESCAPED_SLASHES);
+            }
+        }else{
+            unset($requestOptions['content']);
+        }
 
         var_dump('LALA----');
         var_dump($requestOptions);
         var_dump($options);
 
         var_dump('Merge----');
-        var_dump(array_merge_recursive($requestOptions, $options));
-        var_dump($this->array_merge_recursive_distinct($requestOptions, $options));
-    }
-
-    function array_merge_recursive_distinct(array &$array1, array &$array2){
-        $merged = $array1;
-        foreach ($array2 as $key => &$value){
-            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])){
-                $merged[$key] = $this->array_merge_recursive_distinct($merged[$key], $value);
-            }else{
-                $merged[$key] = $value;
-            }
-        }
-        return $merged;
+        var_dump($requestOptions);
     }
 }
