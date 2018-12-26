@@ -97,7 +97,7 @@ abstract class Api implements ApiInterface {
         $requestOptions = self::array_merge_recursive_distinct($requestOptions, $options);
 
         if( !empty($requestOptions['content']) ){
-            if( !empty($contentType = $requestOptions['header']['Content-Type'])){
+            if(empty($contentType = $requestOptions['header']['Content-Type'])){
                 $contentType = 'application/json';
                 $requestOptions['header']['Content-Type'] = $contentType;
             }
