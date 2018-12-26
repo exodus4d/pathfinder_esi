@@ -70,11 +70,29 @@ abstract class Api implements ApiInterface {
             'user_agent' => $this->getUserAgent(),
             'header' => [
                 'Accept: application/json',
-                'Expect:'
+                'Expect:',
+                'Content-Type' => 'abvddd',
             ]
         ];
 
         var_dump('LALA----');
         var_dump($requestOptions);
+        var_dump($options);
+
+        var_dump('Merge----');
+        var_dump(array_merge_recursive($requestOptions, $options));
+        var_dump($this->array_merge_recursive_distinct($requestOptions, $options));
+    }
+
+    function array_merge_recursive_distinct(array &$array1, array &$array2){
+        $merged = $array1;
+        foreach ($array2 as $key => &$value){
+            if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])){
+                $merged[$key] = $this->array_merge_recursive_distinct($merged[$key], $value);
+            }else{
+                $merged[$key] = $value;
+            }
+        }
+        return $merged;
     }
 }

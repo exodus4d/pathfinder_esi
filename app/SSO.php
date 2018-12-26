@@ -11,14 +11,22 @@ namespace Exodus4D\ESI;
 
 class SSO extends Api implements SsoInterface {
 
-    public function getAccessData() : array {
+    public function getAccessData(string $authHeader, array $urlParams = []) : array {
         $url = $this->getAuthorizationEndpointURL();
 
 
         $accessData = [
             'accessToken' => 'testToken123'
         ];
-        $response = $this->request($url, 'POST');
+        $requestOptions = [
+            'header' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Authorization' => 'Basic ' . $authHeader
+            ],
+            'content' => $urlParams
+        ];
+
+        $response = $this->request('POST', $url, $requestOptions);
 
         return $accessData;
     }
