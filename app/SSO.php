@@ -21,9 +21,10 @@ class SSO extends Api implements SsoInterface {
      *      $urlParams['refresh_token]  = 'XXXX'
      * @param string $credentials
      * @param array $urlParams
+     * @param array $additionalOptions
      * @return array
      */
-    public function getAccessData(string $credentials, array $urlParams = []) : array {
+    public function getAccessData(string $credentials, array $urlParams = [], array $additionalOptions = []) : array {
         $url = $this->getVerifyAuthorizationCodeEndpointURL();
         $urlParts = parse_url($url);
 
@@ -39,7 +40,7 @@ class SSO extends Api implements SsoInterface {
 
         $requestOptions['header'] += $this->getAuthHeader($credentials);
 
-        $response = $this->request('POST', $url, $requestOptions);
+        $response = $this->request('POST', $url, $requestOptions, $additionalOptions);
 
         if( !empty($response) ){
             $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
