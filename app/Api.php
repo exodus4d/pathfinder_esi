@@ -11,13 +11,24 @@ namespace Exodus4D\ESI;
 
 abstract class Api implements ApiInterface {
 
-    const DEFAULT_TIMEOUT = 3;
+    const DEFAULT_TIMEOUT                           = 3;
 
-    private $url = '';
+    const DEFAULT_DEBUG_LEVEL                       = 0;
 
-    private $timeout = self::DEFAULT_TIMEOUT;
+    /**
+     * default for: log any ESI request to log file
+     */
+    const DEFAULT_DEBUG_LOG_REQUESTS                = false;
 
-    private $userAgent = '';
+    private $url                                    = '';
+
+    private $timeout                                = self::DEFAULT_TIMEOUT;
+
+    private $debugLevel                             = self::DEFAULT_DEBUG_LEVEL;
+
+    private $debugLogRequests                       = self::DEFAULT_DEBUG_LOG_REQUESTS;
+
+    private $userAgent                              = '';
 
     /**
      * @param string $url
@@ -31,6 +42,21 @@ abstract class Api implements ApiInterface {
      */
     public function setTimeout(int $timeout = self::DEFAULT_TIMEOUT){
         $this->timeout = $timeout;
+    }
+
+    /**
+     * @param int $debugLevel
+     */
+    public function setDebugLevel(int $debugLevel = self::DEFAULT_DEBUG_LEVEL){
+        $this->debugLevel = $debugLevel;
+    }
+
+    /**
+     * log any requests to log file
+     * @param bool $logRequests
+     */
+    public function setDebugLogRequests(bool $logRequests = self::DEFAULT_DEBUG_LOG_REQUESTS){
+        $this->debugLogRequests = $logRequests;
     }
 
     /**
@@ -52,6 +78,20 @@ abstract class Api implements ApiInterface {
      */
     public function getTimeout() : int {
         return $this->timeout;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDebugLevel() : int {
+        return $this->debugLevel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getDebugLogRequests() : bool {
+        return $this->debugLogRequests;
     }
 
     /**
@@ -101,19 +141,17 @@ abstract class Api implements ApiInterface {
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
         $method = strtoupper($method);
 
+        // default request options
         $requestOptions = [
             'timeout' => $this->getTimeout(),
             'method' => $method,
-            'user_agent' => $this->getUserAgent(),
-            /*
-            'header' => [
-                'Accept' => 'application/json',
-                'Expect' => ''
-            ] */
+            'user_agent' => $this->getUserAgent()
         ];
 
+        // extend/overwrite request options with custom options
         $requestOptions = self::array_merge_recursive_distinct($requestOptions, $options);
 
+        // format content and set 'Content-Type' header
         if( !empty($requestOptions['content']) ){
             if(empty($contentType = $requestOptions['header']['Content-Type'])){
                 $contentType = 'application/json';
@@ -132,18 +170,18 @@ abstract class Api implements ApiInterface {
             unset($requestOptions['content']);
         }
 
-        var_dump('LALA ----');
-        var_dump($requestOptions);
-        var_dump($options);
-
-        var_dump('Merge ----');
-        var_dump($requestOptions);
-
-
-        var_dump('Header ----');
+        // format Header array into plain array
         if( !empty($requestOptions['header']) ){
             $requestOptions['header'] = $this->formatHeaders($requestOptions['header']);
         }
+
+        var_dump('$requestOptions ----');
         var_dump($requestOptions);
+
+        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
+        $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
+        var_dump('$responseBody ----');
+        var_dump($responseBody);
+        return $responseBody;
     }
 }
