@@ -863,6 +863,7 @@ class ESI extends Api implements EsiInterface {
      * @param array $additionalOptions
      * @return null|array|\stdClass
      */
+    /*
     protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []){
         $responseBody = null;
         $method = strtoupper($method);
@@ -907,4 +908,5 @@ class ESI extends Api implements EsiInterface {
 
         return $responseBody;
     }
+    */
 }

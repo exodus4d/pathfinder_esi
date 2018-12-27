@@ -61,6 +61,10 @@ abstract class Api implements ApiInterface {
         return $this->userAgent;
     }
 
+    protected function getAuthHeader(string $credentials, string $type = 'Basic') : array {
+        return ['Authorization' => ucfirst($type) . ' ' . $credentials];
+    }
+
     /**
      * same as PHP´s array_merge_recursive() function except of "distinct" array values in return
      * -> works like jQuery extend()
@@ -80,9 +84,15 @@ abstract class Api implements ApiInterface {
         return $merged;
     }
 
+    /**
+     * format Header data array with ['name' => 'value',...] into plain array:
+     * -> ['name: value', ...]
+     * @param array $headers
+     * @return array
+     */
     protected function formatHeaders(array $headers) : array {
         $combine = function($oldVal, $key, $val){
-            return $key . ': ' . $val;
+            return trim($key) . ': ' . trim($val);
         };
 
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
