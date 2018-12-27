@@ -26,6 +26,7 @@ class WebClient extends \Web {
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
     const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: \'%s\' blocked for %2ss';
     const DEBUG_REQUEST                         = 'Debug request. url: \'%s\' data: %s';
+    const DEBUG_REQUEST_TEST                    = 'Debug request. url: \'%s\' options: %s data: %s';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -435,6 +436,10 @@ class WebClient extends \Web {
         }else{
             $this->getLogger('err_server')->write(sprintf(self::ERROR_REQUEST_URL, $url));
         }
+
+        // TODO remove
+        $this->getLogger('debug_request')->write(sprintf(self::DEBUG_REQUEST_TEST, $url, print_r($options, true), print_r($response, true)));
+
 
         return $responseBody;
     }
