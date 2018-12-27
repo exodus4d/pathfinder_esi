@@ -11,6 +11,25 @@ namespace Exodus4D\ESI;
 
 class SSO extends Api implements SsoInterface {
 
+    public function getVerifyCharacterData(string $accessToken) : array {
+        $url = $this->getVerifyAuthorizationCodeEndpointURL();
+        $urlParts = parse_url($url);
+
+        $characterData = [];
+        $requestOptions = [
+            'header' => [
+                'Host' => $urlParts['host']
+            ]
+        ];
+
+        $requestOptions['header'] += $this->getAuthHeader($accessToken, 'Bearer');
+
+
+        $response = $this->request('GET', $url, $requestOptions);
+
+        return $characterData;
+    }
+
     /**
      * get a valid "access_token" for oAuth 2.0 verification
      * -> verify $authCode and get NEW "access_token"
@@ -53,9 +72,11 @@ class SSO extends Api implements SsoInterface {
         return $this->getUrl() . '/oauth/authorize';
     }
 
+    protected function getVerifyUserEndpointURL() : string {
+        return $this->getUrl() . '/oauth/verify';
+    }
+
     protected function getVerifyAuthorizationCodeEndpointURL() : string {
         return $this->getUrl() . '/oauth/token';
     }
-
-
 }
