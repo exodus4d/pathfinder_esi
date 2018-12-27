@@ -176,6 +176,7 @@ abstract class Api implements ApiInterface {
         }
 
         var_dump('$requestOptions ----');
+        var_dump($url);
         var_dump($requestOptions);
 
         $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
