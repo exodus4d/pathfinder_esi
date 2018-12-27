@@ -175,14 +175,9 @@ abstract class Api implements ApiInterface {
             $requestOptions['header'] = $this->formatHeaders($requestOptions['header']);
         }
 
-        var_dump('$requestOptions ----');
-        var_dump($url);
-        var_dump($requestOptions);
-
         $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
         $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-        var_dump('$responseBody ----');
-        var_dump($responseBody);
+
         return $responseBody;
     }
 }

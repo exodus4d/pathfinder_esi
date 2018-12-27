@@ -146,7 +146,7 @@ class ESI extends Api implements EsiInterface {
     public function getServerStatus() : array {
         $url = $this->getEndpointURL(['status', 'GET']);
         $serverStatus = [];
-        $response = $this->request($url, 'GET');
+        $response = $this->request('GET', $url);
 
         if( !empty($response) ){
             $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
