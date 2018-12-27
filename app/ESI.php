@@ -12,83 +12,20 @@ use Exodus4D\ESI\Config;
 
 class ESI extends Api implements EsiInterface {
 
-    const ESI_TIMEOUT                               = 4;
-
-    const ERROR_ESI_URL                             = 'Invalid ESI API url. %s';
-    const ERROR_ESI_METHOD                          = 'Invalid ESI API HTTP request method. %s: %s';
     const ERROR_ESI_WAYPOINT                        = 'Could not set waypoint.';
     const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
     /**
-     * default debug level
-     */
-    const DEFAULT_DEBUG_LEVEL                       = 0;
-
-    /**
-     * default for: log any ESI request to log file
-     */
-    const DEFAULT_DEBUG_LOG_REQUESTS                = false;
-
-    /**
-     * @var string $esiUrl                          Base ESI Domain (required)
-     * @var string $esiUserAgent                    User-Agent Header (required)
-     * @var string $esiDatasource                   Datasource 'singularity' || 'tranquility'
+     * @var string $esiDataSource                   DataSource 'singularity' || 'tranquility'
      * @var string $endpointVersion                 Overwrite versioned endpoint URL (for testing)
      */
-    private $esiUrl, $esiUserAgent, $esiDatasource, $endpointVersion   = '';
+    private $esiDataSource, $endpointVersion   = '';
 
     /**
-     * debugLevel
-     * @var int
+     * @param string $dataSource
      */
-    private $debugLevel = self::DEFAULT_DEBUG_LEVEL;
-
-    /**
-     * log requests
-     * @var bool
-     */
-    private $debugLogRequests = self::DEFAULT_DEBUG_LOG_REQUESTS;
-
-    /**
-     * ESI constructor.
-     */
-    public function __construct(){
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url){
-        $this->esiUrl = $url;
-    }
-
-    /**
-     * @param string $userAgent
-     */
-    public function setUserAgent(string $userAgent){
-        $this->esiUserAgent = $userAgent;
-    }
-
-    /**
-     * @param string $datasource
-     */
-    public function setDatasource(string $datasource){
-        $this->esiDatasource = $datasource;
-    }
-
-    /**
-     * @param int $debug
-     */
-    public function setDebugLevel(int $debug = self::DEFAULT_DEBUG_LEVEL){
-        $this->debugLevel = $debug;
-    }
-
-    /**
-     * log any requests to log file
-     * @param bool $logRequests
-     */
-    public function setDebugLogRequests(bool $logRequests = self::DEFAULT_DEBUG_LOG_REQUESTS){
-        $this->debugLogRequests = $logRequests;
+    public function setDataSource(string $dataSource){
+        $this->esiDataSource = $dataSource;
     }
 
     /**
@@ -101,42 +38,14 @@ class ESI extends Api implements EsiInterface {
     /**
      * @return string
      */
-    public function getUrl() : string{
-        return $this->esiUrl;
+    public function getDataSource() : string {
+        return $this->esiDataSource;
     }
 
     /**
      * @return string
      */
-    public function getUserAgent() : string{
-        return $this->esiUserAgent;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDatasource() : string{
-        return $this->esiDatasource;
-    }
-
-    /**
-     * @return int
-     */
-    public function getDebugLevel() : int {
-        return $this->debugLevel;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getDebugLogRequests() : bool {
-        return $this->debugLogRequests;
-    }
-
-    /**
-     * @return string
-     */
-    public function getVersion() : string{
+    public function getVersion() : string {
         return $this->endpointVersion;
     }
 
@@ -886,7 +795,7 @@ class ESI extends Api implements EsiInterface {
         $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
         // add "datasource" parameter (SISI, TQ) (optional)
-        if( !empty($datasource = $this->getDatasource()) ){
+        if( !empty($datasource = $this->getDataSource()) ){
             $params['datasource'] = $datasource;
         }
         // overwrite endpoint version (debug)

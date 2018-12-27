@@ -8,17 +8,23 @@
 
 namespace Exodus4D\ESI;
 
-
 abstract class Api implements ApiInterface {
 
+    /**
+     * default for: request timeout
+     */
     const DEFAULT_TIMEOUT                           = 3;
 
+    /**
+     * default for: log level
+     */
     const DEFAULT_DEBUG_LEVEL                       = 0;
 
     /**
-     * default for: log any ESI request to log file
+     * default for: log any request to log file
      */
     const DEFAULT_DEBUG_LOG_REQUESTS                = false;
+
 
     private $url                                    = '';
 
@@ -138,6 +144,13 @@ abstract class Api implements ApiInterface {
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     * @param array $additionalOptions
+     * @return mixed|null
+     */
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
         $method = strtoupper($method);
 

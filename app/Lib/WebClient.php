@@ -9,7 +9,7 @@
 
 namespace Exodus4D\ESI\Lib;
 
-use Exodus4D\ESI\ESI;
+use Exodus4D\ESI\Api;
 
 class WebClient extends \Web {
 
@@ -26,7 +26,6 @@ class WebClient extends \Web {
     const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! We are blocked for (%s seconds)';
     const DEBUG_URI_BLOCKED                     = 'Debug request blocked. Error limit exceeded. url: \'%s\' blocked for %2ss';
     const DEBUG_REQUEST                         = 'Debug request. url: \'%s\' data: %s';
-    const DEBUG_REQUEST_TEST                    = 'Debug request. url: \'%s\' options: %s data: %s';
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
@@ -58,15 +57,16 @@ class WebClient extends \Web {
      * debugLevel used for internal error/warning logging
      * @var int
      */
-    protected $debugLevel                       = ESI::DEFAULT_DEBUG_LEVEL;
+    protected $debugLevel                       = Api::DEFAULT_DEBUG_LEVEL;
 
     /**
-     * if true any ESI requests gets logged in log file
+     * if true any requests gets logged in log file
      * @var bool
      */
-    protected $debugLogRequests                 = ESI::DEFAULT_DEBUG_LOG_REQUESTS;
+    protected $debugLogRequests                 = Api::DEFAULT_DEBUG_LOG_REQUESTS;
 
-    public function __construct(int $debugLevel = ESI::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = ESI::DEFAULT_DEBUG_LOG_REQUESTS){
+
+    public function __construct(int $debugLevel = Api::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = Api::DEFAULT_DEBUG_LOG_REQUESTS){
         $this->debugLevel = $debugLevel;
         $this->debugLogRequests = $debugLogRequests;
     }
@@ -149,7 +149,7 @@ class WebClient extends \Web {
      * @param string $statusType
      * @return \Log
      */
-    public function getLogger(string $statusType): \Log{
+    protected function getLogger(string $statusType): \Log{
         switch($statusType){
             case 'err_server':
                 $logfile = 'esi_error_server';
@@ -307,7 +307,7 @@ class WebClient extends \Web {
      * @param string $url
      * @return bool
      */
-    public function isBlockedUrl(string $url): bool {
+    protected function isBlockedUrl(string $url): bool {
         $isBlocked = false;
         $f3 = \Base::instance();
         if($ttlData = $f3->exists(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate)){
@@ -436,10 +436,6 @@ class WebClient extends \Web {
         }else{
             $this->getLogger('err_server')->write(sprintf(self::ERROR_REQUEST_URL, $url));
         }
-
-        // TODO remove
-        $this->getLogger('debug_request')->write(sprintf(self::DEBUG_REQUEST_TEST, $url, print_r($options, true), print_r($response, true)));
-
 
         return $responseBody;
     }

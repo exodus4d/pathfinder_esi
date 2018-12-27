@@ -12,18 +12,6 @@ namespace Exodus4D\ESI;
 interface EsiInterface {
 
     /**
-     * set user agent string.
-     * -> send in HEADERS
-     * @param string $userAgent
-     */
-    public function setUserAgent(string $userAgent);
-
-    /**
-     * @return string
-     */
-    public function getUserAgent();
-
-    /**
      * @return array
      */
     public function getServerStatus() : array;
