@@ -12,7 +12,7 @@ namespace Exodus4D\ESI;
 class SSO extends Api implements SsoInterface {
 
     public function getAccessData(string $credentials, array $urlParams = []) : array {
-        $url = $this->getAuthorizationEndpointURL();
+        $url = $this->getVerifyAuthorizationCodeEndpointURL();
 
 
         $accessData = [
@@ -34,6 +34,10 @@ class SSO extends Api implements SsoInterface {
 
     protected function getAuthorizationEndpointURL() : string {
         return $this->getUrl() . '/oauth/authorize';
+    }
+
+    protected function getVerifyAuthorizationCodeEndpointURL() : string {
+        return $this->getUrl() . '/oauth/token';
     }
 
 
