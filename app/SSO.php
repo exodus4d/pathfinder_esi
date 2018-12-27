@@ -12,7 +12,7 @@ namespace Exodus4D\ESI;
 class SSO extends Api implements SsoInterface {
 
     public function getVerifyCharacterData(string $accessToken) : array {
-        $url = $this->getVerifyAuthorizationCodeEndpointURL();
+        $url = $this->getVerifyUserEndpointURL();
         $urlParts = parse_url($url);
 
         $characterData = [];
