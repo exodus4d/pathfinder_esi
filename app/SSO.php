@@ -11,16 +11,28 @@ namespace Exodus4D\ESI;
 
 class SSO extends Api implements SsoInterface {
 
+    /**
+     * get a valid "access_token" for oAuth 2.0 verification
+     * -> verify $authCode and get NEW "access_token"
+     *      $urlParams['grant_type]     = 'authorization_code'
+     *      $urlParams['code]           = 'XXXX'
+     * -> request NEW "access_token" if isset:
+     *      $urlParams['grant_type]     = 'refresh_token'
+     *      $urlParams['refresh_token]  = 'XXXX'
+     * @param string $credentials
+     * @param array $urlParams
+     * @return array
+     */
     public function getAccessData(string $credentials, array $urlParams = []) : array {
         $url = $this->getVerifyAuthorizationCodeEndpointURL();
+        $urlParts = parse_url($url);
 
+        $accessData = [];
 
-        $accessData = [
-            'accessToken' => 'testToken123'
-        ];
         $requestOptions = [
             'header' => [
-                'Content-Type' => 'application/x-www-form-urlencoded'
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Host' => $urlParts['host']
             ],
             'content' => $urlParams
         ];
@@ -28,6 +40,10 @@ class SSO extends Api implements SsoInterface {
         $requestOptions['header'] += $this->getAuthHeader($credentials);
 
         $response = $this->request('POST', $url, $requestOptions);
+
+        if( !empty($response) ){
+            $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
+        }
 
         return $accessData;
     }

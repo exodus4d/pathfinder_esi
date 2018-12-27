@@ -373,6 +373,12 @@ class WebClient extends \Web {
             $this->checkResponseHeaders($parsedResponseHeaders, $url);
             $statusCode = $this->getStatusCodeFromHeaders($parsedResponseHeaders);
             $statusType = $this->getStatusType($statusCode);
+var_dump(' ROA-------------');
+var_dump($responseHeaders);
+var_dump($responseBody);
+var_dump($parsedResponseHeaders);
+var_dump($statusCode);
+var_dump($statusType);
 
             switch($statusType){
                 case 'info':                                                // HTTP 1xx
