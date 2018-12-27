@@ -299,7 +299,9 @@ class ESI extends Api implements EsiInterface {
 
         $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
-        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
+
+        $requestOptions = $this->getRequestOptions($accessToken);
+        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
 
         if($response->error){
             $rolesData['error'] = $response->error;
@@ -854,6 +856,20 @@ class ESI extends Api implements EsiInterface {
         }
 
         return $url;
+    }
+
+    protected function getRequestOptions(string $accessToken = '') : array {
+        $requestOptions = [
+            'header' => [
+                'Accept' => 'application/json' // all ESI endpoints return JSON
+            ]
+        ];
+
+        if( !empty($accessToken) ){
+            $requestOptions['header'] += $this->getAuthHeader($accessToken, 'Bearer');
+        }
+
+        return $requestOptions;
     }
 
     /**
