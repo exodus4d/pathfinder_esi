@@ -689,7 +689,9 @@ class ESI extends Api implements EsiInterface {
 
         $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
-        $response = $this->request($url, 'GET', '', $additionalOptions);
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
 
         if($response->error){
             $routeData['error'] = $response->error;
