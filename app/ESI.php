@@ -241,7 +241,9 @@ class ESI extends Api implements EsiInterface {
     public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
         $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
         $onlineData = [];
-        $response = $this->request($url, 'GET', $accessToken, $additionalOptions);
+
+        $requestOptions = $this->getRequestOptions($accessToken);
+        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
 
         if( !empty($response) ){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
