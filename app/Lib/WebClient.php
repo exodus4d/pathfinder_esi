@@ -16,6 +16,9 @@ class WebClient extends \Web {
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
     const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
 
+    const ERROR_REQUEST_URL                     = 'Invalid HTTP request url: \'%s\'';
+    const ERROR_REQUEST_METHOD                  = 'Invalid HTTP request method: \'%s\'| url: \'%s\'';
+
     const ERROR_STATUS_LOG                      = 'HTTP %s: \'%s\' | url: %s \'%s\'%s';
     const ERROR_RESOURCE_LEGACY                 = 'Resource: \'%s\' has been marked as legacy. url: \'%s\' | header: \'%s\'';
     const ERROR_RESOURCE_DEPRECATED             = 'Resource: \'%s\' has been marked as deprecated. url: \'%s\' | header: \'%s\'';
@@ -291,10 +294,10 @@ class WebClient extends \Web {
 
     /**
      * check whether a HTTP request method is valid/given
-     * @param $method
+     * @param string $method
      * @return bool
      */
-    public function checkRequestMethod($method): bool {
+    protected function checkRequestMethod(string $method): bool {
       return in_array($method, self::REQUEST_METHODS);
     }
 
@@ -348,76 +351,89 @@ class WebClient extends \Web {
      * @return mixed|null
      */
     public function request( $url, array $options = null, $additionalOptions = [], $retryCount = 0){
-        // retry same request until request limit is reached
-        $retry = false;
+        $responseBody = null;
 
-        $response = parent::request($url, $options);
+        if(\Audit::instance()->url($url)){
+            // check if url is blocked (error limit exceeded)
+            if(!$this->isBlockedUrl($url)){
+                if($this->checkRequestMethod($options['method'])){
+                    // retry request in case of error until request limit exceeds
+                    $retry = false;
 
-        $this->logRequest($url, $response);
+                    $response = parent::request($url, $options);
 
-        $responseHeaders    = (array)$response['headers'];
-        $responseBody       = json_decode($response['body']);
+                    $this->logRequest($url, $response);
 
-        // make sure return type is correct
-        if(
-            !is_array($responseBody) &&
-            !is_bool($responseBody) &&
-            !($responseBody instanceof \stdClass)
-        ){
-            $responseBody = null;
-        }
+                    $responseHeaders    = (array)$response['headers'];
+                    $responseBody       = json_decode($response['body']);
 
-        if( !empty($responseHeaders)){
-            $parsedResponseHeaders = $this->parseHeaders($responseHeaders);
-            // check response headers
-            $this->checkResponseHeaders($parsedResponseHeaders, $url);
-            $statusCode = $this->getStatusCodeFromHeaders($parsedResponseHeaders);
-            $statusType = $this->getStatusType($statusCode);
-
-            switch($statusType){
-                case 'info':                                                // HTTP 1xx
-                case 'ok':                                                  // HTTP 2xx
-                    break;
-                case 'err_client':                                          // HTTP 4xx
-                    if( !in_array($statusCode, (array)$additionalOptions['suppressHTTPLogging']) ){
-                        $errorMsg = $this->getErrorMessageFromJsonResponse(
-                            $statusCode,
-                            $options['method'],
-                            $url,
-                            $responseBody
-                        );
-                        $this->getLogger($statusType)->write($errorMsg);
+                    // make sure return type is correct
+                    if(
+                        !is_array($responseBody) &&
+                        !is_bool($responseBody) &&
+                        !($responseBody instanceof \stdClass)
+                    ){
+                        $responseBody = null;
                     }
-                    break;
-                case 'err_server':                                          // HTTP 5xx
-                    $retry = true;
 
-                    if( $retryCount == self::RETRY_COUNT_MAX ){
-                        $errorMsg = $this->getErrorMessageFromJsonResponse(
-                            $statusCode,
-                            $options['method'],
-                            $url,
-                            $responseBody
-                        );
-                        $this->getLogger($statusType)->write($errorMsg);
+                    if( !empty($responseHeaders)){
+                        $parsedResponseHeaders = $this->parseHeaders($responseHeaders);
+                        // check response headers
+                        $this->checkResponseHeaders($parsedResponseHeaders, $url);
+                        $statusCode = $this->getStatusCodeFromHeaders($parsedResponseHeaders);
+                        $statusType = $this->getStatusType($statusCode);
 
-                        // trigger error
-                        if($additionalOptions['suppressHTTPErrors'] !== true){
-                            $f3 = \Base::instance();
-                            $f3->error($statusCode, $errorMsg);
+                        switch($statusType){
+                            case 'info':                                                // HTTP 1xx
+                            case 'ok':                                                  // HTTP 2xx
+                                break;
+                            case 'err_client':                                          // HTTP 4xx
+                                if( !in_array($statusCode, (array)$additionalOptions['suppressHTTPLogging']) ){
+                                    $errorMsg = $this->getErrorMessageFromJsonResponse(
+                                        $statusCode,
+                                        $options['method'],
+                                        $url,
+                                        $responseBody
+                                    );
+                                    $this->getLogger($statusType)->write($errorMsg);
+                                }
+                                break;
+                            case 'err_server':                                          // HTTP 5xx
+                                $retry = true;
+
+                                if( $retryCount == self::RETRY_COUNT_MAX ){
+                                    $errorMsg = $this->getErrorMessageFromJsonResponse(
+                                        $statusCode,
+                                        $options['method'],
+                                        $url,
+                                        $responseBody
+                                    );
+                                    $this->getLogger($statusType)->write($errorMsg);
+
+                                    // trigger error
+                                    if($additionalOptions['suppressHTTPErrors'] !== true){
+                                        $f3 = \Base::instance();
+                                        $f3->error($statusCode, $errorMsg);
+                                    }
+                                }
+                                break;
+                            default:
+                        }
+
+                        if(
+                            $retry &&
+                            $retryCount < self::RETRY_COUNT_MAX
+                        ){
+                            $retryCount++;
+                            $this->request($url, $options, $additionalOptions, $retryCount);
                         }
                     }
-                    break;
-                default:
+                }else{
+                    $this->getLogger('err_server')->write(sprintf(self::ERROR_REQUEST_METHOD, $options['method'], $url));
+                }
             }
-
-            if(
-                $retry &&
-                $retryCount < self::RETRY_COUNT_MAX
-            ){
-                $retryCount++;
-                $this->request($url, $options, $additionalOptions, $retryCount);
-            }
+        }else{
+            $this->getLogger('err_server')->write(sprintf(self::ERROR_REQUEST_URL, $url));
         }
 
         return $responseBody;

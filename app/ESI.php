@@ -184,7 +184,7 @@ class ESI extends Api implements EsiInterface {
     public function getCharacterData(int $characterId) : array {
         $url = $this->getEndpointURL(['characters', 'GET'], [$characterId]);
         $characterData = [];
-        $response = $this->request($url, 'GET');
+        $response = $this->request('GET', $url);
 
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
