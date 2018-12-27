@@ -11,11 +11,19 @@ namespace Exodus4D\ESI;
 
 class SSO extends Api implements SsoInterface {
 
+    /**
+     * verify character data by "access_token"
+     * -> get some basic information (like character id)
+     * -> if more character information is required, use ESI "characters" endpoints request instead
+     * @param string $accessToken
+     * @return array
+     */
     public function getVerifyCharacterData(string $accessToken) : array {
         $url = $this->getVerifyUserEndpointURL();
         $urlParts = parse_url($url);
 
         $characterData = [];
+
         $requestOptions = [
             'header' => [
                 'Host' => $urlParts['host']
@@ -24,8 +32,11 @@ class SSO extends Api implements SsoInterface {
 
         $requestOptions['header'] += $this->getAuthHeader($accessToken, 'Bearer');
 
-
         $response = $this->request('GET', $url, $requestOptions);
+
+        if( !empty($response) ){
+            $characterData = (new namespace\Mapper\Sso\Character($response))->getData();
+        }
 
         return $characterData;
     }
