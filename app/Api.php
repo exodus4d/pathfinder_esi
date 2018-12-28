@@ -189,6 +189,8 @@ abstract class Api implements ApiInterface {
         }
 
         $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
+        $webClient->engine('curl');
+
         $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
 
         return $responseBody;

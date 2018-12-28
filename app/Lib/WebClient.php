@@ -463,4 +463,96 @@ class WebClient extends \Web {
 
         return $responseBody;
     }
+
+    /**
+     * IMPORTANT: This overwrites the _curl() from parent
+     * this is in fact a 1:1 clone of the parent method
+     * -> cURL errorCodes get added in this
+     * -> see: https://github.com/bcosca/fatfree/issues/1135
+     * @param string $url
+     * @param array $options
+     * @return array|mixed|null
+     */
+    protected function _curl($url,$options) {
+        $err = [];
+
+        $curl=curl_init($url);
+        if (!$open_basedir=ini_get('open_basedir'))
+            curl_setopt($curl,CURLOPT_FOLLOWLOCATION,
+                $options['follow_location']);
+        curl_setopt($curl,CURLOPT_MAXREDIRS,
+            $options['max_redirects']);
+        curl_setopt($curl,CURLOPT_PROTOCOLS,CURLPROTO_HTTP|CURLPROTO_HTTPS);
+        curl_setopt($curl,CURLOPT_REDIR_PROTOCOLS,CURLPROTO_HTTP|CURLPROTO_HTTPS);
+        curl_setopt($curl,CURLOPT_CUSTOMREQUEST,$options['method']);
+        if (isset($options['header']))
+            curl_setopt($curl,CURLOPT_HTTPHEADER,$options['header']);
+        if (isset($options['content']))
+            curl_setopt($curl,CURLOPT_POSTFIELDS,$options['content']);
+        if (isset($options['proxy']))
+            curl_setopt($curl,CURLOPT_PROXY,$options['proxy']);
+        curl_setopt($curl,CURLOPT_ENCODING,'gzip,deflate');
+        $timeout=isset($options['timeout'])?
+            $options['timeout']:
+            ini_get('default_socket_timeout');
+        curl_setopt($curl,CURLOPT_CONNECTTIMEOUT,$timeout);
+        curl_setopt($curl,CURLOPT_TIMEOUT,$timeout);
+        $headers=[];
+        curl_setopt($curl,CURLOPT_HEADERFUNCTION,
+            // Callback for response headers
+            function($curl,$line) use(&$headers) {
+                if ($trim=trim($line))
+                    $headers[]=$trim;
+                return strlen($line);
+            }
+        );
+        curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,2);
+        curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,FALSE);
+        ob_start();
+        curl_exec($curl);
+        //$err=curl_error($curl);
+
+        // START custom code ------------------------------------------------------------------------------------------
+
+        if($errCode = curl_errno($curl)){
+            $err = [
+                'code'          => $errCode,
+                'message'       => curl_strerror($errCode),
+                'description'   => curl_error($curl)
+            ];
+        }
+
+        $info = [
+            'http_code'         => curl_getinfo($curl, CURLINFO_HTTP_CODE),
+            'content_type'      => curl_getinfo($curl, CURLINFO_CONTENT_TYPE),
+            'total_time'        => curl_getinfo($curl, CURLINFO_TOTAL_TIME),
+            'http_connect_code' => curl_getinfo($curl, CURLINFO_HTTP_CONNECTCODE )
+        ];
+
+        // END custom code --------------------------------------------------------------------------------------------
+
+        curl_close($curl);
+        $body=ob_get_clean();
+        if (empty($err) &&
+            $options['follow_location'] && $open_basedir &&
+            preg_grep('/HTTP\/1\.\d 3\d{2}/',$headers) &&
+            preg_match('/^Location: (.+)$/m',implode(PHP_EOL,$headers),$loc)) {
+            $options['max_redirects']--;
+            if($loc[1][0] == '/') {
+                $parts=parse_url($url);
+                $loc[1]=$parts['scheme'].'://'.$parts['host'].
+                    ((isset($parts['port']) && !in_array($parts['port'],[80,443]))
+                        ?':'.$parts['port']:'').$loc[1];
+            }
+            return $this->request($loc[1],$options);
+        }
+        return [
+            'body'=>$body,
+            'headers'=>$headers,
+            'engine'=>'cURL',
+            'cached'=>FALSE,
+            'error'=>$err,
+            'info'=>$info
+        ];
+    }
 }
