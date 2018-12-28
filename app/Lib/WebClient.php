@@ -29,27 +29,39 @@ class WebClient extends \Web {
 
     const REQUEST_METHODS                       = ['GET', 'POST', 'PUT', 'DELETE'];
 
-    // error limits ---------------------------------------------------------------------------------------------------
-    // ESI calls will return special headers in case a client hits a "error limit" for a single endpoint
+    // request failure ================================================================================================
 
-    // log error when this error count is reached for a single API endpoint in the current error window
-    const ERROR_COUNT_MAX_URL                   = 30;
-
-    // log error if less then this errors remain in current error window (all endpoints)
-    const ERROR_COUNT_REMAIN_TOTAL              = 10;
-
-    // max number of CREST curls for a single endpoint until giving up...
-    // ->this is because CREST is not very stable
+    /**
+     * Failed requests will be re-send up to X times until give up
+     * -> This might help in case of a timeout or temporary unavailable endpoint
+     */
     const RETRY_COUNT_MAX                       = 2;
 
-    // loggable limits ------------------------------------------------------------------------------------------------
+    // error limits ===================================================================================================
+    // ESI calls will return special headers in case a client hits a "error limit" for a single endpoint
+
+    /**
+     * log error when this error count is reached for a single API endpoint in the current error window
+     */
+    const ERROR_COUNT_MAX_URL                   = 30;
+
+    /**
+     * log error if less then this errors remain in current error window (all endpoints)
+     */
+    const ERROR_COUNT_REMAIN_TOTAL              = 10;
+
+    // loggable limits ================================================================================================
     // ESI endpoints that return warning headers (e.g. "resource_legacy", "resource_deprecated") will get logged
     // To prevent big file I/O on these log files, errors get "throttled" and not all of them get logged
 
-    // Time interval used for error inspection (seconds)
+    /**
+     * Time interval used for error inspection (seconds)
+     */
     const LOGGABLE_COUNT_INTERVAL               = 60;
 
-    // Log first "2" errors that occur for an endpoint within "60" (LOGGABLE_COUNT_INTERVAL) seconds interval
+    /**
+     * Log first "2" errors that occur for an endpoint within "60" (LOGGABLE_COUNT_INTERVAL) seconds interval
+     */
     const LOGGABLE_COUNT_MAX_URL                = 2;
 
 
@@ -76,7 +88,7 @@ class WebClient extends \Web {
      * @param array $headers
      * @return array
      */
-    protected function parseHeaders(array $headers = []): array {
+    protected function parseHeaders(array $headers = []) : array {
         $parsedHeaders = [];
         foreach($headers as $header){
             $parts = explode(':', $header, 2);
@@ -89,7 +101,7 @@ class WebClient extends \Web {
      * @param array $headers
      * @return int
      */
-    protected function getStatusCodeFromHeaders(array $headers = []): int {
+    protected function getStatusCodeFromHeaders(array $headers = []) : int {
         $statusCode = 0;
         foreach($headers as $key => $value){
             if(preg_match('/http\/1\.\d (\d{3}?)/i', $key, $matches)){
@@ -105,7 +117,7 @@ class WebClient extends \Web {
      * @param int $statusCode
      * @return string
      */
-    protected function getStatusType(int $statusCode): string{
+    protected function getStatusType(int $statusCode) : string{
         $typeLevel = (int)substr($statusCode, 0, 1);
         switch($typeLevel){
             case 1:
@@ -137,7 +149,7 @@ class WebClient extends \Web {
      * @param null $responseBody
      * @return string
      */
-    protected function getErrorMessageFromJsonResponse(int $code, string $method, string $url, $responseBody = null):string {
+    protected function getErrorMessageFromJsonResponse(int $code, string $method, string $url, $responseBody = null) : string {
         $message = empty($responseBody->message) ?  @constant('Base::HTTP_' . $code) : $responseBody->message;
         $body = !is_null($responseBody) ? ' | body: ' . print_r($responseBody, true) : '';
 
@@ -149,7 +161,7 @@ class WebClient extends \Web {
      * @param string $statusType
      * @return \Log
      */
-    protected function getLogger(string $statusType): \Log{
+    protected function getLogger(string $statusType) : \Log{
         switch($statusType){
             case 'err_server':
                 $logfile = 'esi_error_server';
@@ -345,19 +357,31 @@ class WebClient extends \Web {
     }
 
     /**
+     * get maxRetry count
+     * @param mixed $retryCount
+     * @return int
+     */
+    protected function getMaxRetryCount($retryCount) : int {
+        return is_int($retryCount) ? max($retryCount, 0) :  self::RETRY_COUNT_MAX;
+    }
+
+    /**
      * @param string $url
      * @param array|null $options
      * @param array $additionalOptions
      * @param int $retryCount
      * @return mixed|null
      */
-    public function request( $url, array $options = null, $additionalOptions = [], $retryCount = 0){
+    public function request($url, array $options = null, array $additionalOptions = [], int $retryCount = 0){
         $responseBody = null;
 
         if(\Audit::instance()->url($url)){
             // check if url is blocked (error limit exceeded)
             if(!$this->isBlockedUrl($url)){
                 if($this->checkRequestMethod($options['method'])){
+                    // set max retry count in case of request error
+                    $retryCountMax = $this->getMaxRetryCount($additionalOptions['retryCountMax']);
+
                     // retry request in case of error until request limit exceeds
                     $retry = false;
 
@@ -402,7 +426,7 @@ class WebClient extends \Web {
                             case 'err_server':                                          // HTTP 5xx
                                 $retry = true;
 
-                                if( $retryCount == self::RETRY_COUNT_MAX ){
+                                if($retryCount == $retryCountMax){
                                     $errorMsg = $this->getErrorMessageFromJsonResponse(
                                         $statusCode,
                                         $options['method'],
@@ -423,7 +447,7 @@ class WebClient extends \Web {
 
                         if(
                             $retry &&
-                            $retryCount < self::RETRY_COUNT_MAX
+                            $retryCount < $retryCountMax
                         ){
                             $retryCount++;
                             $this->request($url, $options, $additionalOptions, $retryCount);

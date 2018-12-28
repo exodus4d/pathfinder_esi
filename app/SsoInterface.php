@@ -11,6 +11,17 @@ namespace Exodus4D\ESI;
 
 interface SsoInterface {
 
+    /**
+     * @param string $accessToken
+     * @return array
+     */
+    public function getVerifyCharacterData(string $accessToken) : array;
+
+    /**
+     * @param string $authHeader
+     * @param array $urlParams
+     * @return array
+     */
     public function getAccessData(string $authHeader, array $urlParams = []) : array;
 
 }

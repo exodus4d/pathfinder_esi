@@ -79,10 +79,6 @@ class SSO extends Api implements SsoInterface {
         return $accessData;
     }
 
-    protected function getAuthorizationEndpointURL() : string {
-        return $this->getUrl() . '/oauth/authorize';
-    }
-
     protected function getVerifyUserEndpointURL() : string {
         return $this->getUrl() . '/oauth/verify';
     }
