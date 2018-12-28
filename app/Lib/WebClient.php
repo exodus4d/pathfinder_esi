@@ -11,7 +11,20 @@ namespace Exodus4D\ESI\Lib;
 
 use Exodus4D\ESI\Api;
 
-class WebClient extends \Web {
+class WebClient extends \Prefab {
+
+    public function __construct(int $debugLevel = Api::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = Api::DEFAULT_DEBUG_LOG_REQUESTS){
+        $this->debugLevel = $debugLevel;
+        $this->debugLogRequests = $debugLogRequests;
+    }
+
+    public function request($url, array $options = null, array $additionalOptions = []){
+        var_dump($url);
+        die();
+    }
+}
+
+class WebClientOld extends \Web {
 
     const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
     const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
@@ -350,7 +363,7 @@ class WebClient extends \Web {
      * @param string $url
      * @param $response
      */
-    protected function logRequest(string $url, $response){
+    protected function debugLogRequest(string $url, $response){
         if($this->debugLogRequests){
             $this->getLogger('debug_request')->write(sprintf(self::DEBUG_REQUEST, $url, print_r($response, true)));
         }
@@ -387,7 +400,21 @@ class WebClient extends \Web {
 
                     $response = parent::request($url, $options);
 
-                    $this->logRequest($url, $response);
+                    // write log file in debug mode
+                    $this->debugLogRequest($url, $response);
+
+                    // check cURL errors (e.g. timeout, ...)
+                    /*
+                    if(empty($curlErr = $response['error'])){
+
+                    }else{
+                        // handle cURL errors
+                        switch($curlErrCode = $curlErr['code']){
+                            case CURLE_OPERATION_TIMEOUTED:
+                                $retry = true;
+                                break;
+                        }
+                    }*/
 
                     $responseHeaders    = (array)$response['headers'];
                     $responseBody       = json_decode($response['body']);
