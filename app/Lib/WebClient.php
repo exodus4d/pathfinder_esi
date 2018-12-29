@@ -61,9 +61,28 @@ class WebClient {
         $this->client = new Client($config);
     }
 
-    public function request(string $uri, array $options = null, array $additionalOptions = []){
+    public function __call(string $name, array $arguments = []){
+        $return = [];
 
+        if(is_object($this->client)){
+            if( method_exists($this->client, $name) ){
+                $return  = call_user_func_array([$this->client, $name], $arguments);
+            }else{
+                // TODO
+                /*
+                $errorMsg = $this->getMissingMethodError(get_class($this->client), $name);
+                $this->getLogger('ERROR')->write($errorMsg);
+                \Base::instance()->error(501, $errorMsg);*/
+            }
+        }else{
+            // TODO
+            //\Base::instance()->error(501, self::ERROR_CLIENT_INVALID);
+        }
+
+        return $return;
     }
+
+
 }
 
 class WebClientOld extends \Web {

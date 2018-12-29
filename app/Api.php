@@ -270,9 +270,13 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump('start ------------------------');
         var_dump('$method : ' . $method);
         var_dump('$url : ' . $url);
-        var_dump('$options : ' . $options);
-        var_dump('$additionalOptions : ' . $additionalOptions);
+        var_dump('$options');
+        var_dump($options);
+        var_dump('$additionalOptions');
+        var_dump($additionalOptions);
+        $response = $this->getClient()->request($method, $url);
 
+        var_dump($response);
         die();
     }
 
