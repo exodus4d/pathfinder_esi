@@ -8,12 +8,23 @@
 
 namespace Exodus4D\ESI;
 
-abstract class Api implements ApiInterface {
+
+abstract class Api extends \Prefab implements ApiInterface {
 
     /**
      * default for: request timeout
      */
-    const DEFAULT_TIMEOUT                           = 3;
+    const DEFAULT_TIMEOUT                           = 3.0;
+
+    /**
+     * default for: connect timeout
+     */
+    const DEFAULT_CONNECT_TIMEOUT                   = 3.0;
+
+    /**
+     * default for: read timeout
+     */
+    const DEFAULT_READ_TIMEOUT                      = 10.0;
 
     /**
      * default for: log level
@@ -21,20 +32,78 @@ abstract class Api implements ApiInterface {
     const DEFAULT_DEBUG_LEVEL                       = 0;
 
     /**
-     * default for: log any request to log file
+     * default for: debug requests
      */
-    const DEFAULT_DEBUG_LOG_REQUESTS                = false;
+    const DEFAULT_DEBUG_REQUESTS                    = false;
 
+    /**
+     * WebClient instance
+     * @var \Exodus4D\ESI\Lib\WebClient|null
+     */
+    private $client                                 = null;
 
+    /**
+     * base API URL
+     * @var string
+     */
     private $url                                    = '';
 
+    /**
+     * Timeout of the request in seconds
+     * Use 0 to wait indefinitely
+     * @var float
+     */
     private $timeout                                = self::DEFAULT_TIMEOUT;
 
+    /**
+     * Timeout for server connect in seconds
+     * @var float
+     */
+    private $connectTimeout                         = self::DEFAULT_CONNECT_TIMEOUT;
+
+    /**
+     * Read timeout for Streams
+     * Should be less than "default_socket_timeout" PHP ini
+     * @var float
+     */
+    private $readTimeout                            = self::DEFAULT_READ_TIMEOUT;
+
+    /**
+     * Debug level for API requests
+     * @var int
+     */
     private $debugLevel                             = self::DEFAULT_DEBUG_LEVEL;
 
-    private $debugLogRequests                       = self::DEFAULT_DEBUG_LOG_REQUESTS;
+    /**
+     * Debug requests if enabled
+     * @var bool
+     */
+    private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
+    /**
+     * UserAgent send with requests
+     * @var string
+     */
     private $userAgent                              = '';
+
+    /**
+     * Api constructor.
+     * @param string $url
+     */
+    public function __construct(string $url){
+        $this->setUrl($url);
+    }
+
+    /**
+     * @return Lib\WebClient
+     */
+    protected function getClient() : namespace\Lib\WebClient {
+        if(!$this->client){
+            $this->client = $this->initClient();
+        }
+
+        return $this->client;
+    }
 
     /**
      * @param string $url
@@ -44,10 +113,24 @@ abstract class Api implements ApiInterface {
     }
 
     /**
-     * @param int $timeout
+     * @param float $timeout
      */
-    public function setTimeout(int $timeout = self::DEFAULT_TIMEOUT){
+    public function setTimeout(float $timeout = self::DEFAULT_TIMEOUT){
         $this->timeout = $timeout;
+    }
+
+    /**
+     * @param float $connectTimeout
+     */
+    public function setConnectTimeout(float $connectTimeout = self::DEFAULT_CONNECT_TIMEOUT){
+        $this->connectTimeout = $connectTimeout;
+    }
+
+    /**
+     * @param float $readTimeout
+     */
+    public function setReadTimeout(float $readTimeout = self::DEFAULT_READ_TIMEOUT){
+        $this->readTimeout = $readTimeout;
     }
 
     /**
@@ -58,11 +141,12 @@ abstract class Api implements ApiInterface {
     }
 
     /**
-     * log any requests to log file
-     * @param bool $logRequests
+     * debug requests
+     * https://guzzle.readthedocs.io/en/latest/request-options.html#debug
+     * @param bool $debugRequests
      */
-    public function setDebugLogRequests(bool $logRequests = self::DEFAULT_DEBUG_LOG_REQUESTS){
-        $this->debugLogRequests = $logRequests;
+    public function setDebugRequests(bool $debugRequests = self::DEFAULT_DEBUG_REQUESTS){
+        $this->debugRequests  = $debugRequests;
     }
 
     /**
@@ -80,10 +164,24 @@ abstract class Api implements ApiInterface {
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getTimeout() : int {
+    public function getTimeout() : float {
         return $this->timeout;
+    }
+
+    /**
+     * @return float
+     */
+    public function getConnectTimeout() : float {
+        return $this->connectTimeout;
+    }
+
+    /**
+     * @return float
+     */
+    public function getReadTimeout() : float {
+        return $this->readTimeout;
     }
 
     /**
@@ -96,8 +194,8 @@ abstract class Api implements ApiInterface {
     /**
      * @return bool
      */
-    public function getDebugLogRequests() : bool {
-        return $this->debugLogRequests;
+    public function getDebugRequests() : bool {
+        return $this->debugRequests;
     }
 
     /**
@@ -109,6 +207,30 @@ abstract class Api implements ApiInterface {
 
     protected function getAuthHeader(string $credentials, string $type = 'Basic') : array {
         return ['Authorization' => ucfirst($type) . ' ' . $credentials];
+    }
+
+    /**
+     * init new webClient for this Api
+     * @return Lib\WebClient
+     */
+    protected function initClient() : namespace\Lib\WebClient {
+        return new namespace\Lib\WebClient($this->getUrl(), $this->getClientConfig());
+    }
+
+    /**
+     * get webClient config based on current Api settings
+     * @return array
+     */
+    protected function getClientConfig() : array {
+        return [
+            'timeout'           => $this->getTimeout(),
+            'connect_timeout'   => $this->getConnectTimeout(),
+            'read_timeout'      => $this->getReadTimeout(),
+            'debug'             => $this->getDebugRequests(),
+            'headers'           => [
+                'User-Agent'    => $this->getUserAgent()
+            ]
+        ];
     }
 
     /**
@@ -144,6 +266,16 @@ abstract class Api implements ApiInterface {
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
+    protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
+        var_dump('start ------------------------');
+        var_dump('$method : ' . $method);
+        var_dump('$url : ' . $url);
+        var_dump('$options : ' . $options);
+        var_dump('$additionalOptions : ' . $additionalOptions);
+
+        die();
+    }
+
     /**
      * @param string $method
      * @param string $url
@@ -151,6 +283,7 @@ abstract class Api implements ApiInterface {
      * @param array $additionalOptions
      * @return mixed|null
      */
+    /*
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
         $method = strtoupper($method);
 
@@ -193,5 +326,5 @@ abstract class Api implements ApiInterface {
         $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
 
         return $responseBody;
-    }
+    }*/
 }

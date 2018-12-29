@@ -13,21 +13,29 @@ interface ApiInterface {
 
     public function setUrl(string $url);
 
-    public function setTimeout(int $timeout);
+    public function setTimeout(float $timeout);
+
+    public function setConnectTimeout(float $connectTimeout);
+
+    public function setReadTimeout(float $readTimeout);
 
     public function setDebugLevel(int $debugLevel);
 
-    public function setDebugLogRequests(bool $logRequests);
+    public function setDebugRequests(bool $debugRequests);
 
     public function setUserAgent(string $userAgent);
 
     public function getUrl() : string;
 
-    public function getTimeout() : int;
+    public function getTimeout() : float;
+
+    public function getConnectTimeout() : float;
+
+    public function getReadTimeout() : float;
 
     public function getDebugLevel() : int;
 
-    public function getDebugLogRequests() : bool;
+    public function getDebugRequests() : bool;
 
     public function getUserAgent() : string;
 }

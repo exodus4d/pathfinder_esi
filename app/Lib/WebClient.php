@@ -10,17 +10,59 @@
 namespace Exodus4D\ESI\Lib;
 
 use Exodus4D\ESI\Api;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleRetry\GuzzleRetryMiddleware;
 
-class WebClient extends \Prefab {
+class WebClient {
 
-    public function __construct(int $debugLevel = Api::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = Api::DEFAULT_DEBUG_LOG_REQUESTS){
-        $this->debugLevel = $debugLevel;
-        $this->debugLogRequests = $debugLogRequests;
+    /**
+     * @var Client|null
+     */
+    private $client                             = null;
+
+    /**
+     * debugLevel used for internal error/warning logging
+     * @var int
+     */
+    protected $debugLevel                       = Api::DEFAULT_DEBUG_LEVEL;
+
+    /**
+     * if true any requests gets logged in log file
+     * @var bool
+     */
+    protected $debugLogRequests                 = Api::DEFAULT_DEBUG_REQUESTS;
+
+
+    /**
+     * WebClient constructor.
+     * @param string $url
+     * @param array $config
+     */
+    public function __construct(string $url, array $config = []){
+        // use cURLHandler for all requests
+        $handler = new CurlHandler();
+        // new Stack for the Handler, manages Middleware for requests
+        $stack = HandlerStack::create($handler);
+        // push RetryMiddleware (resend failed requests)
+        $stack->push(GuzzleRetryMiddleware::factory([
+            'max_retry_attempts' => 3,
+            'retry_on_timeout' => true,
+            'retry_on_status' => [429, 503, 504],
+            'default_retry_multiplier' => 0.5
+        ]), 'retry');
+
+        // Client default configuration
+        $config['handler'] = $stack;
+        $config['base_uri'] = $url;
+
+        // init client
+        $this->client = new Client($config);
     }
 
-    public function request($url, array $options = null, array $additionalOptions = []){
-        var_dump($url);
-        die();
+    public function request(string $uri, array $options = null, array $additionalOptions = []){
+
     }
 }
 
