@@ -269,7 +269,7 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
-        var_dump('start ------------------------');
+        var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
         var_dump('$url : ' . $url);
         var_dump('$options');
@@ -283,11 +283,14 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump('request: ----');
         var_dump($request->getHeaders());
         $response = $this->getClient()->send($request);
+
+        var_dump('request final: ----');
+        //var_dump($mockHandler->getLastRequest()->getHeaders());
         //$response = $this->getClient()->request($method, $url);
 
         var_dump('response: ----');
         var_dump($response->getStatusCode());
-        var_dump($response->getBody());
+        var_dump($response->getBody()->getContents());
         var_dump($response->getReasonPhrase());
         var_dump($response->getHeaders());
         die();

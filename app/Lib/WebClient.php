@@ -60,6 +60,8 @@ class WebClient {
 
         // init client
         $this->client = new Client($config);
+
+
     }
 
     /**
