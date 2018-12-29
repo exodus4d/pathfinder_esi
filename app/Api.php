@@ -279,7 +279,11 @@ abstract class Api extends \Prefab implements ApiInterface {
         /**
          * @var $response Response
          */
-        $response = $this->getClient()->request($method, $url);
+        $request = $this->getClient()->newRequest($method, $url);
+        var_dump('request: ----');
+        var_dump($request->getHeaders());
+        $response = $this->getClient()->send($request);
+        //$response = $this->getClient()->request($method, $url);
 
         var_dump('response: ----');
         var_dump($response->getStatusCode());

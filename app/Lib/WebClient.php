@@ -13,6 +13,7 @@ use Exodus4D\ESI\Api;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
 use GuzzleRetry\GuzzleRetryMiddleware;
 
 class WebClient {
@@ -59,6 +60,16 @@ class WebClient {
 
         // init client
         $this->client = new Client($config);
+    }
+
+    /**
+     * get new Request object
+     * @param string $method
+     * @param string $url
+     * @return Request
+     */
+    public function newRequest(string $method, string $url) : Request {
+        return new Request($method, $url);
     }
 
     public function __call(string $name, array $arguments = []){
