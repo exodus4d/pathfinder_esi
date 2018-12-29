@@ -9,9 +9,17 @@
 namespace Exodus4D\ESI;
 
 
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
+
+    /**
+     * default for: accepted response type
+     * -> Affects "Accept" HTTP Header
+     */
+    const DEFAULT_ACCEPT_TYPE                       = 'json';
 
     /**
      * default for: request timeout
@@ -49,6 +57,11 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @var string
      */
     private $url                                    = '';
+
+    /**
+     * @var string
+     */
+    private $acceptType                             = self::DEFAULT_ACCEPT_TYPE;
 
     /**
      * Timeout of the request in seconds
@@ -115,6 +128,13 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @param string $acceptType
+     */
+    public function setAcceptType(string $acceptType = self::DEFAULT_ACCEPT_TYPE){
+        $this->acceptType = $acceptType;
+    }
+
+    /**
      * @param float $timeout
      */
     public function setTimeout(float $timeout = self::DEFAULT_TIMEOUT){
@@ -163,6 +183,13 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function getUrl() : string {
         return $this->url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAcceptType() : string {
+        return $this->acceptType;
     }
 
     /**
@@ -216,7 +243,11 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @return Lib\WebClient
      */
     protected function initClient() : namespace\Lib\WebClient {
-        return new namespace\Lib\WebClient($this->getUrl(), $this->getClientConfig());
+        return new namespace\Lib\WebClient(
+            $this->getUrl(),
+            $this->getClientConfig(),
+            $this->getClientMiddleware()
+        );
     }
 
     /**
@@ -233,6 +264,30 @@ abstract class Api extends \Prefab implements ApiInterface {
                 'User-Agent'    => $this->getUserAgent()
             ]
         ];
+    }
+
+    /**
+     * get all "Middleware" used in GuzzleHttp\HandlerStack() config
+     * for this GuzzleHttp\Client()
+     * @return callable[]
+     */
+    protected function getClientMiddleware() : array {
+        $middleware = [];
+
+        if($this->getAcceptType() == 'json'){
+            // set "Accept" header json
+            $middleware['request_json'] = Middleware::mapRequest(function(ResponseInterface $request){
+                return $request->withHeader('Accept', 'application/json');
+            });
+
+            // decode Json response body
+            $middleware['response_json'] = Middleware::mapResponse(function(ResponseInterface $response){
+                $jsonBody = \GuzzleHttp\json_decode((string) $response->getBody());
+                return $response->withBody($jsonBody);
+            });
+        }
+
+        return $middleware;
     }
 
     /**

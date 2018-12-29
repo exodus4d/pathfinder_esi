@@ -13,6 +13,7 @@ use Exodus4D\ESI\Api;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleRetry\GuzzleRetryMiddleware;
 
@@ -35,13 +36,13 @@ class WebClient {
      */
     protected $debugLogRequests                 = Api::DEFAULT_DEBUG_REQUESTS;
 
-
     /**
      * WebClient constructor.
      * @param string $url
      * @param array $config
+     * @param array $middleware
      */
-    public function __construct(string $url, array $config = []){
+    public function __construct(string $url, array $config = [], array $middleware = []){
         // use cURLHandler for all requests
         $handler = new CurlHandler();
         // new Stack for the Handler, manages Middleware for requests
@@ -53,6 +54,16 @@ class WebClient {
             'retry_on_status' => [429, 503, 504],
             'default_retry_multiplier' => 0.5
         ]), 'retry');
+
+        // add Middleware to HandlerStack
+        foreach($middleware as $name => $middleware){
+            $stack->push($middleware, $name);
+        }
+
+        $stack->push(Middleware::tap(function($request){
+            var_dump('tab middleware ---');
+            var_dump($request->getHeaders());
+        }));
 
         // Client default configuration
         $config['handler'] = $stack;

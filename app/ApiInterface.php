@@ -13,6 +13,8 @@ interface ApiInterface {
 
     public function setUrl(string $url);
 
+    public function setAcceptType(string $acceptType);
+
     public function setTimeout(float $timeout);
 
     public function setConnectTimeout(float $connectTimeout);
@@ -26,6 +28,8 @@ interface ApiInterface {
     public function setUserAgent(string $userAgent);
 
     public function getUrl() : string;
+
+    public function getAcceptType() : string;
 
     public function getTimeout() : float;
 
