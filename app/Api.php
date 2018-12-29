@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI;
 
 
+use GuzzleHttp\Psr7\Response;
+
 abstract class Api extends \Prefab implements ApiInterface {
 
     /**
@@ -274,9 +276,16 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump($options);
         var_dump('$additionalOptions');
         var_dump($additionalOptions);
+        /**
+         * @var $response Response
+         */
         $response = $this->getClient()->request($method, $url);
 
-        var_dump($response);
+        var_dump('response: ----');
+        var_dump($response->getStatusCode());
+        var_dump($response->getBody());
+        var_dump($response->getReasonPhrase());
+        var_dump($response->getHeaders());
         die();
     }
 
