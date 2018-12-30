@@ -9,6 +9,7 @@
 namespace Exodus4D\ESI;
 
 
+use Exodus4D\ESI\Lib\Stream\JsonStream;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -282,8 +283,8 @@ abstract class Api extends \Prefab implements ApiInterface {
 
             // decode Json response body
             $middleware['response_json'] = Middleware::mapResponse(function(ResponseInterface $response){
-                $jsonBody = \GuzzleHttp\json_decode((string) $response->getBody());
-                return $response->withBody($jsonBody);
+                $jsonStream = new JsonStream($response->getBody());
+                return $response->withBody($jsonStream);
             });
         }
 
