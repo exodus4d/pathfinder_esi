@@ -12,12 +12,15 @@ namespace Exodus4D\ESI\Lib\Stream;
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
 use Psr\Http\Message\StreamInterface;
 
-class JsonStream implements StreamInterface, \JsonSerializable {
+class JsonStream implements StreamInterface {
 
-    use StreamDecoratorTrait;
+    use StreamDecoratorTrait {
+        StreamDecoratorTrait::getContents as traitGetContents;
+    }
 
-    public function jsonSerialize(){
-        $contents = (string) $this->getContents();
+
+    public function getContents(){
+        $contents = (string) $this->traitGetContents();
 
         if($contents === ''){
             return null;
