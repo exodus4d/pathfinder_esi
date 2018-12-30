@@ -845,14 +845,14 @@ class ESI extends Api implements EsiInterface {
             $options['json'] = $content;
         }
 
+        if(!empty($datasource = $this->getDataSource())){
+            $query += ['datasource' => $datasource];
+        }
+
         if(!empty($query)){
             // URL Query options
             // see: https://guzzle.readthedocs.io/en/latest/request-options.html#query
             $options['query'] += $query;
-        }
-
-        if(!empty($datasource = $this->getDataSource())){
-            $options['query'] += ['datasource' => $datasource];
         }
 
         return $options;
