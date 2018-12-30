@@ -12,6 +12,7 @@ namespace Exodus4D\ESI;
 use Exodus4D\ESI\Lib\Stream\JsonStream;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
@@ -277,7 +278,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         if($this->getAcceptType() == 'json'){
             // set "Accept" header json
-            $middleware['request_json'] = Middleware::mapRequest(function(ResponseInterface $request){
+            $middleware['request_json'] = Middleware::mapRequest(function(RequestInterface $request){
                 return $request->withHeader('Accept', 'application/json');
             });
 
