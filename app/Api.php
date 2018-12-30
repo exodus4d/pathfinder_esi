@@ -351,7 +351,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         //var_dump($response->getBody()->getContents());
         $test = $response->getBody();
-        var_dump($test->jsonSerialize());
+        var_dump($test->getContents());
 
 
         var_dump($response->getReasonPhrase());
