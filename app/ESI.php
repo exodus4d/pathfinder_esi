@@ -836,8 +836,8 @@ class ESI extends Api implements EsiInterface {
         $options['on_stats'] = function ( $stats) {
             var_dump('transfer start: -----');
             //var_dump($stats->getEffectiveUri());
-            var_dump($stats->getTransferTime());
-            var_dump($stats->getHandlerStats());
+            var_dump('transferTime: ' .$stats->getTransferTime());
+            var_dump('transferUrl: ' . $stats->getHandlerStat('url'));
             var_dump($stats->getHandlerErrorData());
             var_dump('transfer end: -----');
         };

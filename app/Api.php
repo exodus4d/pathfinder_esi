@@ -342,8 +342,8 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
         var_dump('$uri : ' . $uri);
-        var_dump('$options');
-        var_dump($options);
+        //var_dump('$options');
+        //var_dump($options);
         //var_dump('$additionalOptions');
         //var_dump($additionalOptions);
         /**
@@ -371,20 +371,28 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         }catch(ConnectException $e){
             var_dump('ConnectException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(ClientException $e){
             var_dump('ClientException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(ServerException $e){
             var_dump('ServerException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(BadResponseException $e){
             var_dump('BadResponseException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(TooManyRedirectsException $e){
             var_dump('TooManyRedirectsException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(RequestException $e){
             var_dump('RequestException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(TransferException $e){
             var_dump('TransferException --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(\Exception $e){
             var_dump('Exception --------');
+            var_dump($e->getCode() . ': ' . $e->getMessage());
         }
 
         die('END');
