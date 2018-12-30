@@ -852,7 +852,7 @@ class ESI extends Api implements EsiInterface {
         if(!empty($query)){
             // URL Query options
             // see: https://guzzle.readthedocs.io/en/latest/request-options.html#query
-            $options['query'] += $query;
+            $options['query'] = $query;
         }
 
         return $options;
