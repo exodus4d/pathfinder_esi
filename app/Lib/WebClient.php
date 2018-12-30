@@ -38,11 +38,11 @@ class WebClient {
 
     /**
      * WebClient constructor.
-     * @param string $url
+     * @param string $baseUri
      * @param array $config
      * @param array $middleware
      */
-    public function __construct(string $url, array $config = [], array $middleware = []){
+    public function __construct(string $baseUri, array $config = [], array $middleware = []){
         // use cURLHandler for all requests
         $handler = new CurlHandler();
         // new Stack for the Handler, manages Middleware for requests
@@ -56,8 +56,8 @@ class WebClient {
         ]), 'retry');
 
         // add Middleware to HandlerStack
-        foreach($middleware as $name => $middleware){
-            $stack->push($middleware, $name);
+        foreach($middleware as $mwName => $mwFunction){
+            $stack->push($mwFunction, $mwName);
         }
 
         $stack->push(Middleware::tap(function($request){
@@ -67,7 +67,7 @@ class WebClient {
 
         // Client default configuration
         $config['handler'] = $stack;
-        $config['base_uri'] = $url;
+        $config['base_uri'] = $baseUri;
 
         // init client
         $this->client = new Client($config);
@@ -78,11 +78,11 @@ class WebClient {
     /**
      * get new Request object
      * @param string $method
-     * @param string $url
+     * @param string $uri
      * @return Request
      */
-    public function newRequest(string $method, string $url) : Request {
-        return new Request($method, $url);
+    public function newRequest(string $method, string $uri) : Request {
+        return new Request($method, $uri);
     }
 
     public function __call(string $name, array $arguments = []){

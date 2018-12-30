@@ -236,6 +236,12 @@ abstract class Api extends \Prefab implements ApiInterface {
         return $this->userAgent;
     }
 
+    /**
+     * get HTTP request Header for Authorization
+     * @param string $credentials
+     * @param string $type
+     * @return array
+     */
     protected function getAuthHeader(string $credentials, string $type = 'Basic') : array {
         return ['Authorization' => ucfirst($type) . ' ' . $credentials];
     }
@@ -325,10 +331,10 @@ abstract class Api extends \Prefab implements ApiInterface {
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
-    protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
+    protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []){
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
-        var_dump('$url : ' . $url);
+        var_dump('$uri : ' . $uri);
         var_dump('$options');
         var_dump($options);
         var_dump('$additionalOptions');
@@ -336,14 +342,15 @@ abstract class Api extends \Prefab implements ApiInterface {
         /**
          * @var $response Response
          */
-        $request = $this->getClient()->newRequest($method, $url);
+        $request = $this->getClient()->newRequest($method, $uri);
+
         var_dump('request: ----');
         var_dump($request->getHeaders());
         $response = $this->getClient()->send($request);
 
         //var_dump('request final: ----');
         //var_dump($mockHandler->getLastRequest()->getHeaders());
-        //$response = $this->getClient()->request($method, $url);
+        //$response = $this->getClient()->request($method, $uri);
 
         var_dump('response: ----');
         var_dump($response->getStatusCode());

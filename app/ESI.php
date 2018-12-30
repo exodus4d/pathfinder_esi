@@ -53,11 +53,11 @@ class ESI extends Api implements EsiInterface {
      * @return array
      */
     public function getServerStatus() : array {
-        $url = $this->getEndpointURL(['status', 'GET']);
+        $uri = $this->getEndpointURI(['status', 'GET']);
         $serverStatus = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions);
 
         if( !empty($response) ){
             $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
@@ -784,7 +784,19 @@ class ESI extends Api implements EsiInterface {
         return $urlParams;
     }
 
+    protected function getEndpointURI(array $path = [], array $placeholders = []) : string {
+        $uri = Config\ESIConf::getEndpoint($path, $placeholders);
+
+        // overwrite endpoint version (debug)
+        if( !empty($endpointVersion = $this->getVersion()) ){
+            $uri = preg_replace('/(v[\d]+|latest|dev|legacy)/', $endpointVersion, $uri, 1);
+        }
+
+        return $uri;
+    }
+
     /**
+     * TODO remove
      * get/build endpoint URL
      * @param array $path
      * @param array $placeholders
@@ -815,24 +827,35 @@ class ESI extends Api implements EsiInterface {
      * get "default" request options for ESI endpoints
      * @param string $accessToken
      * @param null $content
+     * @param array $query
      * @return array
      */
-    protected function getRequestOptions(string $accessToken = '', $content = null) : array {
-        $requestOptions = [
-            'header' => [
-                'Accept' => 'application/json' // all ESI endpoints return JSON
-            ]
-        ];
+    protected function getRequestOptions(string $accessToken = '', $content = null, array $query = []) : array {
+        $options = [];
 
-        if( !empty($accessToken) ){
-            $requestOptions['header'] += $this->getAuthHeader($accessToken, 'Bearer');
+        if(!empty($accessToken)){
+            // send Authorization HTTP header
+            // see: https://guzzle.readthedocs.io/en/latest/request-options.html#headers
+            $options['headers'] += $this->getAuthHeader($accessToken, 'Bearer');
         }
 
-        if( !empty($content) ){
-            $requestOptions['content'] = $content;
+        if(!empty($content)){
+            // send content (body) is always Json
+            // see: https://guzzle.readthedocs.io/en/latest/request-options.html#json
+            $options['json'] = $content;
         }
 
-        return $requestOptions;
+        if(!empty($query)){
+            // URL Query options
+            // see: https://guzzle.readthedocs.io/en/latest/request-options.html#query
+            $options['query'] += $query;
+        }
+
+        if(!empty($datasource = $this->getDataSource())){
+            $options['query'] += ['datasource' => $datasource];
+        }
+
+        return $options;
     }
 
     /**

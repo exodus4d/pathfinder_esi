@@ -15,7 +15,7 @@ use Psr\Http\Message\StreamInterface;
 class JsonStream implements StreamInterface {
 
     // we need to "overwrite" the default Trait getContents() method
-    // -> therefore we make it usable as traitGetContents() and call it from
+    // -> therefore we make it accessible as traitGetContents() and call it from
     // the new getContents() method
     use StreamDecoratorTrait {
         StreamDecoratorTrait::getContents as traitGetContents;
