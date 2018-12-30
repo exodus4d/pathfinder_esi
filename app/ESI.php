@@ -833,12 +833,12 @@ class ESI extends Api implements EsiInterface {
     protected function getRequestOptions(string $accessToken = '', $content = null, array $query = []) : array {
         $options = [];
 
-        $options['on_transfer'] = function ( $trans) {
+        $options['on_stats'] = function ( $stats) {
             var_dump('transfer start: -----');
-            echo $trans->getEffectiveUri();
-            echo $trans->getRequest()->getUri();
-            echo $trans->getResponse()->getStatusCode();
-            var_dump($trans->getHandlerData());
+            var_dump($stats->getEffectiveUri());
+            var_dump($stats->getTransferTime());
+            var_dump($stats->getHandlerStats());
+            var_dump($stats->getHandlerErrorData());
             var_dump('transfer end: -----');
         };
 
