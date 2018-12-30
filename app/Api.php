@@ -10,6 +10,13 @@ namespace Exodus4D\ESI;
 
 
 use Exodus4D\ESI\Lib\Stream\JsonStream;
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\TooManyRedirectsException;
+use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
@@ -337,13 +344,52 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump('$uri : ' . $uri);
         var_dump('$options');
         var_dump($options);
-        var_dump('$additionalOptions');
-        var_dump($additionalOptions);
+        //var_dump('$additionalOptions');
+        //var_dump($additionalOptions);
         /**
          * @var $response Response
          */
-        $request = $this->getClient()->newRequest($method, $uri);
 
+
+        try{
+            // get new request
+            $request = $this->getClient()->newRequest($method, $uri);
+
+            /**
+             * @var $response Response
+             */
+            $response = $this->getClient()->send($request, $options);
+
+            $bodyStream = $response->getBody();
+
+            $body = $bodyStream->getContents();
+
+            var_dump('response: ----');
+            var_dump('statuscode: ' . $response->getStatusCode());
+            var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
+            var_dump($body);
+
+        }catch(ConnectException $e){
+            var_dump('ConnectException --------');
+        }catch(ClientException $e){
+            var_dump('ClientException --------');
+        }catch(ServerException $e){
+            var_dump('ServerException --------');
+        }catch(BadResponseException $e){
+            var_dump('BadResponseException --------');
+        }catch(TooManyRedirectsException $e){
+            var_dump('TooManyRedirectsException --------');
+        }catch(RequestException $e){
+            var_dump('RequestException --------');
+        }catch(TransferException $e){
+            var_dump('TransferException --------');
+        }catch(\Exception $e){
+            var_dump('Exception --------');
+        }
+
+        die('END');
+
+/*
         var_dump('request: ----');
         var_dump($request->getHeaders());
         $response = $this->getClient()->send($request, $options);
@@ -363,7 +409,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         var_dump($response->getReasonPhrase());
         var_dump($response->getHeaders());
-
+*/
     }
 
     /**
