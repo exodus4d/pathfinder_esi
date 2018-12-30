@@ -833,7 +833,7 @@ class ESI extends Api implements EsiInterface {
     protected function getRequestOptions(string $accessToken = '', $content = null, array $query = []) : array {
         $options = [];
 
-        $query['on_transfer'] = function ( $trans) {
+        $options['on_transfer'] = function ( $trans) {
             var_dump('transfer start: -----');
             echo $trans->getEffectiveUri();
             echo $trans->getRequest()->getUri();
