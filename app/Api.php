@@ -346,7 +346,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         var_dump('request: ----');
         var_dump($request->getHeaders());
-        $response = $this->getClient()->send($request);
+        $response = $this->getClient()->send($request, $options);
 
         //var_dump('request final: ----');
         //var_dump($mockHandler->getLastRequest()->getHeaders());

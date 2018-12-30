@@ -833,6 +833,15 @@ class ESI extends Api implements EsiInterface {
     protected function getRequestOptions(string $accessToken = '', $content = null, array $query = []) : array {
         $options = [];
 
+        $query['on_transfer'] = function ( $trans) {
+            var_dump('transfer start: -----');
+            echo $trans->getEffectiveUri();
+            echo $trans->getRequest()->getUri();
+            echo $trans->getResponse()->getStatusCode();
+            var_dump($trans->getHandlerData());
+            var_dump('transfer end: -----');
+        };
+
         if(!empty($accessToken)){
             // send Authorization HTTP header
             // see: https://guzzle.readthedocs.io/en/latest/request-options.html#headers
