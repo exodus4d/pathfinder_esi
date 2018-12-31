@@ -338,6 +338,12 @@ abstract class Api extends \Prefab implements ApiInterface {
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
+    protected function getErrorResponse(string $errorMessage) : \stdClass {
+        $body = (object)[];
+        $body->error = $errorMessage;
+        return $body;
+    }
+
     protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []){
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
@@ -386,7 +392,10 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(RequestException $e){
             var_dump('RequestException --------');
+            // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
+            $body = $this->getErrorResponse($e->getMessage());
             var_dump($e->getCode() . ': ' . $e->getMessage());
+            // $e->getHandlerContext(); // cURL errors
         }catch(TransferException $e){
             var_dump('TransferException --------');
             var_dump($e->getCode() . ': ' . $e->getMessage());
