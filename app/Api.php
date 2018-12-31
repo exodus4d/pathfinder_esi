@@ -19,6 +19,7 @@ use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use GuzzleRetry\GuzzleRetryMiddleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -54,6 +55,31 @@ abstract class Api extends \Prefab implements ApiInterface {
      * default for: debug requests
      */
     const DEFAULT_DEBUG_REQUESTS                    = false;
+
+    // Guzzle Retry Middleware defaults -------------------------------------------------------------------------------
+    // -> https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
+
+    /**
+     * default for: activate middleware "retry requests"
+     */
+    const DEFAULT_RETRY_ENABLED                     = true;
+
+    /**
+     * default for: retry request count
+     */
+    const DEFAULT_RETRY_COUNT_MAX                   = 2;
+
+    /**
+     * default for: retry request "on timeout"
+     */
+    const DEFAULT_RETRY_ON_TIMEOUT                  = true;
+
+    /**
+     * default for: retry requests "on status"
+     */
+    const DEFAULT_RETRY_ON_STATUS                   = [429, 503, 504];
+
+    // API class properties ===========================================================================================
 
     /**
      * WebClient instance
@@ -109,6 +135,32 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @var string
      */
     private $userAgent                              = '';
+
+    // Guzzle Retry Middleware config ---------------------------------------------------------------------------------
+
+    /**
+     * Retry Middleware enabled for request
+     * @var bool
+     */
+    private $retryEnabled                           = self::DEFAULT_RETRY_ENABLED;
+
+    /**
+     * Retry Middleware max retry count
+     * @var int
+     */
+    private $retryCountMax                          = self::DEFAULT_RETRY_COUNT_MAX;
+
+    /**
+     * Retry Middleware retry on timeout
+     * @var bool
+     */
+    private $retryOnTimeout                         = self::DEFAULT_RETRY_ON_TIMEOUT;
+
+    /**
+     * Retry Middleware retry on status
+     * @var array
+     */
+    private $retryOnStatus                          = self::DEFAULT_RETRY_ON_STATUS;
 
     /**
      * Api constructor.
@@ -289,6 +341,8 @@ abstract class Api extends \Prefab implements ApiInterface {
     protected function getClientMiddleware() : array {
         $middleware = [];
 
+        $middleware['retry'] = GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig());
+
         if($this->getAcceptType() == 'json'){
             // set "Accept" header json
             $middleware['request_json'] = Middleware::mapRequest(function(RequestInterface $request){
@@ -303,6 +357,36 @@ abstract class Api extends \Prefab implements ApiInterface {
         }
 
         return $middleware;
+    }
+
+    /**
+     * get configuration for Retry Middleware
+     * @see https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
+     * @return array
+     */
+    protected function getRetryMiddlewareConfig() : array {
+        return [
+            'retry_enabled'             => $this->retryEnabled,
+            'max_retry_attempts'        => $this->retryCountMax,
+            'retry_on_timeout'          => $this->retryOnTimeout,
+            'retry_on_status'           => $this->retryOnStatus,
+            'default_retry_multiplier'  => 0.5,
+            'on_retry_callback'         => function(
+                                                int $attemptNumber,
+                                                float $delay,
+                                                RequestInterface $request,
+                                                array $options,
+                                                ResponseInterface $response
+                                            ){
+                                                var_dump(sprintf(
+                                            "Retrying request to %s.  Server responded with %s.  Will wait %s seconds.  This is attempt #%s",
+                                                    $request->getUri()->getPath(),
+                                                    $response->getStatusCode(),
+                                                    number_format($delay, 2),
+                                                    $attemptNumber
+                                                ));
+                                            }
+        ];
     }
 
     /**
