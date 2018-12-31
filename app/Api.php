@@ -379,7 +379,9 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump($e->getCode() . ': ' . $e->getMessage());
         }catch(ClientException $e){
             var_dump('ClientException --------');
+            // 4xx response (e.g. 404 URL not found)
             var_dump($e->getCode() . ': ' . $e->getMessage());
+            $body = $this->getErrorResponse($e->getMessage());
         }catch(ServerException $e){
             var_dump('ServerException --------');
             var_dump($e->getCode() . ': ' . $e->getMessage());
@@ -392,14 +394,18 @@ abstract class Api extends \Prefab implements ApiInterface {
         }catch(RequestException $e){
             var_dump('RequestException --------');
             // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
-            $body = $this->getErrorResponse($e->getMessage());
             var_dump($e->getCode() . ': ' . $e->getMessage());
+            $body = $this->getErrorResponse($e->getMessage());
             // $e->getHandlerContext(); // cURL errors
         }catch(TransferException $e){
             var_dump('TransferException --------');
+            // hard fail! Base Exception of "Guzzle" errors
+            // -> All Errors should already be catch above
             var_dump($e->getCode() . ': ' . $e->getMessage());
+            $body = $this->getErrorResponse($e->getMessage());
         }catch(\Exception $e){
             var_dump('Exception --------');
+            // hard fail! Any other type of error
             var_dump($e->getCode() . ': ' . $e->getMessage());
         }
 
