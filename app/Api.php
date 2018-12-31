@@ -352,9 +352,8 @@ abstract class Api extends \Prefab implements ApiInterface {
         //var_dump($options);
         //var_dump('$additionalOptions');
         //var_dump($additionalOptions);
-        /**
-         * @var $response Response
-         */
+
+        $body = null;
 
 
         try{
@@ -373,7 +372,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
-            var_dump($body);
+
 
         }catch(ConnectException $e){
             var_dump('ConnectException --------');
@@ -403,6 +402,8 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('Exception --------');
             var_dump($e->getCode() . ': ' . $e->getMessage());
         }
+
+        var_dump($body);
 
         die('END');
 
