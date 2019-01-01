@@ -22,12 +22,12 @@ abstract class Ccp extends Api {
         $middleware = parent::getClientMiddleware();
 
         // log "legacy" endpoints
-        $middleware['resource_legacy'] = Middleware::tap(null, function(RequestInterface $request, array $options, ResponseInterface $response){
+        $middleware['resource_legacy'] = Middleware::mapResponse(function(ResponseInterface $response) : ResponseInterface {
             var_dump('legacy.....');
-            var_dump(gettype($response));
             var_dump($response->getHeaders());
-            var_dump($response->getHeaderLine('test'));
-            var_dump($response->hasHeader('test'));
+            var_dump($response->getHeaderLine('X-Esi-Error-Limit-Remain'));
+            var_dump($response->hasHeader('X-Esi-Error-Limit-Remain'));
+            return $response;
         });
 
         return $middleware;
