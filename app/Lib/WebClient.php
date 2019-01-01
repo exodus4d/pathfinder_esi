@@ -15,7 +15,6 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
-use GuzzleRetry\GuzzleRetryMiddleware;
 
 class WebClient {
 
@@ -47,13 +46,6 @@ class WebClient {
         $handler = new CurlHandler();
         // new Stack for the Handler, manages Middleware for requests
         $stack = HandlerStack::create($handler);
-        // push RetryMiddleware (resend failed requests)
-        $stack->push(GuzzleRetryMiddleware::factory([
-            'max_retry_attempts' => 3,
-            'retry_on_timeout' => true,
-            'retry_on_status' => [429, 503, 504],
-            'default_retry_multiplier' => 0.5
-        ]), 'retry');
 
         // add Middleware to HandlerStack
         foreach($middleware as $mwName => $mwFunction){

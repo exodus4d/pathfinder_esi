@@ -27,6 +27,8 @@ interface ApiInterface {
 
     public function setUserAgent(string $userAgent);
 
+    public function setNewLog(callable $newLog);
+
     public function getUrl() : string;
 
     public function getAcceptType() : string;

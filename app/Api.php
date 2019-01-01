@@ -79,6 +79,11 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     const DEFAULT_RETRY_ON_STATUS                   = [429, 503, 504];
 
+    /**
+     * default for: Retry request add "X-Retry-Counter" header
+     */
+    const DEFAULT_RETRY_EXPOSE_RETRY_HEADER         = false;
+
     // API class properties ===========================================================================================
 
     /**
@@ -136,6 +141,13 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     private $userAgent                              = '';
 
+    /**
+     * Callback function that returns new Log object
+     * which extends logging\LogInterface class
+     * @var null|callable
+     */
+    private $getLog                                 = null;
+
     // Guzzle Retry Middleware config ---------------------------------------------------------------------------------
 
     /**
@@ -161,6 +173,11 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @var array
      */
     private $retryOnStatus                          = self::DEFAULT_RETRY_ON_STATUS;
+
+    /**
+     * @var bool
+     */
+    private $retryExposeRetryHeader                 = self::DEFAULT_RETRY_EXPOSE_RETRY_HEADER;
 
     /**
      * Api constructor.
@@ -237,6 +254,14 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function setUserAgent(string $userAgent){
         $this->userAgent = $userAgent;
+    }
+
+    /**
+     * set a callback that returns an new Log object that implements LogInterface
+     * @param callable $newLog
+     */
+    public function setNewLog(callable $newLog){
+        $this->getLog = $newLog;
     }
 
     /**
@@ -370,23 +395,19 @@ abstract class Api extends \Prefab implements ApiInterface {
             'max_retry_attempts'        => $this->retryCountMax,
             'retry_on_timeout'          => $this->retryOnTimeout,
             'retry_on_status'           => $this->retryOnStatus,
-            'default_retry_multiplier'  => 0.5,
-            'on_retry_callback'         => function(
-                                                int $attemptNumber,
-                                                float $delay,
-                                                RequestInterface $request,
-                                                array $options,
-                                                ResponseInterface $response
-                                            ){
-                                                var_dump(sprintf(
-                                            "Retrying request to %s.  Server responded with %s.  Will wait %s seconds.  This is attempt #%s",
-                                                    $request->getUri()->getPath(),
-                                                    $response->getStatusCode(),
-                                                    number_format($delay, 2),
-                                                    $attemptNumber
-                                                ));
-                                            }
+            'expose_retry_header'       => $this->retryExposeRetryHeader,
+            'default_retry_multiplier'  => 0.5
         ];
+    }
+
+    protected function isLoggableError(TransferException $e) : bool {
+        return true;
+    }
+
+    protected function logError(TransferException $e){
+        if($this->isLoggableError($e)){
+
+        }
     }
 
     /**
@@ -422,6 +443,11 @@ abstract class Api extends \Prefab implements ApiInterface {
         return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
+    /**
+     * get error response as return object for failed requests
+     * @param string $errorMessage
+     * @return \stdClass
+     */
     protected function getErrorResponse(string $errorMessage) : \stdClass {
         $body = (object)[];
         $body->error = $errorMessage;

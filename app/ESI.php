@@ -10,7 +10,7 @@ namespace Exodus4D\ESI;
 
 use Exodus4D\ESI\Config;
 
-class ESI extends Api implements EsiInterface {
+class ESI extends Ccp implements EsiInterface {
 
     const ERROR_ESI_WAYPOINT                        = 'Could not set waypoint.';
     const ERROR_ESI_WINDOW                          = 'Could not open client window.';
