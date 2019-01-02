@@ -49,16 +49,23 @@ class GuzzleCcpLoggingMiddleware {
         $options = array_replace($this->defaultOptions, $options);
 
         $next = $this->nextHandler;
+
         return $next($request, $options)->then(function(ResponseInterface $response) use ($request, $options){
-var_dump( 'loggingMiddleWareTest...');
-var_dump( $response->getHeaderLine('warning'));
             // check response for "warning" headers
             if(!empty($value = $response->getHeaderLine('warning'))){
-
+                // check header value for 199 code
                 if(preg_match('/199/i', $value)){
+                    var_dump('URi info...');
+                    var_dump($request->getUri()->getFragment());
+                    var_dump($request->getUri()->getHost());
+                    var_dump($request->getUri()->getPath());
+                    die();
                     // "legacy" warning found in response headers
-                    if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable($request, $response) : (bool)$loggable){
+                    if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
                         // warning for legacy endpoint should be logged
+                        if(is_callable($log = $options['log_callback'])){
+                            $log();
+                        }
                     }
                 }
             }
