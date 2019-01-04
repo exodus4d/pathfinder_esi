@@ -9,7 +9,7 @@
 namespace Exodus4D\ESI;
 
 
-use Exodus4D\ESI\Lib\Stream\JsonStream;
+use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -376,6 +376,10 @@ abstract class Api extends \Prefab implements ApiInterface {
         $middleware['retry'] = GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig());
 
         if($this->getAcceptType() == 'json'){
+            // prepare request and response for JSON data
+            $middleware['json'] = GuzzleJsonMiddleware::factory();
+
+            /*
             // set "Accept" header json
             $middleware['request_json'] = Middleware::mapRequest(function(RequestInterface $request){
                 return $request->withHeader('Accept', 'application/json');
@@ -385,7 +389,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             $middleware['response_json'] = Middleware::mapResponse(function(ResponseInterface $response){
                 $jsonStream = new JsonStream($response->getBody());
                 return $response->withBody($jsonStream);
-            });
+            }); */
         }
 
         return $middleware;
