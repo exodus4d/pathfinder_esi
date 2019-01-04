@@ -11,6 +11,7 @@ namespace Exodus4D\ESI;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLoggingMiddleware;
 use GuzzleHttp\Middleware;
 use lib\Config;
+use lib\logging\LogInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -35,6 +36,10 @@ abstract class Ccp extends Api {
      */
     const LOGGABLE_COUNT_MAX_URL                = 2;
 
+    const ERROR_RESOURCE_LEGACY                 = 'Resource has been marked as legacy';
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource has been marked as deprecated';
+
+
     /**
      * add some middleware for all CCP related API calls
      * @return array
@@ -50,28 +55,13 @@ abstract class Ccp extends Api {
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
         });
 
-
-
-/*
-        $middleware['resource_legacy'] = Middleware::mapResponse(function(ResponseInterface $response) : ResponseInterface {
-            $headerName = 'warning';
-            var_dump('legacy.....');
-            if(
-                !empty($value = $response->getHeaderLine($headerName)) &&
-                preg_match('/^199/i', $value) &&
-                $this->isLoggable('legacy', $response->getUr)
-            ){
-
-            }
-            var_dump($response->getHeaders());
-            var_dump($response->getHeaderLine('X-Esi-Error-Limit-Remain'));
-            var_dump($response->hasHeader('X-Esi-Error-Limit-Remain'));
-            return $response;
-        });
-*/
         return $middleware;
     }
 
+    /**
+     * get configuration for GuzzleCcpLoggingMiddleware Middleware
+     * @return array
+     */
     protected function getCcpLoggingMiddlewareConfig() : array {
         return [
             'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
@@ -81,22 +71,33 @@ abstract class Ccp extends Api {
                 }
                 return $loggable;
             },
-            'log_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null){
+            'log_callback' => function(string $type, string $message, RequestInterface $request, ResponseInterface $response = null){
                 var_dump('logg this request!');
-                var_dump($request->getUri()->__toString());
                 if(is_callable($newLog = $this->getNewLog())){
-                    $log = $newLog('esi_resource_' . $type, [
-                        'channelId' => 123,
-                        'channelName' => 'testName'
-                    ]);
+                    /**
+                     * @var LogInterface $log
+                     */
+                    $log = $newLog('esi_resource_' . $type);
 
-                    $log->setMessage('test message lala');
+                    $log->setMessage($message ? : self::ERROR_RESOURCE_LEGACY);
+                    $log->setData([
+                        'url' => $request->getUri()->__toString()
+                    ]);
                     $log->buffer();
                 }
             }
         ];
     }
 
+    /**
+     * checks whether a request should be logged or not
+     * -> if a request url is already logged with a certain $type,
+     *      it will not get logged the next time until self::LOGGABLE_COUNT_INTERVAL
+     *      expires (this helps to reduce log file I/O)
+     * @param string $type
+     * @param string $urlPath
+     * @return bool
+     */
     protected function isLoggableEndpoint(string $type, string $urlPath) : bool {
         $loggable = false;
 

@@ -59,7 +59,7 @@ class GuzzleCcpLoggingMiddleware {
                     if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
                         // warning for legacy endpoint should be logged
                         if(is_callable($log = $options['log_callback'])){
-                            $log('legacy', $request, $response);
+                            $log('legacy', $value, $request, $response);
                         }
                     }
                 }
