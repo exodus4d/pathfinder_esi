@@ -8,6 +8,7 @@
 
 namespace Exodus4D\ESI;
 
+use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLoggingMiddleware;
 use GuzzleHttp\Middleware;
 use lib\Config;
@@ -43,8 +44,11 @@ abstract class Ccp extends Api {
     protected function getClientMiddleware(): array {
         $middleware = parent::getClientMiddleware();
 
+        // check response headers for ESI error limits
+        $middleware['ccp_error_limit'] = GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig());
+
         // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
-        $middleware['resource_warning'] = GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig());
+        $middleware['ccp_resource_warning'] = GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig());
 /*
         $middleware['test_resource_legacy'] = Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
@@ -55,6 +59,14 @@ abstract class Ccp extends Api {
         });
 
         return $middleware;
+    }
+
+    /**
+     * get configuration for GuzzleCcpErrorLimitMiddleware Middleware
+     * @return array
+     */
+    protected function getCcpErrorLimitMiddlewareConfig() : array {
+        return [];
     }
 
     /**

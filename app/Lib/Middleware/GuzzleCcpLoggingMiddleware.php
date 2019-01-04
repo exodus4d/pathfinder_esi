@@ -61,7 +61,22 @@ class GuzzleCcpLoggingMiddleware {
 
         $next = $this->nextHandler;
 
-        return $next($request, $options)->then(function(ResponseInterface $response) use ($request, $options){
+        return $next($request, $options)
+            ->then(
+                $this->onFulfilled($request, $options)
+            );
+    }
+
+    /**
+     * No exceptions were thrown during processing
+     *
+     * @param RequestInterface $request
+     * @param array $options
+     * @return \Closure
+     */
+    protected function onFulfilled(RequestInterface $request, array $options) : \Closure {
+        return function (ResponseInterface $response) use ($request, $options) {
+
             // check response for "warning" headers
             if(!empty($value = $response->getHeaderLine('warning'))){
                 // check header value for 199 code
@@ -88,14 +103,14 @@ class GuzzleCcpLoggingMiddleware {
             }
 
             return $response;
-        });
+        };
     }
 
     /**
      * @param array $defaultOptions
      * @return \Closure
      */
-    public static function factory(array $defaultOptions = []){
+    public static function factory(array $defaultOptions = []) : \Closure {
         return function(callable $handler) use ($defaultOptions){
             return new static($handler, $defaultOptions);
         };
