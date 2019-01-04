@@ -51,12 +51,12 @@ class WebClient {
         foreach($middleware as $mwName => $mwFunction){
             $stack->push($mwFunction, $mwName);
         }
-
+/*
         $stack->push(Middleware::tap(function($request){
             var_dump('tab middleware ---');
             var_dump($request->getHeaders());
         }));
-
+*/
         // Client default configuration
         $config['handler'] = $stack;
         $config['base_uri'] = $baseUri;

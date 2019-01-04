@@ -81,8 +81,9 @@ abstract class Ccp extends Api {
                 }
                 return $loggable;
             },
-            'log_callback' => function(){
+            'log_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null){
                 var_dump('logg this request!');
+                var_dump($request->getUri()->__toString());
             }
         ];
     }
