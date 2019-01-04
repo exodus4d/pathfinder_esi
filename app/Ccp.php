@@ -36,10 +36,6 @@ abstract class Ccp extends Api {
      */
     const LOGGABLE_COUNT_MAX_URL                = 2;
 
-    const ERROR_RESOURCE_LEGACY                 = 'Resource has been marked as legacy';
-    const ERROR_RESOURCE_DEPRECATED             = 'Resource has been marked as deprecated';
-
-
     /**
      * add some middleware for all CCP related API calls
      * @return array
@@ -55,6 +51,10 @@ abstract class Ccp extends Api {
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
         });
 
+        $middleware['testB'] = Middleware::mapResponse(function(ResponseInterface $response){
+            return $response->withHeader('warning', '299 - This endpoint is deprecated.');
+        });
+
         return $middleware;
     }
 
@@ -66,7 +66,7 @@ abstract class Ccp extends Api {
         return [
             'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
                 $loggable = true;
-                if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, 'myURL')){
+                if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, $request->getUri()->__toString())){
                     $loggable = false;
                 }
                 return $loggable;
@@ -79,7 +79,7 @@ abstract class Ccp extends Api {
                      */
                     $log = $newLog('esi_resource_' . $type);
 
-                    $log->setMessage($message ? : self::ERROR_RESOURCE_LEGACY);
+                    $log->setMessage($message);
                     $log->setData([
                         'url' => $request->getUri()->__toString()
                     ]);

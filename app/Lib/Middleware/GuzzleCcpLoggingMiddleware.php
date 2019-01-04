@@ -15,11 +15,22 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleCcpLoggingMiddleware {
 
     /**
+     * error message for legacy endpoints
+     */
+    const ERROR_RESOURCE_LEGACY                 = 'Resource has been marked as legacy';
+
+    /**
+     * error message for deprecated endpoints
+     */
+    const ERROR_RESOURCE_DEPRECATED             = 'Resource has been marked as deprecated';
+
+    /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
-        'is_loggable_callback' => true
+        'is_loggable_callback' => true,
+        'log_callback' => false
     ];
 
     /**
@@ -59,7 +70,18 @@ class GuzzleCcpLoggingMiddleware {
                     if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
                         // warning for legacy endpoint should be logged
                         if(is_callable($log = $options['log_callback'])){
-                            $log('legacy', $value, $request, $response);
+                            $log('legacy', $value ? : self::ERROR_RESOURCE_LEGACY, $request, $response);
+                        }
+                    }
+                }
+
+                // check header value for 299 code
+                if(preg_match('/299/i', $value)){
+                    // "deprecated" warning found in response headers
+                    if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('deprecated', $request, $response) : (bool)$loggable){
+                        // warning for deprecated endpoint should be logged
+                        if(is_callable($log = $options['log_callback'])){
+                            $log('deprecated', $value ? : self::ERROR_RESOURCE_DEPRECATED, $request, $response);
                         }
                     }
                 }
