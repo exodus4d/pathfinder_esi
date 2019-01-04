@@ -66,7 +66,14 @@ abstract class Ccp extends Api {
      * @return array
      */
     protected function getCcpErrorLimitMiddlewareConfig() : array {
-        return [];
+        return [
+            'set_cache_value'           => function(string $key, array $value, int $ttl = 0){
+                \Base::instance()->set($key, $value, $ttl);
+            },
+            'get_cache_value'           => function(string $key, array $value){
+                return \Base::instance()->get($key, $value);
+            },
+        ];
     }
 
     /**
