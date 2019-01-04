@@ -17,11 +17,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Exception\TransferException;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use GuzzleRetry\GuzzleRetryMiddleware;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
 
@@ -378,18 +375,6 @@ abstract class Api extends \Prefab implements ApiInterface {
         if($this->getAcceptType() == 'json'){
             // prepare request and response for JSON data
             $middleware['json'] = GuzzleJsonMiddleware::factory();
-
-            /*
-            // set "Accept" header json
-            $middleware['request_json'] = Middleware::mapRequest(function(RequestInterface $request){
-                return $request->withHeader('Accept', 'application/json');
-            });
-
-            // decode Json response body
-            $middleware['response_json'] = Middleware::mapResponse(function(ResponseInterface $response){
-                $jsonStream = new JsonStream($response->getBody());
-                return $response->withBody($jsonStream);
-            }); */
         }
 
         return $middleware;
