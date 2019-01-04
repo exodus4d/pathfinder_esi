@@ -43,15 +43,14 @@ abstract class Ccp extends Api {
     protected function getClientMiddleware(): array {
         $middleware = parent::getClientMiddleware();
 
-
-        // log "legacy" endpoints
-        $middleware['resource_legacy'] = GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig());
-
-        $middleware['test'] = Middleware::mapResponse(function(ResponseInterface $response){
+        // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
+        $middleware['resource_warning'] = GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig());
+/*
+        $middleware['test_resource_legacy'] = Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
         });
-
-        $middleware['testB'] = Middleware::mapResponse(function(ResponseInterface $response){
+*/
+        $middleware['test_resource_deprecated'] = Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '299 - This endpoint is deprecated.');
         });
 
@@ -72,12 +71,11 @@ abstract class Ccp extends Api {
                 return $loggable;
             },
             'log_callback' => function(string $type, string $message, RequestInterface $request, ResponseInterface $response = null){
-                var_dump('logg this request!');
                 if(is_callable($newLog = $this->getNewLog())){
                     /**
                      * @var LogInterface $log
                      */
-                    $log = $newLog('esi_resource_' . $type);
+                    $log = $newLog('esi_resource_' . $type, 'warning');
 
                     $log->setMessage($message);
                     $log->setData([

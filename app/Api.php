@@ -465,9 +465,7 @@ abstract class Api extends \Prefab implements ApiInterface {
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
         var_dump('$uri : ' . $uri);
-        //var_dump('$options');
         //var_dump($options);
-        //var_dump('$additionalOptions');
         //var_dump($additionalOptions);
 
         $body = null;
@@ -528,29 +526,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         var_dump($body);
 
-        die('END');
 
-/*
-        var_dump('request: ----');
-        var_dump($request->getHeaders());
-        $response = $this->getClient()->send($request, $options);
-
-        //var_dump('request final: ----');
-        //var_dump($mockHandler->getLastRequest()->getHeaders());
-        //$response = $this->getClient()->request($method, $uri);
-
-        var_dump('response: ----');
-        var_dump($response->getStatusCode());
-
-
-        //var_dump($response->getBody()->getContents());
-        $test = $response->getBody();
-        var_dump($test->getContents());
-
-
-        var_dump($response->getReasonPhrase());
-        var_dump($response->getHeaders());
-*/
     }
 
     /**
