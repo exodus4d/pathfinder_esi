@@ -97,7 +97,6 @@ class GuzzleCcpErrorLimitMiddleware {
                     // block further api calls for this URL until error limit is reset/clear
                     $blockUrl = false;
                     var_dump('onFulfilled() ERRORLIMIT');
-                    var_dump($options);
                     var_dump('$esiErrorLimitReset : ' . $esiErrorLimitReset);
                     var_dump('full url : ' . $request->getUri()->__toString());
                     // get "normalized" url path without params/placeholders
