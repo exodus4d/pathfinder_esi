@@ -321,6 +321,13 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @return callable|null
+     */
+    public function getNewLog() : ?callable {
+        return $this->getLog;
+    }
+
+    /**
      * get HTTP request Header for Authorization
      * @param string $credentials
      * @param string $type

@@ -74,7 +74,7 @@ abstract class Ccp extends Api {
 
     protected function getCcpLoggingMiddlewareConfig() : array {
         return [
-            'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null){
+            'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
                 $loggable = true;
                 if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, 'myURL')){
                     $loggable = false;
@@ -84,6 +84,15 @@ abstract class Ccp extends Api {
             'log_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null){
                 var_dump('logg this request!');
                 var_dump($request->getUri()->__toString());
+                if(is_callable($newLog = $this->getNewLog())){
+                    $log = $newLog('esi_resource_' . $type, [
+                        'channelId' => 123,
+                        'channelName' => 'testName'
+                    ]);
+
+                    $log->setMessage('test message lala');
+                    $log->buffer();
+                }
             }
         ];
     }

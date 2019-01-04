@@ -44,4 +44,6 @@ interface ApiInterface {
     public function getDebugRequests() : bool;
 
     public function getUserAgent() : string;
+
+    public function getNewLog() : ?callable;
 }
