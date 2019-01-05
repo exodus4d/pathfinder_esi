@@ -10,6 +10,7 @@ namespace Exodus4D\ESI\Lib\Middleware;
 
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\TransferStats;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -49,6 +50,11 @@ class GuzzleLogMiddleware {
     private $nextHandler;
 
     /**
+     * @var TransferStats|null
+     */
+    private $stats = null;
+
+    /**
      * GuzzleLogMiddleware constructor.
      * @param callable $nextHandler
      * @param array $defaultOptions
@@ -70,8 +76,15 @@ class GuzzleLogMiddleware {
 
         $next = $this->nextHandler;
 
-        var_dump('invoce() LOG');
-        var_dump($options['on_stats']);
+        // reset TransferStats
+        $this->stats = null;
+
+        // TransferStats can only be accessed through a callback -> 'on_stats' Core Guzzle option
+        if($options['log_enabled'] && $options['log_stats'] && !isset($options['on_stats'])){
+            $options['on_stats'] = function(TransferStats $stats){
+                $this->stats = $stats;
+            };
+        }
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options),
@@ -103,16 +116,21 @@ class GuzzleLogMiddleware {
         return function ($reason) use ($request, $options) {
             var_dump('onRejected() Log ');
             var_dump(gettype($reason));
-            $request = null;
+            $response = null;
             $handlerContext = [];
 
             if($reason instanceof RequestException){
                 $handlerContext = $reason->getHandlerContext();
 
                 if($reason->hasResponse()){
-                    $request = $reason->getResponse();
+                    $response = $reason->getResponse();
                 }
             }
+var_dump('$handlerContext');
+            var_dump($handlerContext);
+var_dump('$this->stats');
+var_dump($this->stats);
+
 
             //$this->log($request, null, $reason, $options);
 
