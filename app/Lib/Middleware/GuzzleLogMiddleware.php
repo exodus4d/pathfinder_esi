@@ -154,6 +154,8 @@ class GuzzleLogMiddleware {
                 if($this->checkStatusCode($options, $statusCode)){
 
                 }
+                var_dump('checkStatusCode()');
+                var_dump($this->checkStatusCode($options, $statusCode));
             }
 
             var_dump('$logData');
@@ -171,11 +173,29 @@ class GuzzleLogMiddleware {
         return $data;
     }
 
+    /**
+     * check response HTTP Status code for logging
+     * @param array $options
+     * @param int $statusCode
+     * @return bool
+     */
     protected function checkStatusCode(array $options, int $statusCode) : bool {
         var_dump('$statusCode');
         var_dump($statusCode);
+        if($options['log_all_status']){
+            return true;
+        }
 
-        return true;
+        if(in_array($statusCode, (array)$options['log_off_status'])){
+            return false;
+        }
+
+        if(in_array($statusCode, (array)$options['log_on_status'])){
+            return true;
+        }
+
+        $statusLevel = (int)substr($statusCode, 0, 1);
+        return (bool)$options['log_' . $statusLevel . 'xx'];
     }
 
     /**
