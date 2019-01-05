@@ -16,16 +16,17 @@ use Psr\Http\Message\ResponseInterface;
 
 class GuzzleLogMiddleware {
 
-    const DEFAULT_LOG_ENABLED                   = true;
-    const DEFAULT_LOG_STATS                     = false;
-    const DEFAULT_LOG_5XX                       = true;
-    const DEFAULT_LOG_4XX                       = true;
-    const DEFAULT_LOG_3XX                       = false;
-    const DEFAULT_LOG_2XX                       = false;
-    const DEFAULT_LOG_1XX                       = false;
-    const DEFAULT_LOG_ALL_STATUS                = false;
-    const DEFAULT_LOG_ON_STATUS                 = [];
-    const DEFAULT_LOG_OFF_STATUS                = [];
+    const DEFAULT_LOG_ENABLED       = true;
+    const DEFAULT_LOG_ERROR         = true;
+    const DEFAULT_LOG_STATS         = false;
+    const DEFAULT_LOG_5XX           = true;
+    const DEFAULT_LOG_4XX           = true;
+    const DEFAULT_LOG_3XX           = false;
+    const DEFAULT_LOG_2XX           = false;
+    const DEFAULT_LOG_1XX           = false;
+    const DEFAULT_LOG_ALL_STATUS    = false;
+    const DEFAULT_LOG_ON_STATUS     = [];
+    const DEFAULT_LOG_OFF_STATUS    = [];
 
     /**
      * default options can go here for middleware
@@ -33,6 +34,7 @@ class GuzzleLogMiddleware {
      */
     private $defaultOptions = [
         'log_enabled'               => self::DEFAULT_LOG_ENABLED,
+        'log_error'                 => self::DEFAULT_LOG_ERROR,
         'log_stats'                 => self::DEFAULT_LOG_STATS,
         'log_5xx'                   => self::DEFAULT_LOG_5XX,
         'log_4xx'                   => self::DEFAULT_LOG_4XX,
@@ -102,6 +104,10 @@ class GuzzleLogMiddleware {
         return function (ResponseInterface $response) use ($request, $options) {
             var_dump('onFullFilled() Log ');
 
+            if($options['log_enabled']){
+                $this->log($options, $request, $response);
+            }
+
             return $response;
         };
     }
@@ -115,31 +121,50 @@ class GuzzleLogMiddleware {
     protected function onRejected(RequestInterface $request, array $options) : \Closure {
         return function ($reason) use ($request, $options) {
             var_dump('onRejected() Log ');
-            var_dump(gettype($reason));
-            $response = null;
-            $handlerContext = [];
+            var_dump(get_class($reason));
+            if($options['log_enabled']){
+                $response = null;
+                //$handlerContext = [];
 
-            if($reason instanceof RequestException){
-                $handlerContext = $reason->getHandlerContext();
-
-                if($reason->hasResponse()){
-                    $response = $reason->getResponse();
+                if(($reason instanceof RequestException) && $reason->hasResponse()){
+                    //$handlerContext = $reason->getHandlerContext();
+                        $response = $reason->getResponse();
                 }
+
+                $this->log($options, $request, $response, $reason);
             }
-var_dump('$handlerContext');
-            var_dump($handlerContext);
-var_dump('$this->stats');
-var_dump($this->stats);
-
-
-            //$this->log($request, null, $reason, $options);
 
             return \GuzzleHttp\Promise\rejection_for($reason);
         };
     }
 
-    protected function log(RequestInterface $request, ResponseInterface $response = null, $reason = null){
+    protected function log(array $options, RequestInterface $request, ResponseInterface $response = null, $reason = null){
+        if($options['log_enabled']){
+            $logData = [];
 
+            if(is_null($response)){
+                if($options['log_error']){
+                    if(!empty($reasonData = $this->logReason($reason))){
+                        $logData['reason'] = $reasonData;
+                    }
+                }
+            }else{
+
+            }
+
+            var_dump('$logData');
+            var_dump($logData);
+        }
+    }
+
+    protected function logReason($reason = null) : array {
+        $data = [];
+        if($reason instanceof RequestException){
+            $handlerContext = $reason->getHandlerContext();
+            $data['errno'] = $handlerContext['errno'];
+            $data['error'] = $handlerContext['error'];
+        }
+        return $data;
     }
 
     /**
