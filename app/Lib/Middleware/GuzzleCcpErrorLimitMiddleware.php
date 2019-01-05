@@ -29,12 +29,23 @@ class GuzzleCcpErrorLimitMiddleware {
     const ERROR_COUNT_REMAIN_TOTAL              = 10;
 
     /**
+     * error message for endpoints that hit "critical" amount of error responses
+     */
+    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount';
+
+    /**
+     * error message for blocked endpoints
+     */
+    const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! API endpoint blocked';
+
+    /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
         'set_cache_value'           => null,
         'get_cache_value'           => null,
+        'log_callback'              => null,
         'error_count_max_url'       => self::ERROR_COUNT_MAX_URL,
         'error_count_remain_total'  => self::ERROR_COUNT_REMAIN_TOTAL
     ];
@@ -89,69 +100,73 @@ class GuzzleCcpErrorLimitMiddleware {
             $statusCode = $response->getStatusCode();
 
             // client or server error responses are relevant for error limits
-            if($statusCode >= 400 && $statusCode <= 599){
-                // check for existing x-esi-error headers
-                if($response->hasHeader('x-esi-error-limit-reset')){
-                    $esiErrorLimitReset = (int)$response->getHeaderLine('x-esi-error-limit-reset');
+            // check for existing x-esi-error headers
+            if(
+                $statusCode >= 400 && $statusCode <= 599 &&
+                $response->hasHeader('x-esi-error-limit-reset')
+            ){
+                $esiErrorLimitReset = (int)$response->getHeaderLine('x-esi-error-limit-reset');
 
-                    // block further api calls for this URL until error limit is reset/clear
-                    $blockUrl = false;
-                    var_dump('onFulfilled() ERRORLIMIT');
-                    var_dump('$esiErrorLimitReset : ' . $esiErrorLimitReset);
-                    var_dump('full url : ' . $request->getUri()->__toString());
-                    // get "normalized" url path without params/placeholders
-                    $urlPath = $this->getNormalizedUrlPath($request->getUri()->__toString());
-                    $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
+                // block further api calls for this URL until error limit is reset/clear
+                $blockUrl = false;
 
-                    var_dump('$cacheKey : ' . $cacheKey);
-                    $esiErrorRate = [];
-                    if(is_callable($getCacheValue = $options['get_cache_value'])){
-                        $esiErrorRate = $getCacheValue($cacheKey);
-                    }
+                // get "normalized" url path without params/placeholders
+                $urlPath = $this->getNormalizedUrlPath($request->getUri()->__toString());
+                $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
 
-                    // increase error count for this $url
-                    $errorCount = (int)$esiErrorRate['count'] + 1;
-                    $esiErrorRate['count'] = $errorCount;
+                $esiErrorRate = [];
+                if(is_callable($getCacheValue = $options['get_cache_value'])){
+                    $esiErrorRate = $getCacheValue($cacheKey);
+                }
 
-                    // sort by error count desc
-                    //uasort($esiErrorRate, function($a, $b) {
-                    //    return $b['count'] <=> $a['count'];
-                    //});
+                // increase error count for this $url
+                $errorCount = (int)$esiErrorRate['count'] + 1;
+                $esiErrorRate['count'] = $errorCount;
 
-                    if($response->hasHeader('x-esi-error-limited')){
-                        // request url is blocked until new error limit becomes reset
-                        // -> this should never happen
+                if($response->hasHeader('x-esi-error-limited')){
+                    // request url is blocked until new error limit becomes reset
+                    // -> this should never happen
 
-                        // todo log blocked
-                    }
-
-                    if($response->hasHeader('x-esi-error-limit-remain')){
-                        // remaining errors left until reset/clear
-                        $esiErrorLimitRemain = (int)$response->getHeaderLine('x-esi-error-limit-remain');
-
-                        if(
-                            $errorCount > (int)$options['error_count_max_url'] ||
-                            $esiErrorLimitRemain < (int)$options['error_count_remain_total']
-                        ){
-                            $blockUrl = true;
-
-                            // todo log limit critical
-                        }
-                    }
-
-                    if($blockUrl){
-                        // to many error, block uri until error limit reset
-                        $esiErrorRate['blocked'] = true;
-                    }
-var_dump($blockUrl);
-var_dump('$esiErrorRate ');
-var_dump($esiErrorRate);
-                    if(is_callable($setCacheValue = $options['set_cache_value'])){
-                        $setCacheValue($cacheKey, $esiErrorRate, $esiErrorLimitReset);
+                    if(is_callable($log = $options['log_callback'])){
+                        $log('blocked', self::ERROR_LIMIT_EXCEEDED, [
+                            'url'           => $request->getUri()->__toString(),
+                            'errorCount'    => $errorCount,
+                            'esiLimitReset' => $esiErrorLimitReset,
+                        ]);
                     }
                 }
-            }
 
+                if($response->hasHeader('x-esi-error-limit-remain')){
+                    // remaining errors left until reset/clear
+                    $esiErrorLimitRemain = (int)$response->getHeaderLine('x-esi-error-limit-remain');
+
+                    if(
+                        $errorCount > (int)$options['error_count_max_url'] ||
+                        $esiErrorLimitRemain < (int)$options['error_count_remain_total']
+                    ){
+                        $blockUrl = true;
+
+                        // log critical limit reached
+                        if(is_callable($log = $options['log_callback'])){
+                            $log('critical', self::ERROR_LIMIT_CRITICAL, [
+                                'url'               => $request->getUri()->__toString(),
+                                'errorCount'        => $errorCount,
+                                'esiLimitReset'     => $esiErrorLimitReset,
+                                'esiLimitRemain'    => $esiErrorLimitRemain,
+                            ]);
+                        }
+                    }
+                }
+
+                if($blockUrl){
+                    // to many error, block uri until error limit reset
+                    $esiErrorRate['blocked'] = true;
+                }
+
+                if(is_callable($setCacheValue = $options['set_cache_value'])){
+                    $setCacheValue($cacheKey, $esiErrorRate, $esiErrorLimitReset);
+                }
+            }
 
             return $response;
         };

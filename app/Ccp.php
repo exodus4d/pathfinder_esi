@@ -58,6 +58,12 @@ abstract class Ccp extends Api {
             return $response->withHeader('warning', '299 - This endpoint is deprecated.');
         });
 
+        $middleware['test_error_limit'] = Middleware::mapResponse(function(ResponseInterface $response){
+            return $response->withHeader(' X-Esi-Error-Limit-Reset', 50) // error window reset in s
+                ->withHeader('X-Esi-Error-Limit-Remain', 8) // errors possible in current error window
+                ->withHeader(' X-Esi-Error-Limited', ''); // endpoint blocked
+        });
+
         return $middleware;
     }
 
@@ -67,15 +73,26 @@ abstract class Ccp extends Api {
      */
     protected function getCcpErrorLimitMiddlewareConfig() : array {
         return [
-            'set_cache_value'           => function(string $key, array $value, int $ttl = 0){
+            'set_cache_value' => function(string $key, array $value, int $ttl = 0){
                 // clear existing cache key first -> otherwise f3 updates existing key and ignores new $ttl
                 $f3 = \Base::instance();
                 $f3->clear($key);
                 $f3->set($key, $value, $ttl);
             },
-            'get_cache_value'           => function(string $key){
+            'get_cache_value' => function(string $key){
                 return \Base::instance()->get($key);
             },
+            'log_callback' => function(string $type, string $message, array $data){
+                if(is_callable($newLog = $this->getNewLog())){
+                    /**
+                     * @var LogInterface $log
+                     */
+                    $log = $newLog('esi_resource_' . $type, 'warning');
+                    $log->setMessage($message);
+                    $log->setData($data);
+                    $log->buffer();
+                }
+            }
         ];
     }
 
@@ -92,17 +109,14 @@ abstract class Ccp extends Api {
                 }
                 return $loggable;
             },
-            'log_callback' => function(string $type, string $message, RequestInterface $request, ResponseInterface $response = null){
+            'log_callback' => function(string $type, string $message, array $data){
                 if(is_callable($newLog = $this->getNewLog())){
                     /**
                      * @var LogInterface $log
                      */
                     $log = $newLog('esi_resource_' . $type, 'warning');
-
                     $log->setMessage($message);
-                    $log->setData([
-                        'url' => $request->getUri()->__toString()
-                    ]);
+                    $log->setData($data);
                     $log->buffer();
                 }
             }
