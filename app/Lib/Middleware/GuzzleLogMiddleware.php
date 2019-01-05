@@ -138,13 +138,13 @@ class GuzzleLogMiddleware {
         };
     }
 
-    protected function log(array $options, RequestInterface $request, ResponseInterface $response = null, $reason = null){
+    protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception){
         if($options['log_enabled']){
             $logData = [];
 
             if(is_null($response)){
                 if($options['log_error']){
-                    if(!empty($reasonData = $this->logReason($reason))){
+                    if(!empty($reasonData = $this->logReason($exception))){
                         $logData['reason'] = $reasonData;
                     }
                 }
@@ -157,10 +157,10 @@ class GuzzleLogMiddleware {
         }
     }
 
-    protected function logReason($reason = null) : array {
+    protected function logReason(?\Exception $exception) : array {
         $data = [];
-        if($reason instanceof RequestException){
-            $handlerContext = $reason->getHandlerContext();
+        if($exception instanceof RequestException){
+            $handlerContext = $exception->getHandlerContext();
             $data['errno'] = $handlerContext['errno'];
             $data['error'] = $handlerContext['error'];
         }
