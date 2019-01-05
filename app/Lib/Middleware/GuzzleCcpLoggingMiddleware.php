@@ -55,7 +55,6 @@ class GuzzleCcpLoggingMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
-
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 

@@ -10,7 +10,6 @@ namespace Exodus4D\ESI;
 
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLoggingMiddleware;
-use GuzzleHttp\Middleware;
 use lib\Config;
 use lib\logging\LogInterface;
 use Psr\Http\Message\RequestInterface;
@@ -49,21 +48,26 @@ abstract class Ccp extends Api {
 
         // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
         $middleware['ccp_resource_warning'] = GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig());
-/*
+
+        /*
+        // test "ccp_resource_warning" middleware. Legacy endpoint
         $middleware['test_resource_legacy'] = Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
         });
-*/
+
+        // test "ccp_resource_warning" middleware. Deprecated endpoint
         $middleware['test_resource_deprecated'] = Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '299 - This endpoint is deprecated.');
         });
 
+        // test "ccp_error_limit" middleware
         $middleware['test_error_limit'] = Middleware::mapResponse(function(ResponseInterface $response){
-            return $response->withStatus(400)                     // 4xx or 5xx response is important
+            return $response->withStatus(400)               // 4xx or 5xx response is important
                 ->withHeader('X-Esi-Error-Limit-Reset', 50) // error window reset in s
                 ->withHeader('X-Esi-Error-Limit-Remain', 8) // errors possible in current error window
                 ->withHeader('X-Esi-Error-Limited', '');    // endpoint blocked
         });
+        */
 
         return $middleware;
     }

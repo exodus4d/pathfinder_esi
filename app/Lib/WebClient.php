@@ -167,17 +167,18 @@ class WebClientOld extends \Web {
      */
     protected $debugLogRequests                 = Api::DEFAULT_DEBUG_LOG_REQUESTS;
 
-
+/*
     public function __construct(int $debugLevel = Api::DEFAULT_DEBUG_LEVEL, bool $debugLogRequests = Api::DEFAULT_DEBUG_LOG_REQUESTS){
         $this->debugLevel = $debugLevel;
         $this->debugLogRequests = $debugLogRequests;
     }
-
+*/
     /**
      * parse array with HTTP header data
      * @param array $headers
      * @return array
      */
+    /*
     protected function parseHeaders(array $headers = []) : array {
         $parsedHeaders = [];
         foreach($headers as $header){
@@ -185,12 +186,13 @@ class WebClientOld extends \Web {
             $parsedHeaders[strtolower(trim($parts[0]))] = isset($parts[1]) ? trim($parts[1]) :  '';
         }
         return $parsedHeaders;
-    }
+    }*/
 
     /**
      * @param array $headers
      * @return int
      */
+    /*
     protected function getStatusCodeFromHeaders(array $headers = []) : int {
         $statusCode = 0;
         foreach($headers as $key => $value){
@@ -200,7 +202,7 @@ class WebClientOld extends \Web {
             }
         }
         return $statusCode;
-    }
+    }*/
 
     /**
      * get HTTP status type from HTTP status code (e.g. 404 )> 'err_client')
@@ -279,6 +281,7 @@ class WebClientOld extends \Web {
      * @param array $headers
      * @param string $url
      */
+    /*
     protected function checkResponseHeaders(array $headers, string $url){
         $statusCode = $this->getStatusCodeFromHeaders($headers);
 
@@ -358,7 +361,7 @@ class WebClientOld extends \Web {
                 $f3->set(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate, $esiErrorLimitReset);
             }
         }
-    }
+    }*/
 
     /**
      * get URL path from $url, removes path IDs, parameters, scheme and domain
@@ -374,6 +377,7 @@ class WebClientOld extends \Web {
      * @param string $urlPath
      * @return bool
      */
+    /*
     protected function isLoggable(string $type, string $urlPath) : bool {
         $loggable = false;
 
@@ -393,7 +397,7 @@ class WebClientOld extends \Web {
         }
 
         return $loggable;
-    }
+    }*/
 
     /**
      * check whether a HTTP request method is valid/given
@@ -440,20 +444,22 @@ class WebClientOld extends \Web {
      * @param string $url
      * @param $response
      */
+    /*
     protected function debugLogRequest(string $url, $response){
         if($this->debugLogRequests){
             $this->getLogger('debug_request')->write(sprintf(self::DEBUG_REQUEST, $url, print_r($response, true)));
         }
-    }
+    }*/
 
     /**
      * get maxRetry count
      * @param mixed $retryCount
      * @return int
      */
+    /*
     protected function getMaxRetryCount($retryCount) : int {
         return is_int($retryCount) ? max($retryCount, 0) :  self::RETRY_COUNT_MAX;
-    }
+    }*/
 
     /**
      * @param string $url
@@ -566,97 +572,5 @@ class WebClientOld extends \Web {
         }
 
         return $responseBody;
-    }
-
-    /**
-     * IMPORTANT: This overwrites the _curl() from parent
-     * this is in fact a 1:1 clone of the parent method
-     * -> cURL errorCodes get added in this
-     * -> see: https://github.com/bcosca/fatfree/issues/1135
-     * @param string $url
-     * @param array $options
-     * @return array|mixed|null
-     */
-    protected function _curl($url,$options) {
-        $err = [];
-
-        $curl=curl_init($url);
-        if (!$open_basedir=ini_get('open_basedir'))
-            curl_setopt($curl,CURLOPT_FOLLOWLOCATION,
-                $options['follow_location']);
-        curl_setopt($curl,CURLOPT_MAXREDIRS,
-            $options['max_redirects']);
-        curl_setopt($curl,CURLOPT_PROTOCOLS,CURLPROTO_HTTP|CURLPROTO_HTTPS);
-        curl_setopt($curl,CURLOPT_REDIR_PROTOCOLS,CURLPROTO_HTTP|CURLPROTO_HTTPS);
-        curl_setopt($curl,CURLOPT_CUSTOMREQUEST,$options['method']);
-        if (isset($options['header']))
-            curl_setopt($curl,CURLOPT_HTTPHEADER,$options['header']);
-        if (isset($options['content']))
-            curl_setopt($curl,CURLOPT_POSTFIELDS,$options['content']);
-        if (isset($options['proxy']))
-            curl_setopt($curl,CURLOPT_PROXY,$options['proxy']);
-        curl_setopt($curl,CURLOPT_ENCODING,'gzip,deflate');
-        $timeout=isset($options['timeout'])?
-            $options['timeout']:
-            ini_get('default_socket_timeout');
-        curl_setopt($curl,CURLOPT_CONNECTTIMEOUT,$timeout);
-        curl_setopt($curl,CURLOPT_TIMEOUT,$timeout);
-        $headers=[];
-        curl_setopt($curl,CURLOPT_HEADERFUNCTION,
-            // Callback for response headers
-            function($curl,$line) use(&$headers) {
-                if ($trim=trim($line))
-                    $headers[]=$trim;
-                return strlen($line);
-            }
-        );
-        curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,2);
-        curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,FALSE);
-        ob_start();
-        curl_exec($curl);
-        //$err=curl_error($curl);
-
-        // START custom code ------------------------------------------------------------------------------------------
-
-        if($errCode = curl_errno($curl)){
-            $err = [
-                'code'          => $errCode,
-                'message'       => curl_strerror($errCode),
-                'description'   => curl_error($curl)
-            ];
-        }
-
-        $info = [
-            'http_code'         => curl_getinfo($curl, CURLINFO_HTTP_CODE),
-            'content_type'      => curl_getinfo($curl, CURLINFO_CONTENT_TYPE),
-            'total_time'        => curl_getinfo($curl, CURLINFO_TOTAL_TIME),
-            'http_connect_code' => curl_getinfo($curl, CURLINFO_HTTP_CONNECTCODE )
-        ];
-
-        // END custom code --------------------------------------------------------------------------------------------
-
-        curl_close($curl);
-        $body=ob_get_clean();
-        if (empty($err) &&
-            $options['follow_location'] && $open_basedir &&
-            preg_grep('/HTTP\/1\.\d 3\d{2}/',$headers) &&
-            preg_match('/^Location: (.+)$/m',implode(PHP_EOL,$headers),$loc)) {
-            $options['max_redirects']--;
-            if($loc[1][0] == '/') {
-                $parts=parse_url($url);
-                $loc[1]=$parts['scheme'].'://'.$parts['host'].
-                    ((isset($parts['port']) && !in_array($parts['port'],[80,443]))
-                        ?':'.$parts['port']:'').$loc[1];
-            }
-            return $this->request($loc[1],$options);
-        }
-        return [
-            'body'=>$body,
-            'headers'=>$headers,
-            'engine'=>'cURL',
-            'cached'=>FALSE,
-            'error'=>$err,
-            'info'=>$info
-        ];
     }
 }

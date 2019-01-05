@@ -19,14 +19,14 @@ class GuzzleCcpErrorLimitMiddleware {
     const CACHE_KEY_PREFIX_ERROR_LIMIT          = 'CACHED_ERROR_LIMIT_';
 
     /**
-     * log error when this error count is reached for a single API endpoint in the current error window
+     * default for: log error when this error count is reached for a single API endpoint in the current error window
      */
-    const ERROR_COUNT_MAX_URL                   = 30;
+    const DEFAULT_ERROR_COUNT_MAX_URL           = 30;
 
     /**
-     * log error if less then this errors remain in current error window (all endpoints)
+     * default for: log error if less then this errors remain in current error window (all endpoints)
      */
-    const ERROR_COUNT_REMAIN_TOTAL              = 10;
+    const DEFAULT_ERROR_COUNT_REMAIN_TOTAL      = 10;
 
     /**
      * error message for endpoints that hit "critical" amount of error responses
@@ -46,8 +46,8 @@ class GuzzleCcpErrorLimitMiddleware {
         'set_cache_value'           => null,
         'get_cache_value'           => null,
         'log_callback'              => null,
-        'error_count_max_url'       => self::ERROR_COUNT_MAX_URL,
-        'error_count_remain_total'  => self::ERROR_COUNT_REMAIN_TOTAL
+        'error_count_max_url'       => self::DEFAULT_ERROR_COUNT_MAX_URL,
+        'error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
     ];
 
     /**
@@ -73,7 +73,6 @@ class GuzzleCcpErrorLimitMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
-
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 
@@ -86,7 +85,6 @@ class GuzzleCcpErrorLimitMiddleware {
 
     /**
      * No exceptions were thrown during processing
-     *
      * @param RequestInterface $request
      * @param array $options
      * @return \Closure
@@ -94,9 +92,6 @@ class GuzzleCcpErrorLimitMiddleware {
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure{
         return function (ResponseInterface $response) use ($request, $options) {
             var_dump('onFullFilled() LIMIT ');
-            var_dump($response->getHeaders());
-            var_dump($response->getStatusCode());
-            var_dump($response->getHeaderLine('x-esi-error-limit-reset'));
             $statusCode = $response->getStatusCode();
 
             // client or server error responses are relevant for error limits

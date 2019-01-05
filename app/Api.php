@@ -9,6 +9,7 @@
 namespace Exodus4D\ESI;
 
 
+use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
@@ -370,6 +371,7 @@ abstract class Api extends \Prefab implements ApiInterface {
     protected function getClientMiddleware() : array {
         $middleware = [];
 
+        $middleware['log'] = GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig());
         $middleware['retry'] = GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig());
 
         if($this->getAcceptType() == 'json'){
@@ -381,7 +383,26 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * get configuration for Retry Middleware
+     * get configuration for GuzzleLogMiddleware Middleware
+     * @return array
+     */
+    protected function getLogMiddlewareConfig() : array {
+        return [
+            'log_enabled'               => true,
+            'log_stats'                 => true,
+            'log_5xx'                   => true,
+            'log_4xx'                   => true,
+            'log_3xx'                   => false,
+            'log_2xx'                   => false,
+            'log_1xx'                   => false,
+            'log_all_status'            => false,
+            'log_on_status'             => [],
+            'log_off_status'            => []
+        ];
+    }
+
+    /**
+     * get configuration GuzzleRetryMiddleware Retry Middleware
      * @see https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
      * @return array
      */
@@ -394,16 +415,6 @@ abstract class Api extends \Prefab implements ApiInterface {
             'expose_retry_header'       => $this->retryExposeRetryHeader,
             'default_retry_multiplier'  => 0.5
         ];
-    }
-
-    protected function isLoggableError(TransferException $e) : bool {
-        return true;
-    }
-
-    protected function logError(TransferException $e){
-        if($this->isLoggableError($e)){
-
-        }
     }
 
     /**
@@ -423,20 +434,6 @@ abstract class Api extends \Prefab implements ApiInterface {
             }
         }
         return $merged;
-    }
-
-    /**
-     * format Header data array with ['name' => 'value',...] into plain array:
-     * -> ['name: value', ...]
-     * @param array $headers
-     * @return array
-     */
-    protected function formatHeaders(array $headers) : array {
-        $combine = function($oldVal, $key, $val){
-            return trim($key) . ': ' . trim($val);
-        };
-
-        return array_map($combine, range(0, count($headers) - 1), array_keys($headers), array_values($headers));
     }
 
     /**
