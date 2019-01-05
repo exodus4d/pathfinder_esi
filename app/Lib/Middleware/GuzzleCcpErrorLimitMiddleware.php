@@ -14,9 +14,9 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleCcpErrorLimitMiddleware {
 
     /**
-     * cache key for error limits
+     * cache key prefix for error limits
      */
-    const CACHE_KEY_ERROR_LIMIT                 = 'CACHED_ERROR_LIMIT';
+    const CACHE_KEY_PREFIX_ERROR_LIMIT          = 'CACHED_ERROR_LIMIT_';
 
     /**
      * log error when this error count is reached for a single API endpoint in the current error window
@@ -101,20 +101,22 @@ class GuzzleCcpErrorLimitMiddleware {
                     var_dump('full url : ' . $request->getUri()->__toString());
                     // get "normalized" url path without params/placeholders
                     $urlPath = $this->getNormalizedUrlPath($request->getUri()->__toString());
-                    var_dump('$urlPath : ' . $urlPath);
+                    $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
+
+                    var_dump('$cacheKey : ' . $cacheKey);
                     $esiErrorRate = [];
                     if(is_callable($getCacheValue = $options['get_cache_value'])){
-                        $esiErrorRate = $getCacheValue(self::CACHE_KEY_ERROR_LIMIT);
+                        $esiErrorRate = $getCacheValue($cacheKey);
                     }
 
                     // increase error count for this $url
-                    $errorCount = (int)$esiErrorRate[$urlPath]['count'] + 1;
-                    $esiErrorRate[$urlPath]['count'] = $errorCount;
+                    $errorCount = (int)$esiErrorRate['count'] + 1;
+                    $esiErrorRate['count'] = $errorCount;
 
                     // sort by error count desc
-                    uasort($esiErrorRate, function($a, $b) {
-                        return $b['count'] <=> $a['count'];
-                    });
+                    //uasort($esiErrorRate, function($a, $b) {
+                    //    return $b['count'] <=> $a['count'];
+                    //});
 
                     if($response->hasHeader('x-esi-error-limited')){
                         // request url is blocked until new error limit becomes reset
@@ -139,13 +141,13 @@ class GuzzleCcpErrorLimitMiddleware {
 
                     if($blockUrl){
                         // to many error, block uri until error limit reset
-                        $esiErrorRate[$urlPath]['blocked'] = true;
+                        $esiErrorRate['blocked'] = true;
                     }
 var_dump($blockUrl);
 var_dump('$esiErrorRate ');
 var_dump($esiErrorRate);
                     if(is_callable($setCacheValue = $options['set_cache_value'])){
-                        $setCacheValue(self::CACHE_KEY_ERROR_LIMIT, $esiErrorRate, $esiErrorLimitReset);
+                        $setCacheValue($cacheKey, $esiErrorRate, $esiErrorLimitReset);
                     }
                 }
             }
