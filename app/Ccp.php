@@ -68,7 +68,10 @@ abstract class Ccp extends Api {
     protected function getCcpErrorLimitMiddlewareConfig() : array {
         return [
             'set_cache_value'           => function(string $key, array $value, int $ttl = 0){
-                \Base::instance()->set($key, $value, $ttl);
+                // clear existing cache key first -> otherwise f3 updates existing key and ignores new $ttl
+                $f3 = \Base::instance();
+                $f3->clear($key);
+                $f3->set($key, $value, $ttl);
             },
             'get_cache_value'           => function(string $key){
                 return \Base::instance()->get($key);

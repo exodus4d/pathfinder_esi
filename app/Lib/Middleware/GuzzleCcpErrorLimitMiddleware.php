@@ -157,8 +157,13 @@ var_dump($esiErrorRate);
         };
     }
 
+    /**
+     * convert $url into normalized URL for cache key
+     * @param string $url
+     * @return string
+     */
     protected function getNormalizedUrlPath(string $url) : string {
-        return parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH);
+        return preg_replace('/\//', '_', parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH));
     }
 
     /**
