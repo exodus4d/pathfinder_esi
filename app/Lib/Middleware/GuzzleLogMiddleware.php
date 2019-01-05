@@ -138,7 +138,7 @@ class GuzzleLogMiddleware {
         };
     }
 
-    protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception){
+    protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null){
         if($options['log_enabled']){
             $logData = [];
 
