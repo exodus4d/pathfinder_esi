@@ -143,13 +143,17 @@ class GuzzleLogMiddleware {
             $logData = [];
 
             if(is_null($response)){
+                // no response -> ConnectException or RequestException
                 if($options['log_error']){
                     if(!empty($reasonData = $this->logReason($exception))){
                         $logData['reason'] = $reasonData;
                     }
                 }
             }else{
+                $statusCode = $response->getStatusCode();
+                if($this->checkStatusCode($options, $statusCode)){
 
+                }
             }
 
             var_dump('$logData');
@@ -165,6 +169,11 @@ class GuzzleLogMiddleware {
             $data['error'] = $handlerContext['error'];
         }
         return $data;
+    }
+
+    protected function checkStatusCode(array $options, int $statusCode) : bool {
+        var_dump('$statusCode');
+        var_dump($statusCode);
     }
 
     /**
