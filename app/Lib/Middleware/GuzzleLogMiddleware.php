@@ -9,6 +9,7 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -69,6 +70,9 @@ class GuzzleLogMiddleware {
 
         $next = $this->nextHandler;
 
+        var_dump('invoce() LOG');
+        var_dump($options['on_stats']);
+
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options),
             $this->onRejected($request, $options)
@@ -96,15 +100,28 @@ class GuzzleLogMiddleware {
      * @return \Closure
      */
     protected function onRejected(RequestInterface $request, array $options) : \Closure {
-        return function (\Exception $reason) use ($request, $options) {
+        return function ($reason) use ($request, $options) {
             var_dump('onRejected() Log ');
             var_dump(gettype($reason));
-            if($reason instanceof ConnectException){
-                var_dump($reason->getHandlerContext());
+            $request = null;
+            $handlerContext = [];
+
+            if($reason instanceof RequestException){
+                $handlerContext = $reason->getHandlerContext();
+
+                if($reason->hasResponse()){
+                    $request = $reason->getResponse();
+                }
             }
-            //var_dump($reason);
-            //var_dump($options);
+
+            //$this->log($request, null, $reason, $options);
+
+            return \GuzzleHttp\Promise\rejection_for($reason);
         };
+    }
+
+    protected function log(RequestInterface $request, ResponseInterface $response = null, $reason = null){
+
     }
 
     /**

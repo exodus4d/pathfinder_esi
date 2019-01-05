@@ -832,7 +832,7 @@ class ESI extends Ccp implements EsiInterface {
      */
     protected function getRequestOptions(string $accessToken = '', $content = null, array $query = []) : array {
         $options = [];
-
+/*
         $options['on_stats'] = function ( $stats) {
             var_dump('transfer start: -----');
             //var_dump($stats->getEffectiveUri());
@@ -841,7 +841,7 @@ class ESI extends Ccp implements EsiInterface {
             var_dump($stats->getHandlerErrorData());
             var_dump('transfer end: -----');
         };
-
+*/
         if(!empty($accessToken)){
             // send Authorization HTTP header
             // see: https://guzzle.readthedocs.io/en/latest/request-options.html#headers
