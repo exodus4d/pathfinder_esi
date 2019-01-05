@@ -59,9 +59,10 @@ abstract class Ccp extends Api {
         });
 
         $middleware['test_error_limit'] = Middleware::mapResponse(function(ResponseInterface $response){
-            return $response->withHeader(' X-Esi-Error-Limit-Reset', 50) // error window reset in s
+            return $response->withStatus(400)                     // 4xx or 5xx response is important
+                ->withHeader('X-Esi-Error-Limit-Reset', 50) // error window reset in s
                 ->withHeader('X-Esi-Error-Limit-Remain', 8) // errors possible in current error window
-                ->withHeader(' X-Esi-Error-Limited', ''); // endpoint blocked
+                ->withHeader('X-Esi-Error-Limited', '');    // endpoint blocked
         });
 
         return $middleware;
