@@ -174,6 +174,8 @@ class GuzzleLogMiddleware {
     protected function checkStatusCode(array $options, int $statusCode) : bool {
         var_dump('$statusCode');
         var_dump($statusCode);
+
+        return true;
     }
 
     /**
