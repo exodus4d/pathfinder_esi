@@ -8,6 +8,7 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
+use GuzzleHttp\Exception\ConnectException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -96,9 +97,13 @@ class GuzzleLogMiddleware {
      */
     protected function onRejected(RequestInterface $request, array $options) : \Closure {
         return function (\Exception $reason) use ($request, $options) {
-            var_dump('onFullFilled() Log ');
-            var_dump($reason);
-            var_dump($options);
+            var_dump('onRejected() Log ');
+            var_dump(gettype($reason));
+            if($reason instanceof ConnectException){
+                var_dump($reason->getHandlerContext());
+            }
+            //var_dump($reason);
+            //var_dump($options);
         };
     }
 
