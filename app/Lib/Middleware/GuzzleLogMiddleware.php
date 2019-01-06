@@ -152,7 +152,8 @@ class GuzzleLogMiddleware {
             }else{
                 $statusCode = $response->getStatusCode();
                 if($this->checkStatusCode($options, $statusCode)){
-
+                    $logData['request'] = $this->logRequest($request);
+                    $logData['response'] = $this->logResponse($response);
                 }
                 var_dump('checkStatusCode()');
                 var_dump($this->checkStatusCode($options, $statusCode));
@@ -163,6 +164,34 @@ class GuzzleLogMiddleware {
         }
     }
 
+    protected function logRequest(RequestInterface $request) : array {
+        return [
+            'method'        => $request->getMethod(),
+            'uri'           => $request->getRequestTarget(),
+            'path'          => $request->getUri()->getPath(),
+            'version'          => $request->getProtocolVersion()
+        ];
+    }
+
+    /**
+     * log response -> this might be a HTTP 1xx up to 5xx response
+     * @param ResponseInterface $response
+     * @return array
+     */
+    protected function logResponse(ResponseInterface $response) : array {
+        return [
+            'status_code'   => $response->getStatusCode(),
+            'version'       => 'HTTP/' . $response->getProtocolVersion(),
+            'message'       => $response->getReasonPhrase()
+        ];
+    }
+
+    /**
+     * log reason -> rejected promise
+     * ConnectException or parent of type RequestException
+     * @param \Exception|null $exception
+     * @return array
+     */
     protected function logReason(?\Exception $exception) : array {
         $data = [];
         if($exception instanceof RequestException){
@@ -180,20 +209,15 @@ class GuzzleLogMiddleware {
      * @return bool
      */
     protected function checkStatusCode(array $options, int $statusCode) : bool {
-        var_dump('$statusCode');
-        var_dump($statusCode);
         if($options['log_all_status']){
             return true;
         }
-
         if(in_array($statusCode, (array)$options['log_off_status'])){
             return false;
         }
-
         if(in_array($statusCode, (array)$options['log_on_status'])){
             return true;
         }
-
         $statusLevel = (int)substr($statusCode, 0, 1);
         return (bool)$options['log_' . $statusLevel . 'xx'];
     }
