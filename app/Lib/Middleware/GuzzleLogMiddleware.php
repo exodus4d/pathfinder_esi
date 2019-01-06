@@ -8,7 +8,6 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
-use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\TransferStats;
 use Psr\Http\Message\RequestInterface;
@@ -27,6 +26,9 @@ class GuzzleLogMiddleware {
     const DEFAULT_LOG_ALL_STATUS    = false;
     const DEFAULT_LOG_ON_STATUS     = [];
     const DEFAULT_LOG_OFF_STATUS    = [];
+    const DEFAULT_LOG_CALLBACK      = null;
+    const DEFAULT_LOG_FILE_SERVER   = 'api_error_server';
+    const DEFAULT_LOG_FILE_CLIENT   = 'api_error_client';
 
     /**
      * default options can go here for middleware
@@ -43,7 +45,10 @@ class GuzzleLogMiddleware {
         'log_1xx'                   => self::DEFAULT_LOG_1XX,
         'log_all_status'            => self::DEFAULT_LOG_ALL_STATUS,
         'log_on_status'             => self::DEFAULT_LOG_ON_STATUS,
-        'log_off_status'            => self::DEFAULT_LOG_OFF_STATUS
+        'log_off_status'            => self::DEFAULT_LOG_OFF_STATUS,
+        'log_callback'              => self::DEFAULT_LOG_CALLBACK,
+        'log_file_server'           => self::DEFAULT_LOG_FILE_SERVER,
+        'log_file_client'           => self::DEFAULT_LOG_FILE_CLIENT
     ];
 
     /**
@@ -124,10 +129,7 @@ class GuzzleLogMiddleware {
             var_dump(get_class($reason));
             if($options['log_enabled']){
                 $response = null;
-                //$handlerContext = [];
-
                 if(($reason instanceof RequestException) && $reason->hasResponse()){
-                    //$handlerContext = $reason->getHandlerContext();
                         $response = $reason->getResponse();
                 }
 
@@ -140,29 +142,35 @@ class GuzzleLogMiddleware {
 
     protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null){
         if($options['log_enabled']){
+            $action = $options['log_file_server'];
+            $level = 'info';
             $logData = [];
+            $logRequestData = false;
 
             if(is_null($response)){
                 // no response -> ConnectException or RequestException
                 if($options['log_error']){
                     if(!empty($reasonData = $this->logReason($exception))){
                         $logData['reason'] = $reasonData;
+                        $logRequestData = true;
+                        $level = 'error';
                     }
                 }
             }else{
                 $statusCode = $response->getStatusCode();
                 if($this->checkStatusCode($options, $statusCode)){
-                    $logData['request'] = $this->logRequest($request);
                     $logData['response'] = $this->logResponse($response);
+                    $logRequestData = true;
                 }
-
             }
 
-            if(is_callable($log = $options['log_callback'])){
-                $log('abhhh', 'critical', 'bablabla', $logData);
+            if($logRequestData){
+                $logData['request'] = $this->logRequest($request);
             }
-            var_dump('$logData');
-            var_dump($logData);
+
+            if(!empty($logData) && is_callable($log = $options['log_callback'])){
+                $log($action, $level, 'bablabla', $logData);
+            }
         }
     }
 

@@ -330,8 +330,8 @@ abstract class Api extends \Prefab implements ApiInterface {
      * log callback function
      * @return \Closure
      */
-    protected function log(){
-        return function(string $action, string $level, string $message, array $data){
+    protected function log() : callable {
+        return function(string $action, string $level, string $message, array $data = [], string $tag = 'default'){
             if(is_callable($newLog = $this->getNewLog())){
                 /**
                  * @var LogInterface $log
@@ -339,6 +339,7 @@ abstract class Api extends \Prefab implements ApiInterface {
                 $log = $newLog($action, $level);
                 $log->setMessage($message);
                 $log->setData($data);
+                $log->setTag($tag);
                 $log->buffer();
             }
         };
@@ -417,7 +418,9 @@ abstract class Api extends \Prefab implements ApiInterface {
             'log_all_status'            => false,
             'log_on_status'             => [],
             'log_off_status'            => [],
-            'log_callback'              => $this->log()
+            'log_callback'              => $this->log(),
+            'log_file_server'           => 'esi_error_server',
+            'log_file_client'           => 'esi_error_client'
         ];
     }
 
