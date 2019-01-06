@@ -25,7 +25,7 @@ class JsonStream implements StreamInterface {
      * @return mixed|string|null
      */
     public function getContents(){
-        $contents = (string) $this->traitGetContents();
+        $contents = $this->traitGetContents();
 
         if($contents === ''){
             return null;
@@ -37,5 +37,23 @@ class JsonStream implements StreamInterface {
         }
 
         return $decodedContents;
+    }
+
+    /**
+     * we need to overwrite this because of Trait __toString() calls $this->Contents() which no longer returns a string
+     * @return string
+     */
+    public function __toString(){
+        try {
+            if ($this->isSeekable()) {
+                $this->seek(0);
+            }
+            return $this->traitGetContents();
+        } catch (\Exception $e) {
+            // Really, PHP? https://bugs.php.net/bug.php?id=53648
+            trigger_error('StreamDecorator::__toString exception: '
+                . (string) $e, E_USER_ERROR);
+            return '';
+        }
     }
 }
