@@ -16,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleLogMiddleware {
 
     const DEFAULT_LOG_ENABLED       = true;
+    const DEFAULT_LOG_FORMAT        = '{method} {target}';
     const DEFAULT_LOG_ERROR         = true;
     const DEFAULT_LOG_STATS         = false;
     const DEFAULT_LOG_5XX           = true;
@@ -35,6 +36,7 @@ class GuzzleLogMiddleware {
      */
     private $defaultOptions = [
         'log_enabled'               => self::DEFAULT_LOG_ENABLED,
+        'log_format'                => self::DEFAULT_LOG_FORMAT,
         'log_error'                 => self::DEFAULT_LOG_ERROR,
         'log_stats'                 => self::DEFAULT_LOG_STATS,
         'log_5xx'                   => self::DEFAULT_LOG_5XX,
@@ -187,7 +189,7 @@ class GuzzleLogMiddleware {
             }
 
             if(!empty($logData) && is_callable($log = $options['log_callback'])){
-                $log($action, $level, 'bablabla', $logData, $tag);
+                $log($action, $level, $this->getLogMessage($options['log_format'], $logData), $logData, $tag);
             }
         }
     }
@@ -202,6 +204,8 @@ class GuzzleLogMiddleware {
             'method'        => $request->getMethod(),
             'url'           => $request->getUri()->__toString(),
             'path'          => $request->getUri()->getPath(),
+            'target'        => $request->getRequestTarget(),
+            'tar2'          => $request->getUri()->getHost(),
             'version'       => $request->getProtocolVersion()
         ];
     }
@@ -280,6 +284,21 @@ class GuzzleLogMiddleware {
      */
     protected function is5xx(int $statusCode) : bool {
         return (int)substr($statusCode, 0, 1) === 5;
+    }
+
+    /**
+     * get formatted log message from $logData
+     * @param string $message
+     * @param array $logData
+     * @return string
+     */
+    protected function getLogMessage(string $message, array $logData = []) : string {
+        $replace = [
+            '{method}'      => $logData['request']['method'],
+            '{target}'      => $logData['request']['target']
+        ];
+
+        return str_replace(array_keys($replace), array_values($replace), $message);
     }
 
     /**
