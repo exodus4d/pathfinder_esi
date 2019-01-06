@@ -118,8 +118,8 @@ abstract class Ccp extends Api {
      */
     protected function isLoggableEndpoint(string $type, string $urlPath) : bool {
         $loggable = false;
-
         $f3 = \Base::instance();
+
         if(!$f3->exists(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit)){
             $loggableLimit = [];
         }
