@@ -244,6 +244,11 @@ class GuzzleLogMiddleware {
                 $logData['request'] = $this->logRequest($request);
             }
 
+            // log stats in case other logData should be logged
+            if(!is_null($this->stats) && !empty($logData)){
+                $logData['stats'] = $this->logStats($this->stats);
+            }
+
             if(!empty($logData) && is_callable($log = $options['log_callback'])){
                 $log($action, $level, $this->getLogMessage($options['log_format'], $logData), $logData, $tag);
             }
@@ -294,6 +299,18 @@ class GuzzleLogMiddleware {
             $data['error'] = $handlerContext['error'];
         }
         return $data;
+    }
+
+    /**
+     * log transfer stats
+     * For debugging purpose
+     * @param TransferStats $stats
+     * @return array
+     */
+    protected function logStats(TransferStats $stats) : array {
+        return [
+            'time'                      => $stats->getTransferTime()
+        ];
     }
 
     /**
