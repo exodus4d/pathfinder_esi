@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleLogMiddleware {
 
     const DEFAULT_LOG_ENABLED       = true;
-    const DEFAULT_LOG_FORMAT        = '{method} {target}';
+    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{req_version} {code}';
     const DEFAULT_LOG_ERROR         = true;
     const DEFAULT_LOG_STATS         = false;
     const DEFAULT_LOG_5XX           = true;
@@ -203,9 +203,9 @@ class GuzzleLogMiddleware {
         return [
             'method'        => $request->getMethod(),
             'url'           => $request->getUri()->__toString(),
+            'host'          => $request->getUri()->getHost(),
             'path'          => $request->getUri()->getPath(),
             'target'        => $request->getRequestTarget(),
-            'tar2'          => $request->getUri()->getHost(),
             'version'       => $request->getProtocolVersion()
         ];
     }
@@ -217,8 +217,8 @@ class GuzzleLogMiddleware {
      */
     protected function logResponse(ResponseInterface $response) : array {
         return [
-            'status_code'   => $response->getStatusCode(),
-            'version'       => 'HTTP/' . $response->getProtocolVersion(),
+            'statusCode'    => $response->getStatusCode(),
+            'version'       => $response->getProtocolVersion(),
             'message'       => $response->getReasonPhrase()
         ];
     }
@@ -295,7 +295,13 @@ class GuzzleLogMiddleware {
     protected function getLogMessage(string $message, array $logData = []) : string {
         $replace = [
             '{method}'      => $logData['request']['method'],
-            '{target}'      => $logData['request']['target']
+            '{url}'         => $logData['request']['url'],
+            '{host}'        => $logData['request']['host'],
+            '{path}'        => $logData['request']['path'],
+            '{target}'      => $logData['request']['target'],
+            '{req_version}' => $logData['request']['version'],
+
+            '{code}'        => $logData['response']['statusCode']
         ];
 
         return str_replace(array_keys($replace), array_values($replace), $message);
