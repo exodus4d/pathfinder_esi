@@ -167,9 +167,10 @@ class GuzzleLogMiddleware {
     protected function logRequest(RequestInterface $request) : array {
         return [
             'method'        => $request->getMethod(),
-            'uri'           => $request->getRequestTarget(),
+            'target'           => $request->getRequestTarget(),
             'path'          => $request->getUri()->getPath(),
-            'version'          => $request->getProtocolVersion()
+            'url'          => $request->getUri()->__toString(),
+            'version'       => $request->getProtocolVersion()
         ];
     }
 
