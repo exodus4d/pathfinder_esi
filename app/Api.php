@@ -419,8 +419,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             'log_on_status'             => [],
             'log_off_status'            => [],
             'log_callback'              => $this->log(),
-            'log_file_server'           => 'esi_error_server',
-            'log_file_client'           => 'esi_error_client'
+            'log_file'                  => 'esi_requests'
         ];
     }
 

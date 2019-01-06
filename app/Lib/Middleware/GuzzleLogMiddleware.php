@@ -27,8 +27,7 @@ class GuzzleLogMiddleware {
     const DEFAULT_LOG_ON_STATUS     = [];
     const DEFAULT_LOG_OFF_STATUS    = [];
     const DEFAULT_LOG_CALLBACK      = null;
-    const DEFAULT_LOG_FILE_SERVER   = 'api_error_server';
-    const DEFAULT_LOG_FILE_CLIENT   = 'api_error_client';
+    const DEFAULT_LOG_FILE          = 'requests';
 
     /**
      * default options can go here for middleware
@@ -47,8 +46,7 @@ class GuzzleLogMiddleware {
         'log_on_status'             => self::DEFAULT_LOG_ON_STATUS,
         'log_off_status'            => self::DEFAULT_LOG_OFF_STATUS,
         'log_callback'              => self::DEFAULT_LOG_CALLBACK,
-        'log_file_server'           => self::DEFAULT_LOG_FILE_SERVER,
-        'log_file_client'           => self::DEFAULT_LOG_FILE_CLIENT
+        'log_file'                  => self::DEFAULT_LOG_FILE
     ];
 
     /**
@@ -140,10 +138,18 @@ class GuzzleLogMiddleware {
         };
     }
 
+    /**
+     * log request and response data based on $option flags
+     * @param array $options
+     * @param RequestInterface $request
+     * @param ResponseInterface|null $response
+     * @param \Exception|null $exception
+     */
     protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null){
         if($options['log_enabled']){
-            $action = $options['log_file_server'];
+            $action = $options['log_file'];
             $level = 'info';
+            $tag = 'information';
             $logData = [];
             $logRequestData = false;
 
@@ -153,7 +159,8 @@ class GuzzleLogMiddleware {
                     if(!empty($reasonData = $this->logReason($exception))){
                         $logData['reason'] = $reasonData;
                         $logRequestData = true;
-                        $level = 'error';
+                        $level = 'critical';
+                        $tag = 'danger';
                     }
                 }
             }else{
@@ -161,6 +168,17 @@ class GuzzleLogMiddleware {
                 if($this->checkStatusCode($options, $statusCode)){
                     $logData['response'] = $this->logResponse($response);
                     $logRequestData = true;
+
+                    if($this->is2xx($statusCode)){
+                        $level = 'info';
+                        $tag = 'success';
+                    }elseif($this->is4xx($statusCode)){
+                        $level = 'error';
+                        $tag = 'warning';
+                    }elseif($this->is5xx($statusCode)){
+                        $level = 'critical';
+                        $tag = 'warning';
+                    }
                 }
             }
 
@@ -169,7 +187,7 @@ class GuzzleLogMiddleware {
             }
 
             if(!empty($logData) && is_callable($log = $options['log_callback'])){
-                $log($action, $level, 'bablabla', $logData);
+                $log($action, $level, 'bablabla', $logData, $tag);
             }
         }
     }
@@ -235,6 +253,33 @@ class GuzzleLogMiddleware {
         }
         $statusLevel = (int)substr($statusCode, 0, 1);
         return (bool)$options['log_' . $statusLevel . 'xx'];
+    }
+
+    /**
+     * check HTTP Status for 2xx response
+     * @param int $statusCode
+     * @return bool
+     */
+    protected function is2xx(int $statusCode) : bool {
+        return (int)substr($statusCode, 0, 1) === 2;
+    }
+
+    /**
+     * check HTTP Status for 4xx response
+     * @param int $statusCode
+     * @return bool
+     */
+    protected function is4xx(int $statusCode) : bool {
+        return (int)substr($statusCode, 0, 1) === 4;
+    }
+
+    /**
+     * check HTTP Status for 5xx response
+     * @param int $statusCode
+     * @return bool
+     */
+    protected function is5xx(int $statusCode) : bool {
+        return (int)substr($statusCode, 0, 1) === 5;
     }
 
     /**
