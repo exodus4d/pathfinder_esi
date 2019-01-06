@@ -309,7 +309,7 @@ class GuzzleLogMiddleware {
      */
     protected function logStats(TransferStats $stats) : array {
         return [
-            'time'                      => $stats->getTransferTime()
+            'time'                      => (string)$stats->getTransferTime()
         ];
     }
 
