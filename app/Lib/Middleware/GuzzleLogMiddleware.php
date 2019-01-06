@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleLogMiddleware {
 
     const DEFAULT_LOG_ENABLED       = true;
-    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{req_version} → {code} {phrase}';
+    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{version} → {code} {phrase} {res_header_content-length}';
     const DEFAULT_LOG_ERROR         = true;
     const DEFAULT_LOG_STATS         = false;
     const DEFAULT_LOG_5XX           = true;
@@ -201,12 +201,12 @@ class GuzzleLogMiddleware {
      */
     protected function logRequest(RequestInterface $request) : array {
         return [
-            'method'    => $request->getMethod(),
-            'url'       => $request->getUri()->__toString(),
-            'host'      => $request->getUri()->getHost(),
-            'path'      => $request->getUri()->getPath(),
-            'target'    => $request->getRequestTarget(),
-            'version'   => $request->getProtocolVersion()
+            'method'                    => $request->getMethod(),
+            'url'                       => $request->getUri()->__toString(),
+            'host'                      => $request->getUri()->getHost(),
+            'path'                      => $request->getUri()->getPath(),
+            'target'                    => $request->getRequestTarget(),
+            'version'                   => $request->getProtocolVersion()
         ];
     }
 
@@ -217,9 +217,10 @@ class GuzzleLogMiddleware {
      */
     protected function logResponse(ResponseInterface $response) : array {
         return [
-            'code'      => $response->getStatusCode(),
-            'phrase'    => $response->getReasonPhrase(),
-            'version'   => $response->getProtocolVersion()
+            'code'                      => $response->getStatusCode(),
+            'phrase'                    => $response->getReasonPhrase(),
+            'version'                   => $response->getProtocolVersion(),
+            'res_header_content-length' => $response->getHeaderLine('content-length')
         ];
     }
 
@@ -294,15 +295,16 @@ class GuzzleLogMiddleware {
      */
     protected function getLogMessage(string $message, array $logData = []) : string {
         $replace = [
-            '{method}'      => $logData['request']['method'],
-            '{url}'         => $logData['request']['url'],
-            '{host}'        => $logData['request']['host'],
-            '{path}'        => $logData['request']['path'],
-            '{target}'      => $logData['request']['target'],
-            '{req_version}' => $logData['request']['version'],
+            '{method}'                      => $logData['request']['method'],
+            '{url}'                         => $logData['request']['url'],
+            '{host}'                        => $logData['request']['host'],
+            '{path}'                        => $logData['request']['path'],
+            '{target}'                      => $logData['request']['target'],
+            '{version}'                     => $logData['request']['version'],
 
-            '{code}'        => $logData['response']['code'],
-            '{phrase}'      => $logData['response']['phrase']
+            '{code}'                        => $logData['response']['code'] ? : 'NULL',
+            '{phrase}'                      => $logData['response']['phrase'] ? : '',
+            '{res_header_content-length}'   => $logData['response']['res_header_content-length'] ? : 0
         ];
 
         return str_replace(array_keys($replace), array_values($replace), $message);
