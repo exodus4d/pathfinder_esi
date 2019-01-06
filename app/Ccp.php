@@ -43,29 +43,30 @@ abstract class Ccp extends Api {
     protected function initStack(HandlerStack &$stack): void {
         parent::initStack($stack);
 
-        // check response headers for ESI error limits
-        $stack->push(GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig()), 'ccp_error_limit');
         // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
-        $stack->push(GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig()), 'ccp_resource_warning');
+        $stack->after('log', GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig()), 'ccp_log');
+
+        // check response headers for ESI error limits
+        $stack->after('ccp_log', GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig()), 'ccp_error_limit');
 
         /*
-        // test "ccp_resource_warning" middleware. Legacy endpoint
-        $stack->push(Middleware::mapResponse(function(ResponseInterface $response){
+        // test "ccp_log" middleware. Legacy endpoint
+        $stack->after('ccp_log', Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '199 - This endpoint has been updated.');
-        }), 'test_resource_legacy');
+        }), 'test_ccp_log_legacy');
 
-        // test "ccp_resource_warning" middleware. Deprecated endpoint
-        $stack->push(Middleware::mapResponse(function(ResponseInterface $response){
+        // test "ccp_log" middleware. Deprecated endpoint
+        $stack->after('ccp_log', Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withHeader('warning', '299 - This endpoint is deprecated.');
-        }), 'test_resource_deprecated');
+        }), 'test_ccp_log_deprecated');
 
         // test "ccp_error_limit" middleware
-        $stack->push(Middleware::mapResponse(function(ResponseInterface $response){
+        $stack->after('ccp_error_limit', Middleware::mapResponse(function(ResponseInterface $response){
             return $response->withStatus(400)               // 4xx or 5xx response is important
             ->withHeader('X-Esi-Error-Limit-Reset', 50) // error window reset in s
             ->withHeader('X-Esi-Error-Limit-Remain', 8) // errors possible in current error window
             ->withHeader('X-Esi-Error-Limited', '');    // endpoint blocked
-        }), 'test_error_limit');
+        }), 'test_ccp_error_limit');
         */
     }
 

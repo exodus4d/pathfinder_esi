@@ -389,16 +389,24 @@ abstract class Api extends \Prefab implements ApiInterface {
     /**
      * modify HandlerStack by ref
      * -> use this to manipulate the Stack and add/remove custom Middleware
+     * -> order of Stack is important! Execution order of each Middleware depends on Stack order:
+     * @see https://guzzle.readthedocs.io/en/stable/handlers-and-middleware.html#handlerstack
      * @param HandlerStack $stack
      */
     protected function initStack(HandlerStack &$stack) : void {
-        $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
-        $stack->push(GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig()), 'retry');
 
         if($this->getAcceptType() == 'json'){
-            // prepare request and response for JSON data
-            $stack->push(GuzzleJsonMiddleware::factory(), 'json');
+            // json middleware prepares request and response for JSON data
+            $stack->push( GuzzleJsonMiddleware::factory(), 'json');
         }
+
+        // error log middleware logs all request errors
+        // -> add somewhere to stack BOTTOM so that it runs at the end catches errors from previous middlewares
+        $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
+
+        // retry failed requests should be on TOP of stack
+        // -> in case of retry other middleware don´t need to know about the failed attempts
+        $stack->push(GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig()), 'retry');
     }
 
     /**
