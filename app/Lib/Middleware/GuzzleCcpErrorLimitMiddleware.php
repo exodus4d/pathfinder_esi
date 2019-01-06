@@ -29,6 +29,15 @@ class GuzzleCcpErrorLimitMiddleware {
     const DEFAULT_ERROR_COUNT_REMAIN_TOTAL      = 10;
 
     /**
+     * default for: name for log file width "critical" error limit warnings
+     */
+    const DEFAULT_LOG_FILE_CRITICAL             = 'esi_resource_critical';
+
+    /**
+     * default for: name for log file with "blocked" errors
+     */
+    const DEFAULT_LOG_FILE_BLOCKED              = 'esi_resource_blocked';
+    /**
      * error message for endpoints that hit "critical" amount of error responses
      */
     const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount';
@@ -47,7 +56,9 @@ class GuzzleCcpErrorLimitMiddleware {
         'get_cache_value'           => null,
         'log_callback'              => null,
         'error_count_max_url'       => self::DEFAULT_ERROR_COUNT_MAX_URL,
-        'error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
+        'error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL,
+        'log_file_critical'         => self::DEFAULT_LOG_FILE_CRITICAL,
+        'log_file_blocked'          => self::DEFAULT_LOG_FILE_BLOCKED
     ];
 
     /**
@@ -123,11 +134,13 @@ class GuzzleCcpErrorLimitMiddleware {
                     // -> this should never happen
 
                     if(is_callable($log = $options['log_callback'])){
-                        $log('blocked', self::ERROR_LIMIT_EXCEEDED, [
+                        $logData = [
                             'url'           => $request->getUri()->__toString(),
                             'errorCount'    => $errorCount,
-                            'esiLimitReset' => $esiErrorLimitReset,
-                        ]);
+                            'esiLimitReset' => $esiErrorLimitReset
+                        ];
+
+                        $log($options['log_file_blocked'], 'critical', self::ERROR_LIMIT_EXCEEDED, $logData, 'danger');
                     }
                 }
 
@@ -143,12 +156,14 @@ class GuzzleCcpErrorLimitMiddleware {
 
                         // log critical limit reached
                         if(is_callable($log = $options['log_callback'])){
-                            $log('critical', self::ERROR_LIMIT_CRITICAL, [
+                            $logData = [
                                 'url'               => $request->getUri()->__toString(),
                                 'errorCount'        => $errorCount,
                                 'esiLimitReset'     => $esiErrorLimitReset,
-                                'esiLimitRemain'    => $esiErrorLimitRemain,
-                            ]);
+                                'esiLimitRemain'    => $esiErrorLimitRemain
+                            ];
+
+                            $log($options['log_file_critical'], 'warning', self::ERROR_LIMIT_CRITICAL, $logData, 'warning');
                         }
                     }
                 }

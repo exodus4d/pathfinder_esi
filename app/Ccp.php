@@ -11,7 +11,6 @@ namespace Exodus4D\ESI;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLoggingMiddleware;
 use lib\Config;
-use lib\logging\LogInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -87,17 +86,7 @@ abstract class Ccp extends Api {
             'get_cache_value' => function(string $key){
                 return \Base::instance()->get($key);
             },
-            'log_callback' => function(string $type, string $message, array $data){
-                if(is_callable($newLog = $this->getNewLog())){
-                    /**
-                     * @var LogInterface $log
-                     */
-                    $log = $newLog('esi_resource_' . $type, 'warning');
-                    $log->setMessage($message);
-                    $log->setData($data);
-                    $log->buffer();
-                }
-            }
+            'log_callback' => $this->log()
         ];
     }
 
@@ -114,17 +103,7 @@ abstract class Ccp extends Api {
                 }
                 return $loggable;
             },
-            'log_callback' => function(string $type, string $message, array $data){
-                if(is_callable($newLog = $this->getNewLog())){
-                    /**
-                     * @var LogInterface $log
-                     */
-                    $log = $newLog('esi_resource_' . $type, 'warning');
-                    $log->setMessage($message);
-                    $log->setData($data);
-                    $log->buffer();
-                }
-            }
+            'log_callback' => $this->log()
         ];
     }
 

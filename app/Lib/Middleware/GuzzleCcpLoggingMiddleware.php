@@ -15,6 +15,16 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleCcpLoggingMiddleware {
 
     /**
+     * default for: name for log file with endpoints marked as "legacy" in response Headers
+     */
+    const DEFAULT_LOG_FILE_LEGACY              = 'esi_resource_legacy';
+
+    /**
+     * default for: name for log file with endpoints marked as "deprecated" in response Headers
+     */
+    const DEFAULT_LOG_FILE_DEPRECATED          = 'esi_resource_deprecated';
+
+    /**
      * error message for legacy endpoints
      */
     const ERROR_RESOURCE_LEGACY                 = 'Resource has been marked as legacy';
@@ -29,8 +39,10 @@ class GuzzleCcpLoggingMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'is_loggable_callback' => true,
-        'log_callback' => false
+        'is_loggable_callback'      => true,
+        'log_callback'              => false,
+        'log_file_legacy'           => self::DEFAULT_LOG_FILE_LEGACY,
+        'log_file_deprecated'       => self::DEFAULT_LOG_FILE_DEPRECATED
     ];
 
     /**
@@ -84,9 +96,11 @@ class GuzzleCcpLoggingMiddleware {
                     if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
                         // warning for legacy endpoint should be logged
                         if(is_callable($log = $options['log_callback'])){
-                            $log('legacy', $value ? : self::ERROR_RESOURCE_LEGACY, [
+                            $logData = [
                                 'url' => $request->getUri()->__toString()
-                            ]);
+                            ];
+
+                            $log($options['log_file_legacy'], 'notice', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
                         }
                     }
                 }
@@ -97,9 +111,11 @@ class GuzzleCcpLoggingMiddleware {
                     if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('deprecated', $request, $response) : (bool)$loggable){
                         // warning for deprecated endpoint should be logged
                         if(is_callable($log = $options['log_callback'])){
-                            $log('deprecated', $value ? : self::ERROR_RESOURCE_DEPRECATED, [
+                            $logData = [
                                 'url' => $request->getUri()->__toString()
-                            ]);
+                            ];
+
+                            $log($options['log_file_deprecated'], 'critical', $value ? : self::ERROR_RESOURCE_DEPRECATED, $logData, 'danger');
                         }
                     }
                 }

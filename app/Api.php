@@ -412,12 +412,6 @@ abstract class Api extends \Prefab implements ApiInterface {
             'log_stats'                 => true,
             'log_5xx'                   => true,
             'log_4xx'                   => true,
-            'log_3xx'                   => false,
-            'log_2xx'                   => false,
-            'log_1xx'                   => false,
-            'log_all_status'            => false,
-            'log_on_status'             => [],
-            'log_off_status'            => [],
             'log_callback'              => $this->log(),
             'log_file'                  => 'esi_requests'
         ];
