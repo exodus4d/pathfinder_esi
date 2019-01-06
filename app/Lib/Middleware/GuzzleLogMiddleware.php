@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleLogMiddleware {
 
     const DEFAULT_LOG_ENABLED       = true;
-    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{req_version} {code}';
+    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{req_version} → {code} {phrase}';
     const DEFAULT_LOG_ERROR         = true;
     const DEFAULT_LOG_STATS         = false;
     const DEFAULT_LOG_5XX           = true;
@@ -201,12 +201,12 @@ class GuzzleLogMiddleware {
      */
     protected function logRequest(RequestInterface $request) : array {
         return [
-            'method'        => $request->getMethod(),
-            'url'           => $request->getUri()->__toString(),
-            'host'          => $request->getUri()->getHost(),
-            'path'          => $request->getUri()->getPath(),
-            'target'        => $request->getRequestTarget(),
-            'version'       => $request->getProtocolVersion()
+            'method'    => $request->getMethod(),
+            'url'       => $request->getUri()->__toString(),
+            'host'      => $request->getUri()->getHost(),
+            'path'      => $request->getUri()->getPath(),
+            'target'    => $request->getRequestTarget(),
+            'version'   => $request->getProtocolVersion()
         ];
     }
 
@@ -217,9 +217,9 @@ class GuzzleLogMiddleware {
      */
     protected function logResponse(ResponseInterface $response) : array {
         return [
-            'statusCode'    => $response->getStatusCode(),
-            'version'       => $response->getProtocolVersion(),
-            'message'       => $response->getReasonPhrase()
+            'code'      => $response->getStatusCode(),
+            'phrase'    => $response->getReasonPhrase(),
+            'version'   => $response->getProtocolVersion()
         ];
     }
 
@@ -301,7 +301,8 @@ class GuzzleLogMiddleware {
             '{target}'      => $logData['request']['target'],
             '{req_version}' => $logData['request']['version'],
 
-            '{code}'        => $logData['response']['statusCode']
+            '{code}'        => $logData['response']['code'],
+            '{phrase}'      => $logData['response']['phrase']
         ];
 
         return str_replace(array_keys($replace), array_values($replace), $message);
