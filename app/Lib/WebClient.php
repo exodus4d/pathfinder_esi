@@ -39,17 +39,17 @@ class WebClient {
      * WebClient constructor.
      * @param string $baseUri
      * @param array $config
-     * @param array $middleware
+     * @param callable|null $initStack modify handler Stack by ref
      */
-    public function __construct(string $baseUri, array $config = [], array $middleware = []){
+    public function __construct(string $baseUri, array $config = [], ?callable $initStack = null){
         // use cURLHandler for all requests
         $handler = new CurlHandler();
         // new Stack for the Handler, manages Middleware for requests
         $stack = HandlerStack::create($handler);
 
-        // add Middleware to HandlerStack
-        foreach($middleware as $mwName => $mwFunction){
-            $stack->push($mwFunction, $mwName);
+        // init stack by reference
+        if(is_callable($initStack)){
+            $initStack($stack);
         }
 /*
         $stack->push(Middleware::tap(function($request){

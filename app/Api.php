@@ -20,6 +20,7 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\HandlerStack;
 use GuzzleRetry\GuzzleRetryMiddleware;
 
 abstract class Api extends \Prefab implements ApiInterface {
@@ -363,7 +364,9 @@ abstract class Api extends \Prefab implements ApiInterface {
         return new namespace\Lib\WebClient(
             $this->getUrl(),
             $this->getClientConfig(),
-            $this->getClientMiddleware()
+            function(HandlerStack &$stack){
+                $this->initStack($stack);
+            }
         );
     }
 
@@ -384,22 +387,18 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * get all "Middleware" used in GuzzleHttp\HandlerStack() config
-     * for this GuzzleHttp\Client()
-     * @return callable[]
+     * modify HandlerStack by ref
+     * -> use this to manipulate the Stack and add/remove custom Middleware
+     * @param HandlerStack $stack
      */
-    protected function getClientMiddleware() : array {
-        $middleware = [];
-
-        $middleware['log'] = GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig());
-        $middleware['retry'] = GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig());
+    protected function initStack(HandlerStack &$stack) : void {
+        $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
+        $stack->push(GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig()), 'retry');
 
         if($this->getAcceptType() == 'json'){
             // prepare request and response for JSON data
-            $middleware['json'] = GuzzleJsonMiddleware::factory();
+            $stack->push(GuzzleJsonMiddleware::factory(), 'json');
         }
-
-        return $middleware;
     }
 
     /**
