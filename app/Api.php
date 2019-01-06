@@ -9,6 +9,7 @@
 namespace Exodus4D\ESI;
 
 
+use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use GuzzleHttp\Exception\BadResponseException;
@@ -326,6 +327,24 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * log callback function
+     * @return \Closure
+     */
+    protected function log(){
+        return function(string $action, string $level, string $message, array $data){
+            if(is_callable($newLog = $this->getNewLog())){
+                /**
+                 * @var LogInterface $log
+                 */
+                $log = $newLog($action, $level);
+                $log->setMessage($message);
+                $log->setData($data);
+                $log->buffer();
+            }
+        };
+    }
+
+    /**
      * get HTTP request Header for Authorization
      * @param string $credentials
      * @param string $type
@@ -397,7 +416,8 @@ abstract class Api extends \Prefab implements ApiInterface {
             'log_1xx'                   => false,
             'log_all_status'            => false,
             'log_on_status'             => [],
-            'log_off_status'            => []
+            'log_off_status'            => [],
+            'log_callback'              => $this->log()
         ];
     }
 

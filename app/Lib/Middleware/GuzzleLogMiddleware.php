@@ -155,21 +155,27 @@ class GuzzleLogMiddleware {
                     $logData['request'] = $this->logRequest($request);
                     $logData['response'] = $this->logResponse($response);
                 }
-                var_dump('checkStatusCode()');
-                var_dump($this->checkStatusCode($options, $statusCode));
+
             }
 
+            if(is_callable($log = $options['log_callback'])){
+                $log('abhhh', 'critical', 'bablabla', $logData);
+            }
             var_dump('$logData');
             var_dump($logData);
         }
     }
 
+    /**
+     * log request
+     * @param RequestInterface $request
+     * @return array
+     */
     protected function logRequest(RequestInterface $request) : array {
         return [
             'method'        => $request->getMethod(),
-            'target'           => $request->getRequestTarget(),
+            'url'           => $request->getUri()->__toString(),
             'path'          => $request->getUri()->getPath(),
-            'url'          => $request->getUri()->__toString(),
             'version'       => $request->getProtocolVersion()
         ];
     }
