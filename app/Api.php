@@ -11,6 +11,7 @@ namespace Exodus4D\ESI;
 
 use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
+use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
@@ -404,6 +405,7 @@ abstract class Api extends \Prefab implements ApiInterface {
         // -> add somewhere to stack BOTTOM so that it runs at the end catches errors from previous middlewares
         $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
 
+        $stack->push(GuzzleCacheMiddleware::factory($this->getCacheMiddlewareConfig()), 'cache');
         // retry failed requests should be on TOP of stack
         // -> in case of retry other middleware don´t need to know about the failed attempts
         $stack->push(GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig()), 'retry');
@@ -424,6 +426,15 @@ abstract class Api extends \Prefab implements ApiInterface {
         ];
     }
 
+    /**
+     * get configuration for GuzzleCacheMiddleware Middleware
+     * @return array
+     */
+    protected function getCacheMiddlewareConfig() : array {
+        return [
+
+        ];
+    }
     /**
      * get configuration GuzzleRetryMiddleware Retry Middleware
      * @see https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
