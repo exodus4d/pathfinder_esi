@@ -8,6 +8,7 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
+use Exodus4D\ESI\Lib\Cache\CacheEntry;
 use GuzzleHttp\Promise\FulfilledPromise;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -128,7 +129,7 @@ class GuzzleCacheMiddleware {
      * @param array $options
      */
     protected function save(RequestInterface $request, ResponseInterface $response, array $options) : void {
-        $cacheInfo = $this->getCacheInfo($request, $response, $options);
+        $cacheInfo = $this->getCacheObject($request, $response, $options);
 
         /*
         $statusCode = $response->getStatusCode();
@@ -139,31 +140,34 @@ class GuzzleCacheMiddleware {
         }*/
     }
 
-    protected function getCacheInfo(RequestInterface $request, ResponseInterface $response, array $options) : array {
-        $info = [];
-
+    protected function getCacheObject(RequestInterface $request, ResponseInterface $response, array $options) : ?CacheEntry {
         if(
             in_array($request->getMethod(), (array)$options['cache_http_methods']) &&
-            in_array($response->getStatusCode(), (array)$options['cache_on_status'])
+            in_array($response->getStatusCode(), (array)$options['cache_on_status']) &&
+            $response->hasHeader('Cache-Control')
         ){
-            $cacheControl = $this->getCacheControl($response);
-            var_dump('22: $cacheControl');
-            var_dump($cacheControl);
-        }
-
-        return $info;
-    }
-
-    protected function getCacheControl(ResponseInterface $response) : string {
-        $cacheControl = '';
-        if($response->hasHeader('Cache-Control')){
             $cacheControlHeader = \GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control'));
 
-            $test = self::inArrayRecursive($cacheControlHeader, 'public');
-            var_dump('11: $test');
-            var_dump($test);
+            if(self::inArrayDeep($cacheControlHeader, 'no-store')){
+                return null;
+            }elseif(self::inArrayDeep($cacheControlHeader, 'no-cache')){
+                // Stale response see RFC7234 section 5.2.1.4
+                // TODO
+            }elseif(self::inArrayDeep($cacheControlHeader, 'public')){
+
+            }
+
+            // "max-age" in "Cache-Control" Header overwrites "Expire" Header
+            if($maxAge = (int)self::arrayKeyDeep($cacheControlHeader, 'max-age')){
+                var_dump('$maxAge');
+                var_dump($maxAge);
+            }elseif($response->hasHeader('Expires')){
+                var_dump('Expires');
+                var_dump($response->getHeaderLine('Expires'));
+            }
         }
-        return $cacheControl;
+
+        return new CacheEntry($request, $response);
     }
 
     /**
@@ -178,13 +182,35 @@ class GuzzleCacheMiddleware {
         return $options['cache_debug'] ? $response->withHeader($options['cache_debug_header'], $value) : $response;
     }
 
-    public static function inArrayRecursive(array $array, string $search) : bool {
+    /**
+     * check if $search value exists in "deep" nested Array
+     * @param array $array
+     * @param string $search
+     * @return bool
+     */
+    public static function inArrayDeep(array $array, string $search) : bool {
         $found = false;
         array_walk($array, function($value, $key, $search) use (&$found) {
-            if(is_array($value) && in_array($search, $value)){
+            if(!$found && is_array($value) && in_array($search, $value)){
                 $found = true;
             }
         }, $search);
+        return $found;
+    }
+
+    /**
+     *
+     * @param array $array
+     * @param string $searchKey
+     * @return string
+     */
+    public static function arrayKeyDeep(array $array, string $searchKey) : string {
+        $found = '';
+        array_walk($array, function($value, $key, $searchKey) use (&$found) {
+            if(empty($found) && is_array($value) && array_key_exists($searchKey, $value)){
+                $found = (string)$value[$searchKey];
+            }
+        }, $searchKey);
         return $found;
     }
 
