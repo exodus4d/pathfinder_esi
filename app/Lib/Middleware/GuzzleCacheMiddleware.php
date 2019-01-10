@@ -17,7 +17,12 @@ class GuzzleCacheMiddleware {
     /**
      * default for: cacheable HTTP methods
      */
-    const HTTP_METHODS              = ['GET'];
+    const DEFAULT_HTTP_METHODS      = ['GET'];
+
+    /**
+     * default for: cacheable HTTP response status codes
+     */
+    const DEFAULT_ON_STATUS         = [200];
 
     /**
      * default for: enable debug HTTP headers
@@ -44,7 +49,8 @@ class GuzzleCacheMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'cache_http_methods'        => self::HTTP_METHODS,
+        'cache_http_methods'        => self::DEFAULT_HTTP_METHODS,
+        'cache_on_status'           => self::DEFAULT_ON_STATUS,
         'cache_debug'               => self::DEFAULT_DEBUG,
         'cache_debug_header'        => self::DEFAULT_DEBUG_HEADER
     ];
@@ -98,6 +104,7 @@ class GuzzleCacheMiddleware {
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure {
         return function (ResponseInterface $response) use ($request, $options) {
             var_dump('onFullFilled() Cache ');
+            $this->save($request, $response, $options);
 
             $response = $this->addDebugHeader($response, self::DEFAULT_DEBUG_HEADER_MISS, $options);
 
@@ -112,6 +119,21 @@ class GuzzleCacheMiddleware {
      */
     protected function fetch(RequestInterface $request) : ?ResponseInterface {
         return null;
+    }
+
+    /**
+     * try to store response data in cache
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $options
+     */
+    protected function save(RequestInterface $request, ResponseInterface $response, array $options) : void {
+        $statusCode = $response->getStatusCode();
+        if(in_array($statusCode, (array)$options['cache_on_status'])){
+            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control')));
+            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Controlff')));
+            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Strict-Transport-Security')));
+        }
     }
 
     /**
