@@ -405,7 +405,9 @@ abstract class Api extends \Prefab implements ApiInterface {
         // -> add somewhere to stack BOTTOM so that it runs at the end catches errors from previous middlewares
         $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
 
+        // cache responses based on the response Headers and cache configuration6
         $stack->push(GuzzleCacheMiddleware::factory($this->getCacheMiddlewareConfig()), 'cache');
+
         // retry failed requests should be on TOP of stack
         // -> in case of retry other middleware don´t need to know about the failed attempts
         $stack->push(GuzzleRetryMiddleware::factory($this->getRetryMiddlewareConfig()), 'retry');
@@ -432,7 +434,7 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     protected function getCacheMiddlewareConfig() : array {
         return [
-
+            'cache_debug'               => true
         ];
     }
     /**
@@ -507,6 +509,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
+            var_dump($response->getHeaders());
 
 
         }catch(ConnectException $e){
