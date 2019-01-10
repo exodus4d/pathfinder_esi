@@ -128,12 +128,42 @@ class GuzzleCacheMiddleware {
      * @param array $options
      */
     protected function save(RequestInterface $request, ResponseInterface $response, array $options) : void {
+        $cacheInfo = $this->getCacheInfo($request, $response, $options);
+
+        /*
         $statusCode = $response->getStatusCode();
         if(in_array($statusCode, (array)$options['cache_on_status'])){
             var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control')));
             var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Controlff')));
             var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Strict-Transport-Security')));
+        }*/
+    }
+
+    protected function getCacheInfo(RequestInterface $request, ResponseInterface $response, array $options) : array {
+        $info = [];
+
+        if(
+            in_array($request->getMethod(), (array)$options['cache_http_methods']) &&
+            in_array($response->getStatusCode(), (array)$options['cache_on_status'])
+        ){
+            $cacheControl = $this->getCacheControl($response);
+            var_dump('22: $cacheControl');
+            var_dump($cacheControl);
         }
+
+        return $info;
+    }
+
+    protected function getCacheControl(ResponseInterface $response) : string {
+        $cacheControl = '';
+        if($response->hasHeader('Cache-Control')){
+            $cacheControlHeader = \GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control'));
+
+            $test = self::inArrayRecursive($cacheControlHeader, 'public');
+            var_dump('11: $test');
+            var_dump($test);
+        }
+        return $cacheControl;
     }
 
     /**
@@ -146,6 +176,16 @@ class GuzzleCacheMiddleware {
      */
     protected function addDebugHeader(ResponseInterface $response, string $value, array $options) : ResponseInterface {
         return $options['cache_debug'] ? $response->withHeader($options['cache_debug_header'], $value) : $response;
+    }
+
+    public static function inArrayRecursive(array $array, string $search) : bool {
+        $found = false;
+        array_walk($array, function($value, $key, $search) use (&$found) {
+            if(is_array($value) && in_array($search, $value)){
+                $found = true;
+            }
+        }, $search);
+        return $found;
     }
 
     /**
