@@ -23,6 +23,7 @@
   "require": {
     "php-64bit": ">=7.1",
     "guzzlehttp/guzzle": "6.3.*",
-    "caseyamcl/guzzle_retry_middleware": "2.2.*"
+    "caseyamcl/guzzle_retry_middleware": "2.2.*",
+    "cache/redis-adapter": "1.0.*"
   }
 }

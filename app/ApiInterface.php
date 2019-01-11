@@ -46,4 +46,6 @@ interface ApiInterface {
     public function getUserAgent() : string;
 
     public function getNewLog() : ?callable;
+
+    public function getCachePool() : ?callable;
 }

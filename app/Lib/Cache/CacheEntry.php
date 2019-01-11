@@ -14,7 +14,34 @@ use Psr\Http\Message\ResponseInterface;
 
 class CacheEntry {
 
-    public function __construct(RequestInterface $request, ResponseInterface $response){
+    /**
+     * @var RequestInterface
+     */
+    protected $request;
 
+    /**
+     * @var ResponseInterface
+     */
+    protected $response;
+
+    /**
+     * @var \DateTime
+     */
+    protected $staleAt;
+
+    /**
+     * CacheEntry constructor.
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     * @param \DateTime $staleAt
+     */
+    public function __construct(
+        RequestInterface $request,
+        ResponseInterface $response,
+        \DateTime $staleAt
+    ){
+        $this->request = $request;
+        $this->response = $response;
+        $this->staleAt = $staleAt;
     }
 }

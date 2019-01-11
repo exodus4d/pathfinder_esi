@@ -9,6 +9,9 @@
 namespace Exodus4D\ESI;
 
 
+use Cache\Adapter\Redis\RedisCachePool;
+use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
+use Exodus4D\ESI\Lib\Cache\Storage\Psr6CacheStorage;
 use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
@@ -23,6 +26,7 @@ use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 use GuzzleRetry\GuzzleRetryMiddleware;
+use Psr\Cache\CacheItemPoolInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
 
@@ -329,6 +333,18 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @return callable|null
+     */
+    public function getCachePool() : ?callable {
+        return function() : ?CacheItemPoolInterface {
+            $client = new \Redis();
+            $client->connect('localhost', 6379, 2);
+            $client->select(2);
+            return new RedisCachePool($client);
+        };
+    }
+
+    /**
      * log callback function
      * @return \Closure
      */
@@ -406,7 +422,10 @@ abstract class Api extends \Prefab implements ApiInterface {
         $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
 
         // cache responses based on the response Headers and cache configuration6
-        $stack->push(GuzzleCacheMiddleware::factory($this->getCacheMiddlewareConfig()), 'cache');
+        $stack->push(GuzzleCacheMiddleware::factory(
+            $this->getCacheMiddlewareConfig(),
+            $this->getCacheMiddlewareStorage()
+        ), 'cache');
 
         // retry failed requests should be on TOP of stack
         // -> in case of retry other middleware don´t need to know about the failed attempts
@@ -434,9 +453,25 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     protected function getCacheMiddlewareConfig() : array {
         return [
+            'cache_enabled'             => true,
             'cache_debug'               => true
         ];
     }
+
+    /**
+     * get instance of a CacheStore that is used in GuzzleCacheMiddleware
+     * -> we use a PSR-6 compatible CacheStore that can handle any $cachePool
+     *    that implements the PSR-6 CacheItemPoolInterface
+     *    (e.g. an adapter for Redis -> more adapters here: http://www.php-cache.com)
+     * @return CacheStorageInterface|null
+     */
+    protected function getCacheMiddlewareStorage() : ?CacheStorageInterface {
+        if(is_callable($this->getCachePool()) && !is_null($cachePool = $this->getCachePool()())){
+            return new Psr6CacheStorage($cachePool);
+        }
+        return null;
+    }
+
     /**
      * get configuration GuzzleRetryMiddleware Retry Middleware
      * @see https://packagist.org/packages/caseyamcl/guzzle_retry_middleware

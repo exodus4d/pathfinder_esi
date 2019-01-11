@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 use Exodus4D\ESI\Lib\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
+use Exodus4D\ESI\Lib\Cache\Storage\VolatileRuntimeStorage;
 use GuzzleHttp\Promise\FulfilledPromise;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -16,44 +18,56 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleCacheMiddleware {
 
     /**
+     * default for: global enable this middleware
+     */
+    const DEFAULT_CACHE_ENABLED             = true;
+
+    /**
+     * default for: callback function returns
+     * @var CacheStorageInterface
+     */
+    const DEFAULT_CACHE_STORAGE_CALLBACK    = null;
+
+    /**
      * default for: cacheable HTTP methods
      */
-    const DEFAULT_HTTP_METHODS      = ['GET'];
+    const DEFAULT_CACHE_HTTP_METHODS        = ['GET'];
 
     /**
      * default for: cacheable HTTP response status codes
      */
-    const DEFAULT_ON_STATUS         = [200];
+    const DEFAULT_CACHE_ON_STATUS           = [200];
 
     /**
      * default for: enable debug HTTP headers
      */
-    const DEFAULT_DEBUG             = false;
+    const DEFAULT_CACHE_DEBUG               = false;
 
     /**
      * default for: debug HTTP Header name
      */
-    const DEFAULT_DEBUG_HEADER      = 'X-Guzzle-Cache';
+    const DEFAULT_CACHE_DEBUG_HEADER        = 'X-Guzzle-Cache';
 
     /**
      * default for: debug HTTP Header value for cached responses
      */
-    const DEFAULT_DEBUG_HEADER_HIT  = 'HIT';
+    const DEFAULT_CACHE_DEBUG_HEADER_HIT    = 'HIT';
 
     /**
      * default for: debug HTTP Header value for not cached responses
      */
-    const DEFAULT_DEBUG_HEADER_MISS = 'MISS';
+    const DEFAULT_CACHE_DEBUG_HEADER_MISS   = 'MISS';
 
     /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
-        'cache_http_methods'        => self::DEFAULT_HTTP_METHODS,
-        'cache_on_status'           => self::DEFAULT_ON_STATUS,
-        'cache_debug'               => self::DEFAULT_DEBUG,
-        'cache_debug_header'        => self::DEFAULT_DEBUG_HEADER
+        'cache_enabled'             => self::DEFAULT_CACHE_ENABLED,
+        'cache_http_methods'        => self::DEFAULT_CACHE_HTTP_METHODS,
+        'cache_on_status'           => self::DEFAULT_CACHE_ON_STATUS,
+        'cache_debug'               => self::DEFAULT_CACHE_DEBUG,
+        'cache_debug_header'        => self::DEFAULT_CACHE_DEBUG_HEADER
     ];
 
     /**
@@ -65,10 +79,15 @@ class GuzzleCacheMiddleware {
      * GuzzleCacheMiddleware constructor.
      * @param callable $nextHandler
      * @param array $defaultOptions
+     * @param CacheStorageInterface|null $storage
      */
-    public function __construct(callable $nextHandler, array $defaultOptions = []){
+    public function __construct(callable $nextHandler, array $defaultOptions = [], ?CacheStorageInterface $storage = null){
         $this->nextHandler = $nextHandler;
         $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
+
+        // if no CacheStorageInterface (e.g. Psr6CacheStorage) defined
+        // -> take default CacheStorage save in simple array
+        $this->storage = !is_null($storage) ? $storage : new VolatileRuntimeStorage();
     }
 
     /**
@@ -91,7 +110,7 @@ class GuzzleCacheMiddleware {
             );
         }
 
-        $response = $this->addDebugHeader($response, self::DEFAULT_DEBUG_HEADER_HIT, $options);
+        $response = $this->addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
 
         return new FulfilledPromise($response);
     }
@@ -105,9 +124,9 @@ class GuzzleCacheMiddleware {
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure {
         return function (ResponseInterface $response) use ($request, $options) {
             var_dump('onFullFilled() Cache ');
-            $this->save($request, $response, $options);
+            $this->cache($request, $response, $options);
 
-            $response = $this->addDebugHeader($response, self::DEFAULT_DEBUG_HEADER_MISS, $options);
+            $response = $this->addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_MISS, $options);
 
             return $response;
         };
@@ -128,24 +147,28 @@ class GuzzleCacheMiddleware {
      * @param ResponseInterface $response
      * @param array $options
      */
-    protected function save(RequestInterface $request, ResponseInterface $response, array $options) : void {
-        $cacheInfo = $this->getCacheObject($request, $response, $options);
+    protected function cache(RequestInterface $request, ResponseInterface $response, array $options) : void {
+        $cacheObject = $this->getCacheObject($request, $response, $options);
 
-        /*
-        $statusCode = $response->getStatusCode();
-        if(in_array($statusCode, (array)$options['cache_on_status'])){
-            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control')));
-            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Controlff')));
-            var_dump(\GuzzleHttp\Psr7\parse_header($response->getHeader('Strict-Transport-Security')));
-        }*/
+        if($cacheObject instanceof CacheEntry){
+            // response is cacheable
+            var_dump('cache().......');
+            var_dump(get_class($this->storage));
+        }
     }
 
     protected function getCacheObject(RequestInterface $request, ResponseInterface $response, array $options) : ?CacheEntry {
+        if( !$options['cache_enabled'] ){
+            return null;
+        }
+
         if(
             in_array($request->getMethod(), (array)$options['cache_http_methods']) &&
             in_array($response->getStatusCode(), (array)$options['cache_on_status']) &&
             $response->hasHeader('Cache-Control')
         ){
+            //$response = $response->withHeader('Cache-Control', 'public, max-age=31536000');
+
             $cacheControlHeader = \GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control'));
 
             if(self::inArrayDeep($cacheControlHeader, 'no-store')){
@@ -159,15 +182,16 @@ class GuzzleCacheMiddleware {
 
             // "max-age" in "Cache-Control" Header overwrites "Expire" Header
             if($maxAge = (int)self::arrayKeyDeep($cacheControlHeader, 'max-age')){
-                var_dump('$maxAge');
-                var_dump($maxAge);
+                return new CacheEntry($request, $response, new \DateTime('+' . $maxAge . 'seconds'));
             }elseif($response->hasHeader('Expires')){
-                var_dump('Expires');
-                var_dump($response->getHeaderLine('Expires'));
+                $expireAt = \DateTime::createFromFormat(\DateTime::RFC1123, $response->getHeaderLine('Expires'));
+                if($expireAt !== false){
+                    return new CacheEntry($request, $response, $expireAt);
+                }
             }
         }
 
-        return new CacheEntry($request, $response);
+        return null;
     }
 
     /**
@@ -179,7 +203,10 @@ class GuzzleCacheMiddleware {
      * @return ResponseInterface
      */
     protected function addDebugHeader(ResponseInterface $response, string $value, array $options) : ResponseInterface {
-        return $options['cache_debug'] ? $response->withHeader($options['cache_debug_header'], $value) : $response;
+        if($options['cache_enabled'] && $options['cache_debug']){
+            $response = $response->withHeader($options['cache_debug_header'], $value);
+        }
+        return $response;
     }
 
     /**
@@ -216,11 +243,12 @@ class GuzzleCacheMiddleware {
 
     /**
      * @param array $defaultOptions
+     * @param CacheStorageInterface|null $storage
      * @return \Closure
      */
-    public static function factory(array $defaultOptions = []) : \Closure {
-        return function(callable $handler) use ($defaultOptions){
-            return new static($handler, $defaultOptions);
+    public static function factory(array $defaultOptions = [], ?CacheStorageInterface $storage = null) : \Closure {
+        return function(callable $handler) use ($defaultOptions, $storage){
+            return new static($handler, $defaultOptions, $storage);
         };
     }
 }
