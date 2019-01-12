@@ -10,8 +10,12 @@ namespace Exodus4D\ESI\Lib\Middleware;
 
 use Exodus4D\ESI\Lib\Cache\CacheEntry;
 use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
-use Exodus4D\ESI\Lib\Cache\Storage\VolatileRuntimeStorage;
+use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
+use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
+use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise\RejectedPromise;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -59,6 +63,11 @@ class GuzzleCacheMiddleware {
     const DEFAULT_CACHE_DEBUG_HEADER_MISS   = 'MISS';
 
     /**
+     * default for: debug HTTP Header value for staled responses
+     */
+    const DEFAULT_CACHE_DEBUG_HEADER_STALE  = 'STALE';
+
+    /**
      * default options can go here for middleware
      * @var array
      */
@@ -71,6 +80,11 @@ class GuzzleCacheMiddleware {
     ];
 
     /**
+     * @var CacheStrategyInterface
+     */
+    protected $cacheStrategy;
+
+    /**
      * @var callable
      */
     private $nextHandler;
@@ -79,56 +93,131 @@ class GuzzleCacheMiddleware {
      * GuzzleCacheMiddleware constructor.
      * @param callable $nextHandler
      * @param array $defaultOptions
-     * @param CacheStorageInterface|null $storage
+     * @param CacheStrategyInterface|null $cacheStrategy
      */
-    public function __construct(callable $nextHandler, array $defaultOptions = [], ?CacheStorageInterface $storage = null){
+    public function __construct(callable $nextHandler, array $defaultOptions = [], ?CacheStrategyInterface $cacheStrategy = null){
         $this->nextHandler = $nextHandler;
         $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
 
-        // if no CacheStorageInterface (e.g. Psr6CacheStorage) defined
-        // -> take default CacheStorage save in simple array
-        $this->storage = !is_null($storage) ? $storage : new VolatileRuntimeStorage();
+        // if no CacheStrategyInterface defined
+        // -> use default PrivateCacheStrategy
+        $this->cacheStrategy = !is_null($cacheStrategy) ? $cacheStrategy : new PrivateCacheStrategy();
     }
 
-    /**
+    /*
      * cache response data for successful requests
      * -> load data from cache rather than sending the request
      * @param RequestInterface $request
      * @param array $options
      * @return FulfilledPromise
      */
+    /*
     public function __invoke(RequestInterface $request, array $options){
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 
         $next = $this->nextHandler;
 
+        // TODO
+        $cacheEntry = null;
+
         if(!$response = $this->fetch($request)){
             // response not cached
             return $next($request, $options)->then(
-                $this->onFulfilled($request, $options)
+                $this->onFulfilled($request, $cacheEntry, $options),
+                $this->onRejected($cacheEntry)
             );
         }
 
-        $response = $this->addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
+        $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
 
         return new FulfilledPromise($response);
+    }*/
+
+
+    public function __invoke(callable $handler){
+        return function (RequestInterface $request, array $options) use (&$handler) {
+var_dump('__invoke() Cache');
+
+            $cacheEntry = null;
+
+            /**
+             * @var Promise $promise
+             */
+            $promise = $handler($request, $options);
+
+            return $promise->then(
+                $this->onFulfilled($request, $cacheEntry, $options),
+                $this->onRejected($cacheEntry, $options)
+            );
+        };
     }
 
     /**
      * No exceptions were thrown during processing
      * @param RequestInterface $request
+     * @param CacheEntry $cacheEntry
      * @param array $options
      * @return \Closure
      */
-    protected function onFulfilled(RequestInterface $request, array $options) : \Closure {
-        return function (ResponseInterface $response) use ($request, $options) {
+    protected function onFulfilled(RequestInterface $request, ?CacheEntry $cacheEntry, array $options) : \Closure {
+        return function (ResponseInterface $response) use ($request, $cacheEntry, $options) {
             var_dump('onFullFilled() Cache ');
-            $this->cache($request, $response, $options);
 
-            $response = $this->addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_MISS, $options);
+            // Check if error and looking for a staled content --------------------------------------------------------
+            if($response->getStatusCode() >= 500){
+                $responseStale = static::getStaleResponse($cacheEntry, $options);
+                if($responseStale instanceof ResponseInterface){
+                    return $responseStale;
+                }
+            }
 
-            return $response;
+            $update = false;
+
+            // check for "Not modified" -> cache entry is re-validate -------------------------------------------------
+            if($response->getStatusCode() == 304 && $cacheEntry instanceof CacheEntry){
+                $response = $response->withStatus($cacheEntry->getResponse()->getStatusCode());
+                $response = $response->withBody($cacheEntry->getResponse()->getBody());
+
+                // Merge headers of the "304 Not Modified" and the cache entry
+                /**
+                 * @var string $headerName
+                 * @var string[] $headerValue
+                 */
+                foreach($cacheEntry->getOriginalResponse()->getHeaders() as $headerName => $headerValue){
+                    if(!$response->hasHeader($headerName) && $headerName !== $options['cache_debug_header']){
+                        $response = $response->withHeader($headerName, $headerValue);
+                    }
+                }
+
+                $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
+                $update = true;
+            }else{
+                $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_MISS, $options);
+            }
+
+            return static::addToCache($this->cacheStrategy, $request, $response, $update);
+        };
+    }
+
+    /**
+     * An exception or error was thrown during processing
+     * @param CacheEntry|null $cacheEntry
+     * @param array $options
+     * @return \Closure
+     */
+    protected function onRejected(?CacheEntry $cacheEntry, array $options) : \Closure {
+        return function ($reason) use ($cacheEntry, $options) {
+            var_dump('onRejected() Cache');
+
+            if($reason instanceof TransferException){
+                $response = static::getStaleResponse($cacheEntry, $options);
+                if(!is_null($response)){
+                    return $response;
+                }
+            }
+
+            return new RejectedPromise($reason);
         };
     }
 
@@ -147,6 +236,7 @@ class GuzzleCacheMiddleware {
      * @param ResponseInterface $response
      * @param array $options
      */
+    /*
     protected function cache(RequestInterface $request, ResponseInterface $response, array $options) : void {
         $cacheObject = $this->getCacheObject($request, $response, $options);
 
@@ -192,7 +282,7 @@ class GuzzleCacheMiddleware {
         }
 
         return null;
-    }
+    }*/
 
     /**
      * add debug HTTP header to $response
@@ -202,11 +292,47 @@ class GuzzleCacheMiddleware {
      * @param array $options
      * @return ResponseInterface
      */
-    protected function addDebugHeader(ResponseInterface $response, string $value, array $options) : ResponseInterface {
+    protected static function addDebugHeader(ResponseInterface $response, string $value, array $options) : ResponseInterface {
         if($options['cache_enabled'] && $options['cache_debug']){
             $response = $response->withHeader($options['cache_debug_header'], $value);
         }
         return $response;
+    }
+
+    /**
+     * @param CacheStrategyInterface $cacheStrategy
+     * @param RequestInterface $request
+     * @param ResponseInterface $response
+     * @param bool $update
+     * @return ResponseInterface
+     */
+    protected static function addToCache(CacheStrategyInterface $cacheStrategy, RequestInterface $request, ResponseInterface $response, $update = false) : ResponseInterface {
+        // If the body is not seekable, we have to replace it by a seekable one
+        if(!$response->getBody()->isSeekable()){
+            $response = $response->withBody(\GuzzleHttp\Psr7\stream_for($response->getBody()->getContents()));
+        }
+
+        if($update){
+            $cacheStrategy->update($request, $response);
+        }else{
+            $cacheStrategy->cache($request, $response);
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param CacheEntry|null $cacheEntry
+     * @param array $options
+     * @return ResponseInterface|null
+     * @throws \Exception
+     */
+    protected static function getStaleResponse(?CacheEntry $cacheEntry, array $options) : ?ResponseInterface {
+        // Return staled cache entry if we can
+        if(!is_null($cacheEntry) && $cacheEntry->serveStaleIfError()){
+            return static::addDebugHeader($cacheEntry->getResponse(), self::DEFAULT_CACHE_DEBUG_HEADER_STALE, $options);
+        }
+        return null;
     }
 
     /**
@@ -242,13 +368,24 @@ class GuzzleCacheMiddleware {
     }
 
     /**
+     * flatten multidimensional array ignore keys
+     * @param array $array
+     * @return array
+     */
+    public static function arrayFlattenByValue(array $array) : array {
+        $return = [];
+        array_walk_recursive($array, function($value) use (&$return) {$return[] = $value;});
+        return $return;
+    }
+
+    /**
      * @param array $defaultOptions
-     * @param CacheStorageInterface|null $storage
+     * @param CacheStrategyInterface|null $cacheStrategy
      * @return \Closure
      */
-    public static function factory(array $defaultOptions = [], ?CacheStorageInterface $storage = null) : \Closure {
-        return function(callable $handler) use ($defaultOptions, $storage){
-            return new static($handler, $defaultOptions, $storage);
+    public static function factory(array $defaultOptions = [], ?CacheStrategyInterface $cacheStrategy = null) : \Closure {
+        return function(callable $handler) use ($defaultOptions, $cacheStrategy){
+            return new static($handler, $defaultOptions, $cacheStrategy);
         };
     }
 }

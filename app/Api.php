@@ -12,6 +12,8 @@ namespace Exodus4D\ESI;
 use Cache\Adapter\Redis\RedisCachePool;
 use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\Psr6CacheStorage;
+use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
+use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
 use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
@@ -424,7 +426,7 @@ abstract class Api extends \Prefab implements ApiInterface {
         // cache responses based on the response Headers and cache configuration6
         $stack->push(GuzzleCacheMiddleware::factory(
             $this->getCacheMiddlewareConfig(),
-            $this->getCacheMiddlewareStorage()
+            $this->getCacheMiddlewareStrategy()
         ), 'cache');
 
         // retry failed requests should be on TOP of stack
@@ -456,6 +458,13 @@ abstract class Api extends \Prefab implements ApiInterface {
             'cache_enabled'             => true,
             'cache_debug'               => true
         ];
+    }
+
+    /**
+     * @return CacheStrategyInterface
+     */
+    protected function getCacheMiddlewareStrategy() : CacheStrategyInterface {
+        return new PrivateCacheStrategy($this->getCacheMiddlewareStorage());
     }
 
     /**

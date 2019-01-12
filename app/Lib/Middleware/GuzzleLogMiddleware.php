@@ -163,7 +163,7 @@ class GuzzleLogMiddleware {
      */
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure {
         return function (ResponseInterface $response) use ($request, $options) {
-            var_dump('onFullFilled() Log ');
+            var_dump('onFullFilled() Log');
 
             if($options['log_enabled']){
                 $this->log($options, $request, $response);
@@ -181,7 +181,7 @@ class GuzzleLogMiddleware {
      */
     protected function onRejected(RequestInterface $request, array $options) : \Closure {
         return function ($reason) use ($request, $options) {
-            var_dump('onRejected() Log ');
+            var_dump('onRejected() Log');
             var_dump(get_class($reason));
             if($options['log_enabled']){
                 $response = null;
