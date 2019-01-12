@@ -26,6 +26,13 @@ class CacheEntry {
     protected $response;
 
     /**
+     * This field is only used for serialize
+     * Response::body is a stream and can't be serialized
+     * @var string
+     */
+    protected $responseBody;
+
+    /**
      * @var \DateTime
      */
     protected $staleAt;
@@ -44,6 +51,12 @@ class CacheEntry {
      * @var \DateTime
      */
     protected $dateCreated;
+
+    /**
+     * Cached timestamp of staleAt variable
+     * @var int
+     */
+    protected $timestampStale;
 
     /**
      * CacheEntry constructor.
@@ -152,11 +165,51 @@ class CacheEntry {
     }
 
     /**
+     * @return \DateTime|null
+     */
+    public function getStaleAt() : ?\DateTime {
+        return $this->staleAt;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFresh() : bool {
+        return !$this->isStale();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStale() : bool {
+        return $this->getStaleAge() > 0;
+    }
+
+    /**
+     * @return int positive value equal staled
+     */
+    public function getStaleAge() : int {
+        // This object is immutable
+        if(is_null($this->timestampStale)){
+            $this->timestampStale = $this->staleAt->getTimestamp();
+        }
+        return time() - $this->timestampStale;
+    }
+
+    /**
      * @return bool
      * @throws \Exception
      */
     public function serveStaleIfError() : bool {
         return !is_null($this->staleIfErrorTo) && $this->staleIfErrorTo->getTimestamp() >= (new \DateTime())->getTimestamp();
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function staleWhileValidate() : bool {
+        return !is_null($this->staleWhileRevalidateTo) && $this->staleWhileRevalidateTo->getTimestamp() >= (new \DateTime())->getTimestamp();
     }
 
     /**
@@ -193,4 +246,28 @@ class CacheEntry {
     public function getAge() : int {
         return time() - $this->dateCreated->getTimestamp();
     }
+
+    /**
+     * magic __sleep()
+     * @return array
+     */
+    public function __sleep() : array {
+        if($this->response !== null){
+            // Stream/Resource can't be serialized... So we copy the content
+            $this->responseBody = (string) $this->response->getBody();
+            $this->response->getBody()->rewind();
+        }
+        return array_keys(get_object_vars($this));
+    }
+
+    /**
+     * magic __wakeup()
+     */
+    public function __wakeup() : void {
+        if($this->response !== null){
+            // We re-create the stream of the response
+            $this->response = $this->response->withBody(\GuzzleHttp\Psr7\stream_for($this->responseBody));
+        }
+    }
+
 }

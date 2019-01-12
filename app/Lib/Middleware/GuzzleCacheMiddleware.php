@@ -9,13 +9,14 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 use Exodus4D\ESI\Lib\Cache\CacheEntry;
-use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
 use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\Promise;
 use GuzzleHttp\Promise\RejectedPromise;
+use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -24,48 +25,42 @@ class GuzzleCacheMiddleware {
     /**
      * default for: global enable this middleware
      */
-    const DEFAULT_CACHE_ENABLED             = true;
-
-    /**
-     * default for: callback function returns
-     * @var CacheStorageInterface
-     */
-    const DEFAULT_CACHE_STORAGE_CALLBACK    = null;
+    const DEFAULT_CACHE_ENABLED                 = true;
 
     /**
      * default for: cacheable HTTP methods
      */
-    const DEFAULT_CACHE_HTTP_METHODS        = ['GET'];
-
-    /**
-     * default for: cacheable HTTP response status codes
-     */
-    const DEFAULT_CACHE_ON_STATUS           = [200];
+    const DEFAULT_CACHE_HTTP_METHODS            = ['GET'];
 
     /**
      * default for: enable debug HTTP headers
      */
-    const DEFAULT_CACHE_DEBUG               = false;
+    const DEFAULT_CACHE_DEBUG                   = false;
+
+    /**
+     * default for: revalidate cache HTTP headers
+     */
+    const DEFAULT_CACHE_RE_VALIDATION_HEADER    = 'X-Guzzle-Cache-ReValidation';
 
     /**
      * default for: debug HTTP Header name
      */
-    const DEFAULT_CACHE_DEBUG_HEADER        = 'X-Guzzle-Cache';
+    const DEFAULT_CACHE_DEBUG_HEADER            = 'X-Guzzle-Cache';
 
     /**
      * default for: debug HTTP Header value for cached responses
      */
-    const DEFAULT_CACHE_DEBUG_HEADER_HIT    = 'HIT';
+    const DEFAULT_CACHE_DEBUG_HEADER_HIT        = 'HIT';
 
     /**
      * default for: debug HTTP Header value for not cached responses
      */
-    const DEFAULT_CACHE_DEBUG_HEADER_MISS   = 'MISS';
+    const DEFAULT_CACHE_DEBUG_HEADER_MISS       = 'MISS';
 
     /**
      * default for: debug HTTP Header value for staled responses
      */
-    const DEFAULT_CACHE_DEBUG_HEADER_STALE  = 'STALE';
+    const DEFAULT_CACHE_DEBUG_HEADER_STALE      = 'STALE';
 
     /**
      * default options can go here for middleware
@@ -74,10 +69,19 @@ class GuzzleCacheMiddleware {
     private $defaultOptions = [
         'cache_enabled'             => self::DEFAULT_CACHE_ENABLED,
         'cache_http_methods'        => self::DEFAULT_CACHE_HTTP_METHODS,
-        'cache_on_status'           => self::DEFAULT_CACHE_ON_STATUS,
         'cache_debug'               => self::DEFAULT_CACHE_DEBUG,
         'cache_debug_header'        => self::DEFAULT_CACHE_DEBUG_HEADER
     ];
+
+    /**
+     * @var Promise[]
+     */
+    protected $waitingRevalidate = [];
+
+    /**
+     * @var Client
+     */
+    protected $client;
 
     /**
      * @var CacheStrategyInterface
@@ -102,6 +106,8 @@ class GuzzleCacheMiddleware {
         // if no CacheStrategyInterface defined
         // -> use default PrivateCacheStrategy
         $this->cacheStrategy = !is_null($cacheStrategy) ? $cacheStrategy : new PrivateCacheStrategy();
+
+        register_shutdown_function([$this, 'purgeReValidation']);
     }
 
     /*
@@ -134,7 +140,21 @@ class GuzzleCacheMiddleware {
         return new FulfilledPromise($response);
     }*/
 
+    /**
+     * Will be called at the end of the script
+     */
+    public function purgeReValidation() : void {
+        \GuzzleHttp\Promise\inspect_all($this->waitingRevalidate);
+    }
 
+    /**
+     * cache response data for successful requests
+     * -> load data from cache rather than sending the request
+     * @param RequestInterface $request
+     * @param array $options
+     * @return FulfilledPromise
+     * @throws \Exception
+     */
     public function __invoke(RequestInterface $request, array $options){
         var_dump('__invoke() Cache');
         // Combine options with defaults specified by this middleware
@@ -142,26 +162,97 @@ class GuzzleCacheMiddleware {
 
         $next = $this->nextHandler;
 
-        $cacheEntry = null;
+        // check if request HTTP Method can be cached -----------------------------------------------------------------
+        if(!in_array(strtoupper($request->getMethod()), (array)$options['cache_http_methods'])){
+            // No caching for this method allowed
+            return $next($request, $options)->then(
+                function(ResponseInterface $response) use ($options) {
+                    return static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_MISS, $options);
+                }
+            );
+        }
+
+        // check if it´s is a re-validation request, so bypass the cache! ---------------------------------------------
+        if($request->hasHeader(self::DEFAULT_CACHE_RE_VALIDATION_HEADER)){
+            // It's a re-validation request, so bypass the cache!
+            return $next($request->withoutHeader(self::DEFAULT_CACHE_RE_VALIDATION_HEADER), $options);
+        }
+
+        // Retrieve information from request (Cache-Control) ----------------------------------------------------------
+        $onlyFromCache  = false;
+        $staleResponse  = false;
+        $maxStaleCache  = null;
+        $minFreshCache  = null;
+
+        if($request->hasHeader('Cache-Control')){
+            $reqCacheControl = \GuzzleHttp\Psr7\parse_header($request->getHeader('Cache-Control'));
+
+            if(GuzzleCacheMiddleware::inArrayDeep($reqCacheControl, 'only-if-cached')){
+                $onlyFromCache = true;
+            }
+            if(GuzzleCacheMiddleware::inArrayDeep($reqCacheControl, 'max-stale')){
+                $staleResponse = true;
+            }
+            if($maxStale = (int)GuzzleCacheMiddleware::arrayKeyDeep($reqCacheControl, 'max-stale')){
+                $maxStaleCache = $maxStale;
+            }
+            if($minFresh = (int)GuzzleCacheMiddleware::arrayKeyDeep($reqCacheControl, 'min-fresh')){
+                $minFreshCache = $minFresh;
+            }
+        }
+
+        // If cache => return new FulfilledPromise(...) with response -------------------------------------------------
+        $cacheEntry = $this->cacheStrategy->fetch($request);
+
+        if($cacheEntry instanceof CacheEntry){
+            $body = $cacheEntry->getResponse()->getBody();
+            if($body->tell() > 0){
+                $body->rewind();
+            }
+
+            if(
+                $cacheEntry->isFresh() &&
+                ($minFreshCache === null || $cacheEntry->getStaleAge() + (int)$minFreshCache <= 0)
+            ){
+                // Cache HIT!
+                return new FulfilledPromise(
+                    static::addDebugHeader($cacheEntry->getResponse(), self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options)
+                );
+            }elseif(
+                $staleResponse ||
+                ($maxStaleCache !== null && $cacheEntry->getStaleAge() <= $maxStaleCache)
+            ){
+                // Staled cache!
+                return new FulfilledPromise(
+                    static::addDebugHeader($cacheEntry->getResponse(), self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options)
+                );
+            }elseif($cacheEntry->hasValidationInformation() && !$onlyFromCache){
+                // Re-validation header
+                $request = static::getRequestWithReValidationHeader($request, $cacheEntry);
+
+                if($cacheEntry->staleWhileValidate()){
+                    static::addReValidationRequest($request, $this->cacheStrategy, $cacheEntry);
+
+                    return new FulfilledPromise(
+                        static::addDebugHeader($cacheEntry->getResponse(), self::DEFAULT_CACHE_DEBUG_HEADER_STALE, $options)
+                    );
+                }
+            }
+        }else{
+            $cacheEntry = null;
+        }
+
+        // explicit asking of a cached response -> 504 ----------------------------------------------------------------
+        if(is_null($cacheEntry) && $onlyFromCache){
+            return new FulfilledPromise(
+                new Response(504)
+            );
+        }
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $cacheEntry, $options),
             $this->onRejected($cacheEntry, $options)
         );
-
-      /*
-        return function (RequestInterface $request, array $options) use (&$handler) {
-var_dump('__invoke() Cache');
-
-            $cacheEntry = null;
-
-            $promise = $handler($request, $options);
-
-            return $promise->then(
-                $this->onFulfilled($request, $cacheEntry, $options),
-                $this->onRejected($cacheEntry, $options)
-            );
-        }; */
     }
 
     /**
@@ -189,9 +280,10 @@ var_dump('__invoke() Cache');
             if($response->getStatusCode() == 304 && $cacheEntry instanceof CacheEntry){
                 $response = $response->withStatus($cacheEntry->getResponse()->getStatusCode());
                 $response = $response->withBody($cacheEntry->getResponse()->getBody());
+                $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
 
-                // Merge headers of the "304 Not Modified" and the cache entry
                 /**
+                 * Merge headers of the "304 Not Modified" and the cache entry
                  * @var string $headerName
                  * @var string[] $headerValue
                  */
@@ -201,7 +293,6 @@ var_dump('__invoke() Cache');
                     }
                 }
 
-                $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
                 $update = true;
             }else{
                 $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_MISS, $options);
@@ -231,69 +322,6 @@ var_dump('__invoke() Cache');
             return new RejectedPromise($reason);
         };
     }
-
-    /**
-     * try to fetch response data from cache for the $request
-     * @param RequestInterface $request
-     * @return ResponseInterface|null
-     */
-    protected function fetch(RequestInterface $request) : ?ResponseInterface {
-        return null;
-    }
-
-    /**
-     * try to store response data in cache
-     * @param RequestInterface $request
-     * @param ResponseInterface $response
-     * @param array $options
-     */
-    /*
-    protected function cache(RequestInterface $request, ResponseInterface $response, array $options) : void {
-        $cacheObject = $this->getCacheObject($request, $response, $options);
-
-        if($cacheObject instanceof CacheEntry){
-            // response is cacheable
-            var_dump('cache().......');
-            var_dump(get_class($this->storage));
-        }
-    }
-
-    protected function getCacheObject(RequestInterface $request, ResponseInterface $response, array $options) : ?CacheEntry {
-        if( !$options['cache_enabled'] ){
-            return null;
-        }
-
-        if(
-            in_array($request->getMethod(), (array)$options['cache_http_methods']) &&
-            in_array($response->getStatusCode(), (array)$options['cache_on_status']) &&
-            $response->hasHeader('Cache-Control')
-        ){
-            //$response = $response->withHeader('Cache-Control', 'public, max-age=31536000');
-
-            $cacheControlHeader = \GuzzleHttp\Psr7\parse_header($response->getHeader('Cache-Control'));
-
-            if(self::inArrayDeep($cacheControlHeader, 'no-store')){
-                return null;
-            }elseif(self::inArrayDeep($cacheControlHeader, 'no-cache')){
-                // Stale response see RFC7234 section 5.2.1.4
-                // TODO
-            }elseif(self::inArrayDeep($cacheControlHeader, 'public')){
-
-            }
-
-            // "max-age" in "Cache-Control" Header overwrites "Expire" Header
-            if($maxAge = (int)self::arrayKeyDeep($cacheControlHeader, 'max-age')){
-                return new CacheEntry($request, $response, new \DateTime('+' . $maxAge . 'seconds'));
-            }elseif($response->hasHeader('Expires')){
-                $expireAt = \DateTime::createFromFormat(\DateTime::RFC1123, $response->getHeaderLine('Expires'));
-                if($expireAt !== false){
-                    return new CacheEntry($request, $response, $expireAt);
-                }
-            }
-        }
-
-        return null;
-    }*/
 
     /**
      * add debug HTTP header to $response
@@ -333,6 +361,39 @@ var_dump('__invoke() Cache');
     }
 
     /**
+     * @param RequestInterface $request
+     * @param CacheStrategyInterface $cacheStrategy
+     * @param CacheEntry $cacheEntry
+     * @return bool if added
+     */
+    protected function addReValidationRequest(RequestInterface $request, CacheStrategyInterface &$cacheStrategy, CacheEntry $cacheEntry) : bool {
+        // Add the promise for revalidate
+        if(!is_null($this->client)){
+            $request = $request->withHeader(self::DEFAULT_CACHE_RE_VALIDATION_HEADER, '1');
+            $this->waitingRevalidate[] = $this->client
+                ->sendAsync($request)
+                ->then(function(ResponseInterface $response) use ($request, &$cacheStrategy, $cacheEntry){
+                    $update = false;
+                    if($response->getStatusCode() == 304){
+                        // Not modified => cache entry is re-validate
+                        $response = $response->withStatus($cacheEntry->getResponse()->getStatusCode());
+                        $response = $response->withBody($cacheEntry->getResponse()->getBody());
+                        // Merge headers of the "304 Not Modified" and the cache entry
+                        foreach($cacheEntry->getResponse()->getHeaders() as $headerName => $headerValue){
+                            if(!$response->hasHeader($headerName)){
+                                $response = $response->withHeader($headerName, $headerValue);
+                            }
+                        }
+                        $update = true;
+                    }
+                    static::addToCache($cacheStrategy, $request, $response, $update);
+                });
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param CacheEntry|null $cacheEntry
      * @param array $options
      * @return ResponseInterface|null
@@ -344,6 +405,27 @@ var_dump('__invoke() Cache');
             return static::addDebugHeader($cacheEntry->getResponse(), self::DEFAULT_CACHE_DEBUG_HEADER_STALE, $options);
         }
         return null;
+    }
+
+    /**
+     * @param RequestInterface $request
+     * @param CacheEntry $cacheEntry
+     * @return RequestInterface
+     */
+    protected static function getRequestWithReValidationHeader(RequestInterface $request, CacheEntry $cacheEntry) : RequestInterface {
+        if($cacheEntry->getResponse()->hasHeader('Last-Modified')){
+            $request = $request->withHeader(
+                'If-Modified-Since',
+                $cacheEntry->getResponse()->getHeader('Last-Modified')
+            );
+        }
+        if($cacheEntry->getResponse()->hasHeader('Etag')){
+            $request = $request->withHeader(
+                'If-None-Match',
+                $cacheEntry->getResponse()->getHeader('Etag')
+            );
+        }
+        return $request;
     }
 
     /**

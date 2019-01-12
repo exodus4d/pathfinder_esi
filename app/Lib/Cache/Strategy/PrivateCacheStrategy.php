@@ -37,7 +37,7 @@ class PrivateCacheStrategy implements CacheStrategyInterface {
         410 => 410,
         414 => 414,
         418 => 418,
-        501 => 501,
+        501 => 501
     ];
 
     /**
@@ -136,10 +136,8 @@ class PrivateCacheStrategy implements CacheStrategyInterface {
     }
 
     /**
-     * Return a CacheEntry or null if no cache.
-     *
+     * Return a CacheEntry or null if no cache
      * @param RequestInterface $request
-     *
      * @return CacheEntry|null
      */
     public function fetch(RequestInterface $request) : ?CacheEntry {

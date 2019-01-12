@@ -553,6 +553,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
+            var_dump($response->getHeader('X-Guzzle-Cache'));
             var_dump($response->getHeaders());
 
 
