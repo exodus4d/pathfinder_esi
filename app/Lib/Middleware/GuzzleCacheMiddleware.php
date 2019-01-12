@@ -135,22 +135,33 @@ class GuzzleCacheMiddleware {
     }*/
 
 
-    public function __invoke(callable $handler){
+    public function __invoke(RequestInterface $request, array $options){
+        var_dump('__invoke() Cache');
+        // Combine options with defaults specified by this middleware
+        $options = array_replace($this->defaultOptions, $options);
+
+        $next = $this->nextHandler;
+
+        $cacheEntry = null;
+
+        return $next($request, $options)->then(
+            $this->onFulfilled($request, $cacheEntry, $options),
+            $this->onRejected($cacheEntry, $options)
+        );
+
+      /*
         return function (RequestInterface $request, array $options) use (&$handler) {
 var_dump('__invoke() Cache');
 
             $cacheEntry = null;
 
-            /**
-             * @var Promise $promise
-             */
             $promise = $handler($request, $options);
 
             return $promise->then(
                 $this->onFulfilled($request, $cacheEntry, $options),
                 $this->onRejected($cacheEntry, $options)
             );
-        };
+        }; */
     }
 
     /**
