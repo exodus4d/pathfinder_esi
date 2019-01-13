@@ -54,14 +54,14 @@ abstract class Api extends \Prefab implements ApiInterface {
     const DEFAULT_READ_TIMEOUT                      = 10.0;
 
     /**
-     * default for: log level
-     */
-    const DEFAULT_DEBUG_LEVEL                       = 0;
-
-    /**
      * default for: debug requests
      */
     const DEFAULT_DEBUG_REQUESTS                    = false;
+
+    /**
+     * default for: log level
+     */
+    const DEFAULT_DEBUG_LEVEL                       = 0;
 
     // Guzzle Retry Middleware defaults -------------------------------------------------------------------------------
     // -> https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
@@ -113,12 +113,14 @@ abstract class Api extends \Prefab implements ApiInterface {
     /**
      * Timeout of the request in seconds
      * Use 0 to wait indefinitely
+     * @see https://guzzle.readthedocs.io/en/latest/request-options.html#timeout
      * @var float
      */
     private $timeout                                = self::DEFAULT_TIMEOUT;
 
     /**
      * Timeout for server connect in seconds
+     * @see https://guzzle.readthedocs.io/en/latest/request-options.html#connect-timeout
      * @var float
      */
     private $connectTimeout                         = self::DEFAULT_CONNECT_TIMEOUT;
@@ -126,21 +128,40 @@ abstract class Api extends \Prefab implements ApiInterface {
     /**
      * Read timeout for Streams
      * Should be less than "default_socket_timeout" PHP ini
+     * @see https://guzzle.readthedocs.io/en/latest/request-options.html#read-timeout
      * @var float
      */
     private $readTimeout                            = self::DEFAULT_READ_TIMEOUT;
+
+    /**
+     * HTTP proxy
+     * -> for debugging purpose it might help to proxy requests through a local proxy
+     *    e.g. 127.0.0.1:8888 (check out Fiddler https://www.telerik.com/fiddler)
+     *    this should be used with 'verify' == false for HTTPS requests
+     * @see http://docs.guzzlephp.org/en/stable/request-options.html#proxy
+     * @var null|string|array
+     */
+    private $proxy                                  = null;
+
+    /**
+     * SSL certificate verification behavior of a request
+     * @see http://docs.guzzlephp.org/en/stable/request-options.html#verify
+     * @var bool
+     */
+    private $verify                                 = true;
+
+    /**
+     * Debug requests if enabled
+     * @see https://guzzle.readthedocs.io/en/latest/request-options.html#debug
+     * @var bool
+     */
+    private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
     /**
      * Debug level for API requests
      * @var int
      */
     private $debugLevel                             = self::DEFAULT_DEBUG_LEVEL;
-
-    /**
-     * Debug requests if enabled
-     * @var bool
-     */
-    private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
     /**
      * UserAgent send with requests
@@ -241,19 +262,32 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @param int $debugLevel
+     * @param null|string|array $proxy
      */
-    public function setDebugLevel(int $debugLevel = self::DEFAULT_DEBUG_LEVEL){
-        $this->debugLevel = $debugLevel;
+    public function setProxy($proxy){
+        $this->proxy = $proxy;
+    }
+
+    /**
+     * @param bool $verify
+     */
+    public function setVerify(bool $verify){
+        $this->verify = $verify;
     }
 
     /**
      * debug requests
-     * https://guzzle.readthedocs.io/en/latest/request-options.html#debug
      * @param bool $debugRequests
      */
     public function setDebugRequests(bool $debugRequests = self::DEFAULT_DEBUG_REQUESTS){
         $this->debugRequests  = $debugRequests;
+    }
+
+    /**
+     * @param int $debugLevel
+     */
+    public function setDebugLevel(int $debugLevel = self::DEFAULT_DEBUG_LEVEL){
+        $this->debugLevel = $debugLevel;
     }
 
     /**
@@ -307,10 +341,17 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @return int
+     * @return array|string|null
      */
-    public function getDebugLevel() : int {
-        return $this->debugLevel;
+    public function getProxy(){
+        return $this->proxy;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getVerify(): bool {
+        return $this->verify;
     }
 
     /**
@@ -318,6 +359,13 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function getDebugRequests() : bool {
         return $this->debugRequests;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDebugLevel() : int {
+        return $this->debugLevel;
     }
 
     /**
@@ -398,6 +446,8 @@ abstract class Api extends \Prefab implements ApiInterface {
             'timeout'           => $this->getTimeout(),
             'connect_timeout'   => $this->getConnectTimeout(),
             'read_timeout'      => $this->getReadTimeout(),
+            'proxy'             => $this->getProxy(),
+            'verify'            => $this->getVerify(),
             'debug'             => $this->getDebugRequests(),
             'headers'           => [
                 'User-Agent'    => $this->getUserAgent()

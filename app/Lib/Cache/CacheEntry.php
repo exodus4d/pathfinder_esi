@@ -236,7 +236,7 @@ class CacheEntry {
             $ttl = $this->staleAt->getTimestamp() - time();
         }
         // Don't return 0, it's reserved for infinite TTL
-        return $ttl !== 0 ? (int)$ttl : -1;
+        return $ttl !== 0 ? $ttl : -1;
     }
 
     /**

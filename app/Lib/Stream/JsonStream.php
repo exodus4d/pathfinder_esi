@@ -45,11 +45,11 @@ class JsonStream implements StreamInterface {
      */
     public function __toString(){
         try {
-            if ($this->isSeekable()) {
+            if($this->isSeekable()){
                 $this->seek(0);
             }
             return $this->traitGetContents();
-        } catch (\Exception $e) {
+        }catch (\Exception $e){
             // Really, PHP? https://bugs.php.net/bug.php?id=53648
             trigger_error('StreamDecorator::__toString exception: '
                 . (string) $e, E_USER_ERROR);

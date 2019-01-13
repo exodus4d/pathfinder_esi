@@ -203,55 +203,53 @@ class GuzzleLogMiddleware {
      * @param ResponseInterface|null $response
      * @param \Exception|null $exception
      */
-    protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null){
-        if($options['log_enabled']){
-            $action = $options['log_file'];
-            $level = 'info';
-            $tag = 'information';
-            $logData = [];
-            $logRequestData = false;
+    protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null) : void {
+        $action = $options['log_file'];
+        $level = 'info';
+        $tag = 'information';
+        $logData = [];
+        $logRequestData = false;
 
-            if(is_null($response)){
-                // no response -> ConnectException or RequestException
-                if($options['log_error']){
-                    if(!empty($reasonData = $this->logReason($exception))){
-                        $logData['reason'] = $reasonData;
-                        $logRequestData = true;
-                        $level = 'critical';
-                        $tag = 'danger';
-                    }
-                }
-            }else{
-                $statusCode = $response->getStatusCode();
-                if($this->checkStatusCode($options, $statusCode)){
-                    $logData['response'] = $this->logResponse($response);
+        if(is_null($response)){
+            // no response -> ConnectException or RequestException
+            if($options['log_error']){
+                if(!empty($reasonData = $this->logReason($exception))){
+                    $logData['reason'] = $reasonData;
                     $logRequestData = true;
-
-                    if($this->is2xx($statusCode)){
-                        $level = 'info';
-                        $tag = 'success';
-                    }elseif($this->is4xx($statusCode)){
-                        $level = 'error';
-                        $tag = 'warning';
-                    }elseif($this->is5xx($statusCode)){
-                        $level = 'critical';
-                        $tag = 'warning';
-                    }
+                    $level = 'critical';
+                    $tag = 'danger';
                 }
             }
+        }else{
+            $statusCode = $response->getStatusCode();
+            if($this->checkStatusCode($options, $statusCode)){
+                $logData['response'] = $this->logResponse($response);
+                $logRequestData = true;
 
-            if($logRequestData){
-                $logData['request'] = $this->logRequest($request);
+                if($this->is2xx($statusCode)){
+                    $level = 'info';
+                    $tag = 'success';
+                }elseif($this->is4xx($statusCode)){
+                    $level = 'error';
+                    $tag = 'warning';
+                }elseif($this->is5xx($statusCode)){
+                    $level = 'critical';
+                    $tag = 'warning';
+                }
             }
+        }
 
-            // log stats in case other logData should be logged
-            if(!is_null($this->stats) && !empty($logData)){
-                $logData['stats'] = $this->logStats($this->stats);
-            }
+        if($logRequestData){
+            $logData['request'] = $this->logRequest($request);
+        }
 
-            if(!empty($logData) && is_callable($log = $options['log_callback'])){
-                $log($action, $level, $this->getLogMessage($options['log_format'], $logData), $logData, $tag);
-            }
+        // log stats in case other logData should be logged
+        if(!is_null($this->stats) && !empty($logData)){
+            $logData['stats'] = $this->logStats($this->stats);
+        }
+
+        if(!empty($logData) && is_callable($log = $options['log_callback'])){
+            $log($action, $level, $this->getLogMessage($options['log_format'], $logData), $logData, $tag);
         }
     }
 

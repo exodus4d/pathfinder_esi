@@ -21,9 +21,13 @@ interface ApiInterface {
 
     public function setReadTimeout(float $readTimeout);
 
-    public function setDebugLevel(int $debugLevel);
+    public function setProxy($proxy);
+
+    public function setVerify(bool $verify);
 
     public function setDebugRequests(bool $debugRequests);
+
+    public function setDebugLevel(int $debugLevel);
 
     public function setUserAgent(string $userAgent);
 
@@ -39,9 +43,13 @@ interface ApiInterface {
 
     public function getReadTimeout() : float;
 
-    public function getDebugLevel() : int;
+    public function getProxy();
+
+    public function getVerify() : bool;
 
     public function getDebugRequests() : bool;
+
+    public function getDebugLevel() : int;
 
     public function getUserAgent() : string;
 
