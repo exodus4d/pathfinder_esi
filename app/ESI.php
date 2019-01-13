@@ -71,11 +71,11 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCharacterAffiliationData(array $characterIds) : array {
-        $url = $this->getEndpointURL(['characters', 'affiliation', 'POST']);
+        $uri = $this->getEndpointURI(['characters', 'affiliation', 'POST']);
         $characterAffiliationData = [];
 
         $requestOptions = $this->getRequestOptions('', $characterIds);
-        $response = $this->request('POST', $url, $requestOptions);
+        $response = $this->request('POST', $uri, $requestOptions);
 
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
@@ -751,7 +751,7 @@ class ESI extends Ccp implements EsiInterface {
     /**
      * @return array
      */
-    public function getNpcCorporations() : array {
+    protected function getNpcCorporations() : array {
         $uri = $this->getEndpointURI(['corporations', 'npccorps', 'GET']);
         $npcCorporations = [];
 
@@ -784,6 +784,12 @@ class ESI extends Ccp implements EsiInterface {
         return $urlParams;
     }
 
+    /**
+     * get/build endpoint URI
+     * @param array $path
+     * @param array $placeholders
+     * @return string
+     */
     protected function getEndpointURI(array $path = [], array $placeholders = []) : string {
         $uri = Config\ESIConf::getEndpoint($path, $placeholders);
 
