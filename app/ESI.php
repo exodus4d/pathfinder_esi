@@ -756,11 +756,10 @@ class ESI extends Ccp implements EsiInterface {
         $npcCorporations = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions);
-var_dump('ggggg');
-var_dump($response->getContents());
-        if( !empty($response) ){
-            $npcCorporations = (array)$response;
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if( !$response->error && is_array($response) ){
+            $npcCorporations = $response;
         }
 
         return $npcCorporations;
