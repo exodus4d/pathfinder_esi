@@ -570,18 +570,6 @@ abstract class Api extends \Prefab implements ApiInterface {
 
     /**
      * get error response as return object for failed requests
-     * @param string $errorMessage
-     * @return \stdClass
-     */
-    /*
-    protected function getErrorResponse(string $errorMessage) : \stdClass {
-        $body = (object)[];
-        $body->error = $errorMessage;
-        return $body;
-    }
-*/
-    /**
-     * get error response as return object for failed requests
      * -> this class should handle any Exception thrown within Guzzle Context
      * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
      * @param \Exception $e
@@ -595,11 +583,11 @@ abstract class Api extends \Prefab implements ApiInterface {
             $message[] = $e->getMessage();
         }elseif($e instanceof ClientException){
             // 4xx response (e.g. 404 URL not found)
-            $message[] = $e->getCode();
+            $message[] = 'HTTP ' . $e->getCode();
             $message[] = $e->getMessage();
         }elseif($e instanceof ServerException){
             // 5xx response
-            $message[] = $e->getCode();
+            $message[] = 'HTTP ' . $e->getCode();
             $message[] = $e->getMessage();
         }elseif($e instanceof RequestException){
             // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
@@ -607,7 +595,7 @@ abstract class Api extends \Prefab implements ApiInterface {
         }
 
         $body = (object)[];
-        $body->error = implode(' : ', $message);
+        $body->error = implode(', ', $message);
         return $body;
     }
 
@@ -619,7 +607,6 @@ abstract class Api extends \Prefab implements ApiInterface {
         //var_dump($additionalOptions);
 
         $body = null;
-
 
         try{
             // get new request
@@ -638,7 +625,8 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
             var_dump($response->getHeader('X-Guzzle-Cache'));
-            var_dump($response->getHeaders());
+            //var_dump($response->getHeaders());
+            var_dump($body);
 
         }catch(TransferException $e){
             // Base Exception of Guzzle errors
@@ -652,49 +640,8 @@ abstract class Api extends \Prefab implements ApiInterface {
 
             $body = $this->getErrorResponse($e);
         }
-/*
-        }catch(ConnectException $e){
-            var_dump('ConnectException --------');
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-        }catch(ClientException $e){
-            var_dump('ClientException --------');
-            // 4xx response (e.g. 404 URL not found)
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-            $body = $this->getErrorResponse($e->getMessage());
-        }catch(ServerException $e){
-            var_dump('ServerException --------');
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-        }catch(BadResponseException $e){
-            var_dump('BadResponseException --------');
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-        }catch(TooManyRedirectsException $e){
-            var_dump('TooManyRedirectsException --------');
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-        }catch(RequestException $e){
-            var_dump('RequestException --------');
-            // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-            $body = $this->getErrorResponse($e->getMessage());
-            // $e->getHandlerContext(); // cURL errors
-            var_dump($e->getHandlerContext());
-        }catch(TransferException $e){
-            var_dump('TransferException --------');
-            // hard fail! Base Exception of "Guzzle" errors
-            // -> All Errors should already be catch above
-            var_dump($e->getCode() . ': ' . $e->getMessage());
-            $body = $this->getErrorResponse($e->getMessage());
-        }catch(\Exception $e){
-            var_dump('Exception --------');
-            // hard fail! Any other type of error
-            var_dump($e->getCode() . ': ' . $e->getMessage());
 
-
-            $body = $this->getErrorResponse($e);
-        }
-*/
-        var_dump($body);
-
-
+        return $body;
     }
 
     /**
