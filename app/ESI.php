@@ -57,9 +57,9 @@ class ESI extends Ccp implements EsiInterface {
         $serverStatus = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
         }
 
@@ -75,7 +75,7 @@ class ESI extends Ccp implements EsiInterface {
         $characterAffiliationData = [];
 
         $requestOptions = $this->getRequestOptions('', $characterIds);
-        $response = $this->request('POST', $uri, $requestOptions);
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         if( !empty($response) ){
             foreach((array)$response as $affiliationData){
