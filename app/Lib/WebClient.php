@@ -9,8 +9,13 @@
 
 namespace Exodus4D\ESI\Lib;
 
+
 use Exodus4D\ESI\Api;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -64,8 +69,6 @@ class WebClient {
 
         // init client
         $this->client = new Client($config);
-
-
     }
 
     /**
@@ -88,6 +91,48 @@ class WebClient {
      */
     public function newResponse(int $status = 200, array $headers = [], $body = null, string $version = '1.1', ?string $reason = null) : Response {
         return new Response($status, $headers, $body, $version, $reason);
+    }
+
+    /**
+     * get error response with error message in body
+     * -> wraps a GuzzleException (or any other Exception) into an error response
+     * -> this class should handle any Exception thrown within Guzzle Context
+     * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
+     * @param \Exception $e
+     * @return Response
+     */
+    public function newErrorResponse(\Exception $e) : Response {
+        $message = [get_class($e)];
+
+        if($e instanceof ConnectException){
+            // hard fail! e.g. cURL connect error
+            $message[] = $e->getMessage();
+        }elseif($e instanceof ClientException){
+            // 4xx response (e.g. 404 URL not found)
+            $message[] = 'HTTP ' . $e->getCode();
+            $message[] = $e->getMessage();
+        }elseif($e instanceof ServerException){
+            // 5xx response
+            $message[] = 'HTTP ' . $e->getCode();
+            $message[] = $e->getMessage();
+        }elseif($e instanceof RequestException){
+            // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
+            $message[] = $e->getMessage();
+        }elseif($e instanceof \Exception){
+            // any other Exception type
+            $message[] = $e->getMessage();
+        }
+
+        $body = (object)[];
+        $body->error = implode(', ', $message);
+
+        $bodyStream = \GuzzleHttp\Psr7\stream_for(\GuzzleHttp\json_encode($body));
+
+        $response = $this->newResponse();
+        $response = $response->withStatus(200, 'Error Response');
+        $response = $response->withBody($bodyStream);
+
+        return $response;
     }
 
     public function __call(string $name, array $arguments = []){

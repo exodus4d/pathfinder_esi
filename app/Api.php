@@ -18,10 +18,6 @@ use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
@@ -567,48 +563,6 @@ abstract class Api extends \Prefab implements ApiInterface {
         return $merged;
     }
 
-    /**
-     * get error response with error message in body
-     * -> wraps a GuzzleException (or any other Exception) into an error response
-     * -> this class should handle any Exception thrown within Guzzle Context
-     * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
-     * @param \Exception $e
-     * @return Response
-     */
-    protected function getErrorResponse(\Exception $e) : Response {
-        $message = [get_class($e)];
-
-        if($e instanceof ConnectException){
-            // hard fail! e.g. cURL connect error
-            $message[] = $e->getMessage();
-        }elseif($e instanceof ClientException){
-            // 4xx response (e.g. 404 URL not found)
-            $message[] = 'HTTP ' . $e->getCode();
-            $message[] = $e->getMessage();
-        }elseif($e instanceof ServerException){
-            // 5xx response
-            $message[] = 'HTTP ' . $e->getCode();
-            $message[] = $e->getMessage();
-        }elseif($e instanceof RequestException){
-            // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
-            $message[] = $e->getMessage();
-        }elseif($e instanceof \Exception){
-            // any other Exception type
-            $message[] = $e->getMessage();
-        }
-
-        $body = (object)[];
-        $body->error = implode(', ', $message);
-
-        $bodyStream = \GuzzleHttp\Psr7\stream_for(\GuzzleHttp\json_encode($body));
-
-        $response = $this->getClient()->newResponse();
-        $response = $response->withStatus(200, 'Error Response');
-        $response = $response->withBody($bodyStream);
-
-        return $response;
-    }
-
     protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
@@ -628,34 +582,23 @@ abstract class Api extends \Prefab implements ApiInterface {
 
             $body = $response->getBody();
 
-            //$body = $bodyStream->getContents();
 
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
             var_dump($response->getHeader('X-Guzzle-Cache'));
-            //var_dump($response->getHeaders());
-            //var_dump($body);
-
         }catch(TransferException $e){
             // Base Exception of Guzzle errors
             // -> this includes "expected" errors like 4xx responses (ClientException)
             //    and "unexpected" errors like cURL fails (ConnectException)...
             // -> error is already logged by LogMiddleware
-            $res = $this->getErrorResponse($e);
-            $body = $res->getBody();
-
-            var_dump('eeeeeeee');
-            var_dump($res->getStatusCode());
-            var_dump($res->getReasonPhrase());
-            var_dump($body);
-            var_dump($body->getContents());
+            $body = $this->getClient()->newErrorResponse($e)->getBody();
         }catch(\Exception $e){
             // Hard fail! Any other type of error
             // -> e.g. RuntimeException,...
             // TODO trigger Error...
 
-            $body = $this->getErrorResponse($e)->getBody();
+            $body = $this->getClient()->newErrorResponse($e)->getBody();
         }
 
         return $body;
