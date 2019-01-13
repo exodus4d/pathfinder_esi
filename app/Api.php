@@ -10,25 +10,24 @@ namespace Exodus4D\ESI;
 
 
 use Cache\Adapter\Redis\RedisCachePool;
+use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\Psr6CacheStorage;
 use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
 use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
-use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
-use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
-use GuzzleHttp\Exception\TooManyRedirectsException;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 use GuzzleRetry\GuzzleRetryMiddleware;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Message\StreamInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
 
@@ -573,9 +572,9 @@ abstract class Api extends \Prefab implements ApiInterface {
      * -> this class should handle any Exception thrown within Guzzle Context
      * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
      * @param \Exception $e
-     * @return \stdClass
+     * @return StreamInterface
      */
-    protected function getErrorResponse(\Exception $e) : \stdClass {
+    protected function getErrorResponse(\Exception $e) : StreamInterface {
         $message = [get_class($e)];
 
         if($e instanceof ConnectException){
@@ -596,10 +595,11 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         $body = (object)[];
         $body->error = implode(', ', $message);
-        return $body;
+
+        return \GuzzleHttp\Psr7\stream_for($body);
     }
 
-    protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []){
+    protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
         var_dump('$uri : ' . $uri);
@@ -617,16 +617,16 @@ abstract class Api extends \Prefab implements ApiInterface {
              */
             $response = $this->getClient()->send($request, $options);
 
-            $bodyStream = $response->getBody();
+            $body = $response->getBody();
 
-            $body = $bodyStream->getContents();
+            //$body = $bodyStream->getContents();
 
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
             var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
             var_dump($response->getHeader('X-Guzzle-Cache'));
             //var_dump($response->getHeaders());
-            var_dump($body);
+            //var_dump($body);
 
         }catch(TransferException $e){
             // Base Exception of Guzzle errors
