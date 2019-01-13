@@ -592,13 +592,13 @@ abstract class Api extends \Prefab implements ApiInterface {
             // -> this includes "expected" errors like 4xx responses (ClientException)
             //    and "unexpected" errors like cURL fails (ConnectException)...
             // -> error is already logged by LogMiddleware
-            $body = $this->getClient()->newErrorResponse($e)->getBody();
+            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
         }catch(\Exception $e){
             // Hard fail! Any other type of error
             // -> e.g. RuntimeException,...
             // TODO trigger Error...
 
-            $body = $this->getClient()->newErrorResponse($e)->getBody();
+            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
         }
 
         return $body;
