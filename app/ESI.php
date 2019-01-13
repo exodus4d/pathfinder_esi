@@ -752,11 +752,11 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getNpcCorporations() : array {
-        $url = $this->getEndpointURL(['corporations', 'npccorps', 'GET']);
+        $uri = $this->getEndpointURI(['corporations', 'npccorps', 'GET']);
         $npcCorporations = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions);
 var_dump('ggggg');
 var_dump($response->getContents());
         if( !empty($response) ){
@@ -804,6 +804,7 @@ var_dump($response->getContents());
      * @param array $params
      * @return string
      */
+    /*
     protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []) : string {
         $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
 
@@ -822,7 +823,7 @@ var_dump($response->getContents());
         }
 
         return $url;
-    }
+    }*/
 
     /**
      * get "default" request options for ESI endpoints
