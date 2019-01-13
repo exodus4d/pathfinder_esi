@@ -11,6 +11,7 @@ namespace Exodus4D\ESI\Lib;
 
 
 use Exodus4D\ESI\Api;
+use Exodus4D\ESI\Lib\Stream\JsonStream;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
@@ -99,9 +100,10 @@ class WebClient {
      * -> this class should handle any Exception thrown within Guzzle Context
      * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
      * @param \Exception $e
+     * @param bool $json
      * @return Response
      */
-    public function newErrorResponse(\Exception $e) : Response {
+    public function newErrorResponse(\Exception $e, bool $json = true) : Response {
         $message = [get_class($e)];
 
         if($e instanceof ConnectException){
@@ -127,6 +129,11 @@ class WebClient {
         $body->error = implode(', ', $message);
 
         $bodyStream = \GuzzleHttp\Psr7\stream_for(\GuzzleHttp\json_encode($body));
+
+        if($json){
+            // use JsonStream for as body
+            $bodyStream = new JsonStream($bodyStream);
+        }
 
         $response = $this->newResponse();
         $response = $response->withStatus(200, 'Error Response');
