@@ -15,6 +15,7 @@ use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
 class WebClient {
 
@@ -68,13 +69,25 @@ class WebClient {
     }
 
     /**
-     * get new Request object
      * @param string $method
      * @param string $uri
      * @return Request
      */
     public function newRequest(string $method, string $uri) : Request {
         return new Request($method, $uri);
+    }
+
+    /**
+     * get new Response object
+     * @param int $status
+     * @param array $headers
+     * @param null $body
+     * @param string $version
+     * @param string|null $reason
+     * @return Response
+     */
+    public function newResponse(int $status = 200, array $headers = [], $body = null, string $version = '1.1', ?string $reason = null) : Response {
+        return new Response($status, $headers, $body, $version, $reason);
     }
 
     public function __call(string $name, array $arguments = []){

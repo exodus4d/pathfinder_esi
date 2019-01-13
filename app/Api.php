@@ -568,13 +568,14 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * get error response as return object for failed requests
+     * get error response with error message in body
+     * -> wraps a GuzzleException (or any other Exception) into an error response
      * -> this class should handle any Exception thrown within Guzzle Context
      * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
      * @param \Exception $e
-     * @return StreamInterface
+     * @return Response
      */
-    protected function getErrorResponse(\Exception $e) : StreamInterface {
+    protected function getErrorResponse(\Exception $e) : Response {
         $message = [get_class($e)];
 
         if($e instanceof ConnectException){
@@ -591,19 +592,27 @@ abstract class Api extends \Prefab implements ApiInterface {
         }elseif($e instanceof RequestException){
             // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
             $message[] = $e->getMessage();
+        }elseif($e instanceof \Exception){
+            // any other Exception type
+            $message[] = $e->getMessage();
         }
 
         $body = (object)[];
         $body->error = implode(', ', $message);
 
-        return \GuzzleHttp\Psr7\stream_for($body);
+        $bodyStream = \GuzzleHttp\Psr7\stream_for(\GuzzleHttp\json_encode($body));
+
+        $response = $this->getClient()->newResponse();
+        $response = $response->withStatus(200, 'Error Response');
+        $response = $response->withBody($bodyStream);
+
+        return $response;
     }
 
     protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
         var_dump('start ---------------------------------');
         var_dump('$method : ' . $method);
         var_dump('$uri : ' . $uri);
-        //var_dump($options);
         //var_dump($additionalOptions);
 
         $body = null;
@@ -632,13 +641,21 @@ abstract class Api extends \Prefab implements ApiInterface {
             // Base Exception of Guzzle errors
             // -> this includes "expected" errors like 4xx responses (ClientException)
             //    and "unexpected" errors like cURL fails (ConnectException)...
-            $body = $this->getErrorResponse($e);
+            // -> error is already logged by LogMiddleware
+            $res = $this->getErrorResponse($e);
+            $body = $res->getBody();
+
+            var_dump('eeeeeeee');
+            var_dump($res->getStatusCode());
+            var_dump($res->getReasonPhrase());
+            var_dump($body);
+            var_dump($body->getContents());
         }catch(\Exception $e){
             // Hard fail! Any other type of error
             // -> e.g. RuntimeException,...
             // TODO trigger Error...
 
-            $body = $this->getErrorResponse($e);
+            $body = $this->getErrorResponse($e)->getBody();
         }
 
         return $body;
