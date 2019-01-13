@@ -91,7 +91,9 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     const DEFAULT_RETRY_EXPOSE_RETRY_HEADER         = false;
 
-    // API class properties ===========================================================================================
+    // ================================================================================================================
+    // API class properties
+    // ================================================================================================================
 
     /**
      * WebClient instance
@@ -571,9 +573,41 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @param string $errorMessage
      * @return \stdClass
      */
+    /*
     protected function getErrorResponse(string $errorMessage) : \stdClass {
         $body = (object)[];
         $body->error = $errorMessage;
+        return $body;
+    }
+*/
+    /**
+     * get error response as return object for failed requests
+     * -> this class should handle any Exception thrown within Guzzle Context
+     * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
+     * @param \Exception $e
+     * @return \stdClass
+     */
+    protected function getErrorResponse(\Exception $e) : \stdClass {
+        $message = [get_class($e)];
+
+        if($e instanceof ConnectException){
+            // hard fail! e.g. cURL connect error
+            $message[] = $e->getMessage();
+        }elseif($e instanceof ClientException){
+            // 4xx response (e.g. 404 URL not found)
+            $message[] = $e->getCode();
+            $message[] = $e->getMessage();
+        }elseif($e instanceof ServerException){
+            // 5xx response
+            $message[] = $e->getCode();
+            $message[] = $e->getMessage();
+        }elseif($e instanceof RequestException){
+            // hard fail! e.g. cURL errors (connection timeout, DNS errors, etc.)
+            $message[] = $e->getMessage();
+        }
+
+        $body = (object)[];
+        $body->error = implode(' : ', $message);
         return $body;
     }
 
@@ -606,7 +640,19 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump($response->getHeader('X-Guzzle-Cache'));
             var_dump($response->getHeaders());
 
+        }catch(TransferException $e){
+            // Base Exception of Guzzle errors
+            // -> this includes "expected" errors like 4xx responses (ClientException)
+            //    and "unexpected" errors like cURL fails (ConnectException)...
+            $body = $this->getErrorResponse($e);
+        }catch(\Exception $e){
+            // Hard fail! Any other type of error
+            // -> e.g. RuntimeException,...
+            // TODO trigger Error...
 
+            $body = $this->getErrorResponse($e);
+        }
+/*
         }catch(ConnectException $e){
             var_dump('ConnectException --------');
             var_dump($e->getCode() . ': ' . $e->getMessage());
@@ -630,6 +676,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump($e->getCode() . ': ' . $e->getMessage());
             $body = $this->getErrorResponse($e->getMessage());
             // $e->getHandlerContext(); // cURL errors
+            var_dump($e->getHandlerContext());
         }catch(TransferException $e){
             var_dump('TransferException --------');
             // hard fail! Base Exception of "Guzzle" errors
@@ -640,8 +687,11 @@ abstract class Api extends \Prefab implements ApiInterface {
             var_dump('Exception --------');
             // hard fail! Any other type of error
             var_dump($e->getCode() . ': ' . $e->getMessage());
-        }
 
+
+            $body = $this->getErrorResponse($e);
+        }
+*/
         var_dump($body);
 
 

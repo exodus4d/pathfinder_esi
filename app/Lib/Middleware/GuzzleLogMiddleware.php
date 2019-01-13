@@ -186,7 +186,7 @@ class GuzzleLogMiddleware {
             if($options['log_enabled']){
                 $response = null;
                 if(($reason instanceof RequestException) && $reason->hasResponse()){
-                        $response = $reason->getResponse();
+                    $response = $reason->getResponse();
                 }
 
                 $this->log($options, $request, $response, $reason);
@@ -204,37 +204,43 @@ class GuzzleLogMiddleware {
      * @param \Exception|null $exception
      */
     protected function log(array $options, RequestInterface $request, ?ResponseInterface $response, ?\Exception $exception = null) : void {
+        $logData = [];
+
         $action = $options['log_file'];
         $level = 'info';
         $tag = 'information';
-        $logData = [];
+
+        $logError = $options['log_error'] && $exception instanceof \Exception;
         $logRequestData = false;
 
-        if(is_null($response)){
-            // no response -> ConnectException or RequestException
-            if($options['log_error']){
-                if(!empty($reasonData = $this->logReason($exception))){
-                    $logData['reason'] = $reasonData;
-                    $logRequestData = true;
-                    $level = 'critical';
-                    $tag = 'danger';
-                }
-            }
-        }else{
+        if($logError){
+            // Either Guzzle Exception -> ConnectException or RequestException
+            // of any other Exception
+            $reasonData = $this->logReason($exception);
+            $logData['reason'] = $reasonData;
+            $logRequestData = true;
+            $level = 'critical';
+            $tag = 'danger';
+        }
+
+        if(!is_null($response)){
             $statusCode = $response->getStatusCode();
-            if($this->checkStatusCode($options, $statusCode)){
+            if($logError || $this->checkStatusCode($options, $statusCode)){
                 $logData['response'] = $this->logResponse($response);
                 $logRequestData = true;
 
-                if($this->is2xx($statusCode)){
-                    $level = 'info';
-                    $tag = 'success';
-                }elseif($this->is4xx($statusCode)){
-                    $level = 'error';
-                    $tag = 'warning';
-                }elseif($this->is5xx($statusCode)){
-                    $level = 'critical';
-                    $tag = 'warning';
+                // if Error -> do not change log $level and $tag
+                if(!$logError){
+                    if($this->is2xx($statusCode)){
+                        $level = 'info';
+                        $tag = 'success';
+                    }elseif($this->is4xx($statusCode)){
+                        $level = 'error';
+                        $tag = 'warning';
+                    }elseif($this->is5xx($statusCode)){
+                        $level = 'critical';
+                        $tag = 'warning';
+                    }
                 }
             }
         }
@@ -285,18 +291,24 @@ class GuzzleLogMiddleware {
 
     /**
      * log reason -> rejected promise
-     * ConnectException or parent of type RequestException
+     * ConnectException or parent of type RequestException -> get error from HandlerContext
+     * any other Exception (no idea when this can happen) -> get error from Exception
      * @param \Exception|null $exception
      * @return array
      */
     protected function logReason(?\Exception $exception) : array {
-        $data = [];
         if($exception instanceof RequestException){
             $handlerContext = $exception->getHandlerContext();
-            $data['errno'] = $handlerContext['errno'];
-            $data['error'] = $handlerContext['error'];
+            return [
+                'errno'                 => $handlerContext['errno'],
+                'error'                 => $handlerContext['error']
+            ];
+        }else{
+            return [
+                'errno'                 => 'NULL',
+                'error'                 => $exception->getMessage()
+            ];
         }
-        return $data;
     }
 
     /**
