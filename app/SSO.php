@@ -19,20 +19,14 @@ class SSO extends Ccp implements SsoInterface {
      * @return array
      */
     public function getVerifyCharacterData(string $accessToken) : array {
-        $url = $this->getVerifyUserEndpointURL();
-        $urlParts = parse_url($url);
-
+        $uri = $this->getVerifyUserEndpointURI();
         $characterData = [];
 
         $requestOptions = [
-            'header' => [
-                'Host' => $urlParts['host']
-            ]
+            'headers' => $this->getAuthHeader($accessToken, 'Bearer')
         ];
 
-        $requestOptions['header'] += $this->getAuthHeader($accessToken, 'Bearer');
-
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions);
 
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Sso\Character($response))->getData();
@@ -44,44 +38,27 @@ class SSO extends Ccp implements SsoInterface {
     /**
      * get a valid "access_token" for oAuth 2.0 verification
      * -> verify $authCode and get NEW "access_token"
-     *      $urlParams['grant_type]     = 'authorization_code'
-     *      $urlParams['code]           = 'XXXX'
+     *      $requestParams['grant_type]     = 'authorization_code'
+     *      $requestParams['code]           = 'XXXX'
      * -> request NEW "access_token" if isset:
-     *      $urlParams['grant_type]     = 'refresh_token'
-     *      $urlParams['refresh_token]  = 'XXXX'
+     *      $requestParams['grant_type]     = 'refresh_token'
+     *      $requestParams['refresh_token]  = 'XXXX'
      * @param array $credentials
-     * @param array $urlParams
+     * @param array $requestParams
      * @param array $additionalOptions
      * @return array
      */
-    public function getAccessData(array $credentials, array $urlParams = [], array $additionalOptions = []) : array {
+    public function getAccessData(array $credentials, array $requestParams = [], array $additionalOptions = []) : array {
         $uri = $this->getVerifyAuthorizationCodeEndpointURI();
-        //$urlParts = parse_url($url);
-
         $accessData = [];
 
         $requestOptions = [
+            'json' => $requestParams,
             'auth' => $credentials
         ];
 
         $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
-        var_dump('resp:');
-        var_dump($response);
-        die();
 
-        /*
-        $requestOptions = [
-            'header' => [
-                'Content-Type' => 'application/x-www-form-urlencoded',
-                'Host' => $urlParts['host']
-            ],
-            'content' => $urlParams
-        ];
-
-        $requestOptions['header'] += $this->getAuthHeader($credentials);
-
-        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions);
-*/
         if( !empty($response) ){
             $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
         }
@@ -89,10 +66,16 @@ class SSO extends Ccp implements SsoInterface {
         return $accessData;
     }
 
-    protected function getVerifyUserEndpointURL() : string {
+    /**
+     * @return string
+     */
+    protected function getVerifyUserEndpointURI() : string {
         return '/oauth/verify';
     }
 
+    /**
+     * @return string
+     */
     protected function getVerifyAuthorizationCodeEndpointURI() : string {
         return '/oauth/token';
     }
