@@ -49,17 +49,27 @@ class SSO extends Ccp implements SsoInterface {
      * -> request NEW "access_token" if isset:
      *      $urlParams['grant_type]     = 'refresh_token'
      *      $urlParams['refresh_token]  = 'XXXX'
-     * @param string $credentials
+     * @param array $credentials
      * @param array $urlParams
      * @param array $additionalOptions
      * @return array
      */
-    public function getAccessData(string $credentials, array $urlParams = [], array $additionalOptions = []) : array {
-        $url = $this->getVerifyAuthorizationCodeEndpointURL();
-        $urlParts = parse_url($url);
+    public function getAccessData(array $credentials, array $urlParams = [], array $additionalOptions = []) : array {
+        $uri = $this->getVerifyAuthorizationCodeEndpointURI();
+        //$urlParts = parse_url($url);
 
         $accessData = [];
 
+        $requestOptions = [
+            'auth' => $credentials
+        ];
+
+        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
+        var_dump('resp:');
+        var_dump($response);
+        die();
+
+        /*
         $requestOptions = [
             'header' => [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -70,8 +80,8 @@ class SSO extends Ccp implements SsoInterface {
 
         $requestOptions['header'] += $this->getAuthHeader($credentials);
 
-        $response = $this->request('POST', $url, $requestOptions, $additionalOptions);
-
+        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions);
+*/
         if( !empty($response) ){
             $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
         }
@@ -80,10 +90,10 @@ class SSO extends Ccp implements SsoInterface {
     }
 
     protected function getVerifyUserEndpointURL() : string {
-        return $this->getUrl() . '/oauth/verify';
+        return '/oauth/verify';
     }
 
-    protected function getVerifyAuthorizationCodeEndpointURL() : string {
-        return $this->getUrl() . '/oauth/token';
+    protected function getVerifyAuthorizationCodeEndpointURI() : string {
+        return '/oauth/token';
     }
 }
