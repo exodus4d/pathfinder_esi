@@ -156,7 +156,6 @@ class GuzzleCacheMiddleware {
      * @throws \Exception
      */
     public function __invoke(RequestInterface $request, array $options){
-        var_dump('__invoke() Cache');
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 
@@ -264,8 +263,6 @@ class GuzzleCacheMiddleware {
      */
     protected function onFulfilled(RequestInterface $request, ?CacheEntry $cacheEntry, array $options) : \Closure {
         return function (ResponseInterface $response) use ($request, $cacheEntry, $options) {
-            var_dump('onFullFilled() Cache ');
-
             // Check if error and looking for a staled content --------------------------------------------------------
             if($response->getStatusCode() >= 500){
                 $responseStale = static::getStaleResponse($cacheEntry, $options);
@@ -309,8 +306,7 @@ class GuzzleCacheMiddleware {
      * @return \Closure
      */
     protected function onRejected(?CacheEntry $cacheEntry, array $options) : \Closure {
-        return function ($reason) use ($cacheEntry, $options) {
-            var_dump('onRejected() Cache');
+        return function ($reason) use ($cacheEntry, $options){
 
             if($reason instanceof TransferException){
                 $response = static::getStaleResponse($cacheEntry, $options);

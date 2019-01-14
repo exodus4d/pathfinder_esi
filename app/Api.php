@@ -564,11 +564,6 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
-        var_dump('start ---------------------------------');
-        var_dump('$method : ' . $method);
-        var_dump('$uri : ' . $uri);
-        //var_dump($additionalOptions);
-
         $body = null;
 
         try{
@@ -579,14 +574,11 @@ abstract class Api extends \Prefab implements ApiInterface {
              * @var $response Response
              */
             $response = $this->getClient()->send($request, $options);
-
             $body = $response->getBody();
-
-
+            /*
             var_dump('response: ----');
             var_dump('statuscode: ' . $response->getStatusCode());
-            var_dump('getReasonPhrase: ' . $response->getReasonPhrase());
-            var_dump($response->getHeader('X-Guzzle-Cache'));
+            var_dump($response->getHeader('X-Guzzle-Cache'));*/
         }catch(TransferException $e){
             // Base Exception of Guzzle errors
             // -> this includes "expected" errors like 4xx responses (ClientException)
@@ -603,56 +595,4 @@ abstract class Api extends \Prefab implements ApiInterface {
 
         return $body;
     }
-
-    /**
-     * @param string $method
-     * @param string $url
-     * @param array $options
-     * @param array $additionalOptions
-     * @return mixed|null
-     */
-    /*
-    protected function request(string $method, string $url, array $options = [], array $additionalOptions = []){
-        $method = strtoupper($method);
-
-        // default request options
-        $requestOptions = [
-            'timeout' => $this->getTimeout(),
-            'method' => $method,
-            'user_agent' => $this->getUserAgent()
-        ];
-
-        // extend/overwrite request options with custom options
-        $requestOptions = self::array_merge_recursive_distinct($requestOptions, $options);
-
-        // format content and set 'Content-Type' header
-        if( !empty($requestOptions['content']) ){
-            if(empty($contentType = $requestOptions['header']['Content-Type'])){
-                $contentType = 'application/json';
-                $requestOptions['header']['Content-Type'] = $contentType;
-            }
-
-            switch($contentType){
-                case 'application/x-www-form-urlencoded':
-                    $requestOptions['content'] =  http_build_query($requestOptions['content']);
-                    break;
-                case 'application/json':
-                default:
-                    $requestOptions['content'] =  json_encode($requestOptions['content'], JSON_UNESCAPED_SLASHES);
-            }
-        }else{
-            unset($requestOptions['content']);
-        }
-
-        // format Header array into plain array
-        if( !empty($requestOptions['header']) ){
-            $requestOptions['header'] = $this->formatHeaders($requestOptions['header']);
-        }
-
-        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
-
-        $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-
-        return $responseBody;
-    }*/
 }

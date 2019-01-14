@@ -66,8 +66,7 @@ class GuzzleJsonMiddleware {
      * @return \Closure
      */
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure{
-        return function (ResponseInterface $response) use ($request, $options) {
-            var_dump('onFullFilled() JSON ');
+        return function (ResponseInterface $response) use ($request, $options){
             // decode Json response body
             $jsonStream = new JsonStream($response->getBody());
             return $response->withBody($jsonStream);

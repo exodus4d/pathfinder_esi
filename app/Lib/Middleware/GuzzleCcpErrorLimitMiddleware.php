@@ -102,7 +102,6 @@ class GuzzleCcpErrorLimitMiddleware {
      */
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure{
         return function (ResponseInterface $response) use ($request, $options) {
-            var_dump('onFullFilled() LIMIT');
             $statusCode = $response->getStatusCode();
 
             // client or server error responses are relevant for error limits
