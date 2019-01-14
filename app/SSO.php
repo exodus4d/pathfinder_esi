@@ -26,7 +26,7 @@ class SSO extends Ccp implements SsoInterface {
             'headers' => $this->getAuthHeader($accessToken, 'Bearer')
         ];
 
-        $response = $this->request('GET', $uri, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if( !$response->error ){
             $characterData = (new namespace\Mapper\Sso\Character($response))->getData();
