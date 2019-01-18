@@ -540,7 +540,16 @@ abstract class Api extends \Prefab implements ApiInterface {
             'retry_on_timeout'          => $this->retryOnTimeout,
             'retry_on_status'           => $this->retryOnStatus,
             'expose_retry_header'       => $this->retryExposeRetryHeader,
-            'default_retry_multiplier'  => 0.5
+            'default_retry_multiplier'  => 0.5,
+            'on_retry_callback'         => function($attemptNumber, $delay, $request, $options, $response){
+                var_dump($request->getUri()->getPath());
+                var_dump($delay);
+                var_dump($response->getStatusCode());
+                var_dump( $attemptNumber);
+                var_dump($options);
+                $test= null;
+
+            }
         ];
     }
 

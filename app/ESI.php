@@ -224,12 +224,12 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if($response->error){
-            $rolesData['error'] = $response->error;
-        }elseif( !empty($response) ){
+        if( !$response->error ){
             foreach((array)$response as $characterRuleData){
                 $rolesData['roles'][(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
             }
+        }else{
+            $rolesData['error'] = $response->error;
         }
 
         return $rolesData;
