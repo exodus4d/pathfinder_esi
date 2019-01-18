@@ -852,7 +852,7 @@ class ESI extends Ccp implements EsiInterface {
         if(!empty($accessToken)){
             // send Authorization HTTP header
             // see: https://guzzle.readthedocs.io/en/latest/request-options.html#headers
-            $options['headers'] += $this->getAuthHeader($accessToken, 'Bearer');
+            $options['headers'] = $this->getAuthHeader($accessToken, 'Bearer');
         }
 
         if(!empty($content)){
