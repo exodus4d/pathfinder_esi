@@ -91,11 +91,11 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCharacterData(int $characterId) : array {
-        $url = $this->getEndpointURL(['characters', 'GET'], [$characterId]);
+        $uri = $this->getEndpointURI(['characters', 'GET'], [$characterId]);
         $characterData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if( !empty($response) ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
