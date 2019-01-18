@@ -97,7 +97,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $characterData = (new namespace\Mapper\Character($response))->getData();
             if( !empty($characterData) ){
                 $characterData['id'] = $characterId;
@@ -154,13 +154,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['characters', 'online', 'GET'], [$characterId]);
+        $uri = $this->getEndpointURI(['characters', 'online', 'GET'], [$characterId]);
         $onlineData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
         }
 
