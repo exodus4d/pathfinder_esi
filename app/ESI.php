@@ -638,11 +638,11 @@ class ESI extends Ccp implements EsiInterface {
             'avoid' => [',']
         ]);
 
-        $url = $this->getEndpointURL(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
+        $uri = $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId], $urlParams);
         $routeData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
         if($response->error){
             $routeData['error'] = $response->error;
