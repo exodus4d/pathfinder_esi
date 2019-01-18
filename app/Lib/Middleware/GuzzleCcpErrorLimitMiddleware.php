@@ -68,13 +68,13 @@ class GuzzleCcpErrorLimitMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'ccp_limit_set_cache_value'           => self::DEFAULT_SET_CACHE_VALUE,
-        'ccp_limit_get_cache_value'           => self::DEFAULT_GET_CACHE_VALUE,
-        'ccp_limit_log_callback'              => self::DEFAULT_LOG_CALLBACK,
-        'ccp_limit_log_file_critical'         => self::DEFAULT_LOG_FILE_CRITICAL,
-        'ccp_limit_log_file_blocked'          => self::DEFAULT_LOG_FILE_BLOCKED,
-        'ccp_limit_error_count_max_url'       => self::DEFAULT_ERROR_COUNT_MAX_URL,
-        'ccp_limit_error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
+        'ccp_limit_set_cache_value'             => self::DEFAULT_SET_CACHE_VALUE,
+        'ccp_limit_get_cache_value'             => self::DEFAULT_GET_CACHE_VALUE,
+        'ccp_limit_log_callback'                => self::DEFAULT_LOG_CALLBACK,
+        'ccp_limit_log_file_critical'           => self::DEFAULT_LOG_FILE_CRITICAL,
+        'ccp_limit_log_file_blocked'            => self::DEFAULT_LOG_FILE_BLOCKED,
+        'ccp_limit_error_count_max_url'         => self::DEFAULT_ERROR_COUNT_MAX_URL,
+        'ccp_limit_error_count_remain_total'    => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
     ];
 
     /**
