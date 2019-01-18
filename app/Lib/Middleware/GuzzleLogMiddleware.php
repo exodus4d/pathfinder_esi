@@ -147,7 +147,8 @@ class GuzzleLogMiddleware {
         var_dump('log--------');
         var_dump($options['log_enabled']);
         if(is_callable($loggable = $options['log_loggable_callback'])){
-            $loggable($request);
+            $test = $loggable($request);
+            var_dump('$test: ' . $test);
         }
 
 
