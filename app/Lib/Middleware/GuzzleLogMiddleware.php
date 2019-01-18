@@ -18,73 +18,79 @@ class GuzzleLogMiddleware {
     /**
      * default for: global enable this middleware
      */
-    const DEFAULT_LOG_ENABLED       = true;
+    const DEFAULT_LOG_ENABLED           = true;
 
     /**
      * default for: log message format
      */
-    const DEFAULT_LOG_FORMAT        = '{method} {target} HTTP/{version} → {code} {phrase} {res_header_content-length}';
+    const DEFAULT_LOG_FORMAT            = '{method} {target} HTTP/{version} → {code} {phrase} {res_header_content-length}';
 
     /**
      * default for: log errors, e.g. ConnectException or other errors where no response available
      */
-    const DEFAULT_LOG_ERROR         = true;
+    const DEFAULT_LOG_ERROR             = true;
 
     /**
      * default for: log statistics (if available)
      */
-    const DEFAULT_LOG_STATS         = false;
+    const DEFAULT_LOG_STATS             = false;
 
     /**
      * default for: log requests with HTTP 5xx response
      */
-    const DEFAULT_LOG_5XX           = true;
+    const DEFAULT_LOG_5XX               = true;
 
     /**
      * default for: log requests with HTTP 4xx response
      */
-    const DEFAULT_LOG_4XX           = true;
+    const DEFAULT_LOG_4XX               = true;
 
     /**
      * default for: log requests with HTTP 3xx response
      */
-    const DEFAULT_LOG_3XX           = false;
+    const DEFAULT_LOG_3XX               = false;
 
     /**
      * default for: log requests with HTTP 2xx response
      */
-    const DEFAULT_LOG_2XX           = false;
+    const DEFAULT_LOG_2XX               = false;
 
     /**
      * default for: log requests with HTTP 1xx response
      */
-    const DEFAULT_LOG_1XX           = false;
+    const DEFAULT_LOG_1XX               = false;
 
     /**
      * default for: log all requests regardless of the HTTP status response code
      */
-    const DEFAULT_LOG_ALL_STATUS    = false;
+    const DEFAULT_LOG_ALL_STATUS        = false;
 
     /**
      * default for: log requests with specific HTTP status response
      */
-    const DEFAULT_LOG_ON_STATUS     = [];
+    const DEFAULT_LOG_ON_STATUS         = [];
 
     /**
      * default for: exclude requests with specific HTTP status response.
      * This overwrites all other configured status options set before
      */
-    const DEFAULT_LOG_OFF_STATUS    = [];
+    const DEFAULT_LOG_OFF_STATUS        = [];
+
+    /**
+     * default for: callback function that checks a $request
+     * -> can be used to "exclude" some requests from been logged (e.g. on expected downtime)
+     */
+    const DEFAULT_LOG_LOGGABLE_CALLBACK = null;
 
     /**
      * default for: callback function for logging
      */
-    const DEFAULT_LOG_CALLBACK      = null;
+    const DEFAULT_LOG_CALLBACK          = null;
 
     /**
      * default for: name for log file
      */
-    const DEFAULT_LOG_FILE          = 'requests';
+    const DEFAULT_LOG_FILE              = 'requests';
 
     /**
      * default options can go here for middleware
@@ -103,6 +109,7 @@ class GuzzleLogMiddleware {
         'log_all_status'            => self::DEFAULT_LOG_ALL_STATUS,
         'log_on_status'             => self::DEFAULT_LOG_ON_STATUS,
         'log_off_status'            => self::DEFAULT_LOG_OFF_STATUS,
+        'log_loggable_callback'     => self::DEFAULT_LOG_LOGGABLE_CALLBACK,
         'log_callback'              => self::DEFAULT_LOG_CALLBACK,
         'log_file'                  => self::DEFAULT_LOG_FILE
     ];
@@ -136,6 +143,13 @@ class GuzzleLogMiddleware {
     public function __invoke(RequestInterface $request, array $options){
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
+
+        var_dump('log--------');
+        var_dump($options['log_enabled']);
+        if(is_callable($loggable = $options['log_loggable_callback'])){
+            $loggable($request);
+        }
+
 
         $next = $this->nextHandler;
 

@@ -168,10 +168,37 @@ abstract class Api extends \Prefab implements ApiInterface {
 
     /**
      * Callback function that returns new Log object
-     * which extends logging\LogInterface class
+     * that extends logging\LogInterface class
      * @var null|callable
      */
     private $getLog                                 = null;
+
+    /**
+     * Callback function that returns true|false
+     * if a $request should be logged
+     * @var null|callable
+     */
+    private $isLoggable                             = null;
+
+    // Guzzle Log Middleware config ----------------------------------------------------------------------------------
+
+    /**
+     * @see GuzzleLogMiddleware::DEFAULT_LOG_ENABLED
+     * @var bool
+     */
+    private $logEnabled                             = GuzzleLogMiddleware::DEFAULT_LOG_ENABLED;
+
+    /**
+     * @see GuzzleLogMiddleware::DEFAULT_LOG_STATS
+     * @var bool
+     */
+    private $logStats                               = GuzzleLogMiddleware::DEFAULT_LOG_STATS;
+
+    /**
+     * @see GuzzleLogMiddleware::DEFAULT_LOG_FILE
+     * @var string
+     */
+    private $logFile                                = GuzzleLogMiddleware::DEFAULT_LOG_FILE;
 
     // Guzzle Retry Middleware config ---------------------------------------------------------------------------------
 
@@ -303,6 +330,38 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * set a callback that returns true/false, param: ResponseInterface
+     * @param callable $isLoggable
+     */
+    public function setIsLoggable(callable $isLoggable){
+        $this->isLoggable = $isLoggable;
+    }
+
+    /**
+     * GuzzleLogMiddleware config
+     * @param bool $logEnabled
+     */
+    public function setLogEnabled(bool $logEnabled = GuzzleLogMiddleware::DEFAULT_LOG_ENABLED){
+        $this->logEnabled = $logEnabled;
+    }
+
+    /**
+     * GuzzleLogMiddleware config
+     * @param bool $logStats
+     */
+    public function setLogStats(bool $logStats = GuzzleLogMiddleware::DEFAULT_LOG_STATS){
+        $this->logStats = $logStats;
+    }
+
+    /**
+     * GuzzleLogMiddleware config
+     * @param string $logFile
+     */
+    public function setLogFile(string $logFile = GuzzleLogMiddleware::DEFAULT_LOG_FILE){
+        $this->logFile = $logFile;
+    }
+
+    /**
      * @return string
      */
     public function getUrl() : string {
@@ -377,6 +436,34 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function getNewLog() : ?callable {
         return $this->getLog;
+    }
+
+    /**
+     * @return callable|null
+     */
+    public function getIsLoggable() : ?callable {
+        return $this->isLoggable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLogEnabled() : bool {
+        return $this->logEnabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLogStats() : bool {
+        return $this->logStats;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogFile() : string {
+        return $this->logFile;
     }
 
     /**
@@ -487,12 +574,13 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     protected function getLogMiddlewareConfig() : array {
         return [
-            'log_enabled'               => true,
-            'log_stats'                 => true,
+            'log_enabled'               => $this->getLogEnabled(),
+            'log_stats'                 => $this->getLogStats(),
             'log_5xx'                   => true,
             'log_4xx'                   => true,
+            'log_loggable_callback'     => $this->getIsLoggable(),
             'log_callback'              => $this->log(),
-            'log_file'                  => 'esi_requests'
+            'log_file'                  => $this->getLogFile()
         ];
     }
 

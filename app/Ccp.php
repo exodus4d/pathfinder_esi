@@ -71,6 +71,23 @@ abstract class Ccp extends Api {
     }
 
     /**
+     * get configuration for GuzzleCcpLoggingMiddleware Middleware
+     * @return array
+     */
+    protected function getCcpLoggingMiddlewareConfig() : array {
+        return [
+            'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
+                $loggable = true;
+                if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, $request->getUri()->__toString())){
+                    $loggable = false;
+                }
+                return $loggable;
+            },
+            'log_callback' => $this->log()
+        ];
+    }
+
+    /**
      * get configuration for GuzzleCcpErrorLimitMiddleware Middleware
      * @return array
      */
@@ -84,23 +101,6 @@ abstract class Ccp extends Api {
             },
             'get_cache_value' => function(string $key){
                 return \Base::instance()->get($key);
-            },
-            'log_callback' => $this->log()
-        ];
-    }
-
-    /**
-     * get configuration for GuzzleCcpLoggingMiddleware Middleware
-     * @return array
-     */
-    protected function getCcpLoggingMiddlewareConfig() : array {
-        return [
-            'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
-                $loggable = true;
-                if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, $request->getUri()->__toString())){
-                    $loggable = false;
-                }
-                return $loggable;
             },
             'log_callback' => $this->log()
         ];
