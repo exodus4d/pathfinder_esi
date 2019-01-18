@@ -218,11 +218,11 @@ class ESI extends Ccp implements EsiInterface {
         // 403 'Character cannot grant roles' error
         $additionalOptions['suppressHTTPLogging'] = [403];
 
-        $url = $this->getEndpointURL(['corporations', 'roles', 'GET'], [$corporationId]);
+        $uri = $this->getEndpointURI(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
         if($response->error){
             $rolesData['error'] = $response->error;
