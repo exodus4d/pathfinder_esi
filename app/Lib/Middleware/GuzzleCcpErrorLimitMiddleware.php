@@ -187,7 +187,7 @@ class GuzzleCcpErrorLimitMiddleware {
      * @return string
      */
     protected function getNormalizedUrlPath(string $url) : string {
-        return preg_replace('/\//', '_', parse_url(strtok(preg_replace('/\/(\d+)\//', '/{x}/', $url), '?'), PHP_URL_PATH));
+        return preg_replace('/\//', '_', parse_url(strtok(preg_replace('/\/(\d+)\//', '/x/', $url), '?'), PHP_URL_PATH));
     }
 
     /**
