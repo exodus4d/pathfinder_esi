@@ -19,14 +19,19 @@ class GuzzleCcpErrorLimitMiddleware {
     const CACHE_KEY_PREFIX_ERROR_LIMIT          = 'CACHED_ERROR_LIMIT_';
 
     /**
-     * default for: log error when this error count is reached for a single API endpoint in the current error window
+     * default for: callback function that stores $key, $value with $ttl in cache
      */
-    const DEFAULT_ERROR_COUNT_MAX_URL           = 30;
+    const DEFAULT_SET_CACHE_VALUE               = null;
 
     /**
-     * default for: log error if less then this errors remain in current error window (all endpoints)
+     * default for: callback function that reads $key from cache
      */
-    const DEFAULT_ERROR_COUNT_REMAIN_TOTAL      = 10;
+    const DEFAULT_GET_CACHE_VALUE               = null;
+
+    /**
+     * default for: callback function for logging
+     */
+    const DEFAULT_LOG_CALLBACK                  = null;
 
     /**
      * default for: name for log file width "critical" error limit warnings
@@ -37,6 +42,17 @@ class GuzzleCcpErrorLimitMiddleware {
      * default for: name for log file with "blocked" errors
      */
     const DEFAULT_LOG_FILE_BLOCKED              = 'esi_resource_blocked';
+
+    /**
+     * default for: log error when this error count is reached for a single API endpoint in the current error window
+     */
+    const DEFAULT_ERROR_COUNT_MAX_URL           = 30;
+
+    /**
+     * default for: log error if less then this errors remain in current error window (all endpoints)
+     */
+    const DEFAULT_ERROR_COUNT_REMAIN_TOTAL      = 10;
+
     /**
      * error message for endpoints that hit "critical" amount of error responses
      */
@@ -52,13 +68,13 @@ class GuzzleCcpErrorLimitMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'set_cache_value'           => null,
-        'get_cache_value'           => null,
-        'log_callback'              => null,
-        'error_count_max_url'       => self::DEFAULT_ERROR_COUNT_MAX_URL,
-        'error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL,
-        'log_file_critical'         => self::DEFAULT_LOG_FILE_CRITICAL,
-        'log_file_blocked'          => self::DEFAULT_LOG_FILE_BLOCKED
+        'ccp_limit_set_cache_value'           => self::DEFAULT_SET_CACHE_VALUE,
+        'ccp_limit_get_cache_value'           => self::DEFAULT_GET_CACHE_VALUE,
+        'ccp_limit_log_callback'              => self::DEFAULT_LOG_CALLBACK,
+        'ccp_limit_log_file_critical'         => self::DEFAULT_LOG_FILE_CRITICAL,
+        'ccp_limit_log_file_blocked'          => self::DEFAULT_LOG_FILE_BLOCKED,
+        'ccp_limit_error_count_max_url'       => self::DEFAULT_ERROR_COUNT_MAX_URL,
+        'ccp_limit_error_count_remain_total'  => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
     ];
 
     /**
@@ -120,7 +136,7 @@ class GuzzleCcpErrorLimitMiddleware {
                 $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
 
                 $esiErrorRate = [];
-                if(is_callable($getCacheValue = $options['get_cache_value'])){
+                if(is_callable($getCacheValue = $options['ccp_limit_get_cache_value'])){
                     $esiErrorRate = $getCacheValue($cacheKey);
                 }
 
@@ -132,14 +148,14 @@ class GuzzleCcpErrorLimitMiddleware {
                     // request url is blocked until new error limit becomes reset
                     // -> this should never happen
 
-                    if(is_callable($log = $options['log_callback'])){
+                    if(is_callable($log = $options['ccp_limit_log_callback'])){
                         $logData = [
                             'url'           => $request->getUri()->__toString(),
                             'errorCount'    => $errorCount,
                             'esiLimitReset' => $esiErrorLimitReset
                         ];
 
-                        $log($options['log_file_blocked'], 'critical', self::ERROR_LIMIT_EXCEEDED, $logData, 'danger');
+                        $log($options['ccp_limit_log_file_blocked'], 'critical', self::ERROR_LIMIT_EXCEEDED, $logData, 'danger');
                     }
                 }
 
@@ -148,13 +164,13 @@ class GuzzleCcpErrorLimitMiddleware {
                     $esiErrorLimitRemain = (int)$response->getHeaderLine('x-esi-error-limit-remain');
 
                     if(
-                        $errorCount > (int)$options['error_count_max_url'] ||
-                        $esiErrorLimitRemain < (int)$options['error_count_remain_total']
+                        $errorCount > (int)$options['ccp_limit_error_count_max_url'] ||
+                        $esiErrorLimitRemain < (int)$options['ccp_limit_error_count_remain_total']
                     ){
                         $blockUrl = true;
 
                         // log critical limit reached
-                        if(is_callable($log = $options['log_callback'])){
+                        if(is_callable($log = $options['ccp_limit_log_callback'])){
                             $logData = [
                                 'url'               => $request->getUri()->__toString(),
                                 'errorCount'        => $errorCount,
@@ -162,7 +178,7 @@ class GuzzleCcpErrorLimitMiddleware {
                                 'esiLimitRemain'    => $esiErrorLimitRemain
                             ];
 
-                            $log($options['log_file_critical'], 'warning', self::ERROR_LIMIT_CRITICAL, $logData, 'warning');
+                            $log($options['ccp_limit_log_file_critical'], 'warning', self::ERROR_LIMIT_CRITICAL, $logData, 'warning');
                         }
                     }
                 }
@@ -172,7 +188,7 @@ class GuzzleCcpErrorLimitMiddleware {
                     $esiErrorRate['blocked'] = true;
                 }
 
-                if(is_callable($setCacheValue = $options['set_cache_value'])){
+                if(is_callable($setCacheValue = $options['ccp_limit_set_cache_value'])){
                     $setCacheValue($cacheKey, $esiErrorRate, $esiErrorLimitReset);
                 }
             }

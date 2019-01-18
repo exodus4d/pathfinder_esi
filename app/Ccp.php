@@ -9,7 +9,7 @@
 namespace Exodus4D\ESI;
 
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
-use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLoggingMiddleware;
+use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLogMiddleware;
 use GuzzleHttp\HandlerStack;
 use lib\Config;
 use Psr\Http\Message\RequestInterface;
@@ -44,7 +44,7 @@ abstract class Ccp extends Api {
         parent::initStack($stack);
 
         // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
-        $stack->after('log', GuzzleCcpLoggingMiddleware::factory($this->getCcpLoggingMiddlewareConfig()), 'ccp_log');
+        $stack->after('log', GuzzleCcpLogMiddleware::factory($this->getCcpLogMiddlewareConfig()), 'ccp_log');
 
         // check response headers for ESI error limits
         $stack->after('ccp_log', GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig()), 'ccp_error_limit');
@@ -62,7 +62,7 @@ abstract class Ccp extends Api {
 
         // test "ccp_error_limit" middleware
         $stack->after('ccp_error_limit', Middleware::mapResponse(function(ResponseInterface $response){
-            return $response->withStatus(400)               // 4xx or 5xx response is important
+            return $response->withStatus(400)           // 4xx or 5xx response is important
             ->withHeader('X-Esi-Error-Limit-Reset', 50) // error window reset in s
             ->withHeader('X-Esi-Error-Limit-Remain', 8) // errors possible in current error window
             ->withHeader('X-Esi-Error-Limited', '');    // endpoint blocked
@@ -71,19 +71,19 @@ abstract class Ccp extends Api {
     }
 
     /**
-     * get configuration for GuzzleCcpLoggingMiddleware Middleware
+     * get configuration for GuzzleCcpLogMiddleware Middleware
      * @return array
      */
-    protected function getCcpLoggingMiddlewareConfig() : array {
+    protected function getCcpLogMiddlewareConfig() : array {
         return [
-            'is_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
+            'ccp_log_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
                 $loggable = true;
                 if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, $request->getUri()->__toString())){
                     $loggable = false;
                 }
                 return $loggable;
             },
-            'log_callback' => $this->log()
+            'ccp_log_callback' => $this->log()
         ];
     }
 
@@ -93,16 +93,16 @@ abstract class Ccp extends Api {
      */
     protected function getCcpErrorLimitMiddlewareConfig() : array {
         return [
-            'set_cache_value' => function(string $key, array $value, int $ttl = 0){
+            'ccp_limit_set_cache_value' => function(string $key, array $value, int $ttl = 0){
                 // clear existing cache key first -> otherwise f3 updates existing key and ignores new $ttl
                 $f3 = \Base::instance();
                 $f3->clear($key);
                 $f3->set($key, $value, $ttl);
             },
-            'get_cache_value' => function(string $key){
+            'ccp_limit_get_cache_value' => function(string $key){
                 return \Base::instance()->get($key);
             },
-            'log_callback' => $this->log()
+            'ccp_limit_log_callback' => $this->log()
         ];
     }
 

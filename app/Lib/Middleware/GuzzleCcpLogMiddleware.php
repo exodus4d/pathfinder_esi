@@ -12,37 +12,48 @@ namespace Exodus4D\ESI\Lib\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class GuzzleCcpLoggingMiddleware {
+class GuzzleCcpLogMiddleware {
+
+    /**
+     * default for: callback function that checks a $request
+     * -> can be used to "exclude" some requests from been logged (e.g. on expected downtime)
+     */
+    const DEFAULT_LOG_LOGGABLE_CALLBACK = null;
+
+    /**
+     * default for: callback function for logging
+     */
+    const DEFAULT_LOG_CALLBACK          = null;
 
     /**
      * default for: name for log file with endpoints marked as "legacy" in response Headers
      */
-    const DEFAULT_LOG_FILE_LEGACY              = 'esi_resource_legacy';
+    const DEFAULT_LOG_FILE_LEGACY       = 'esi_resource_legacy';
 
     /**
      * default for: name for log file with endpoints marked as "deprecated" in response Headers
      */
-    const DEFAULT_LOG_FILE_DEPRECATED          = 'esi_resource_deprecated';
+    const DEFAULT_LOG_FILE_DEPRECATED   = 'esi_resource_deprecated';
 
     /**
      * error message for legacy endpoints
      */
-    const ERROR_RESOURCE_LEGACY                 = 'Resource has been marked as legacy';
+    const ERROR_RESOURCE_LEGACY         = 'Resource has been marked as legacy';
 
     /**
      * error message for deprecated endpoints
      */
-    const ERROR_RESOURCE_DEPRECATED             = 'Resource has been marked as deprecated';
+    const ERROR_RESOURCE_DEPRECATED     = 'Resource has been marked as deprecated';
 
     /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
-        'is_loggable_callback'      => true,
-        'log_callback'              => false,
-        'log_file_legacy'           => self::DEFAULT_LOG_FILE_LEGACY,
-        'log_file_deprecated'       => self::DEFAULT_LOG_FILE_DEPRECATED
+        'ccp_log_loggable_callback'     => self::DEFAULT_LOG_LOGGABLE_CALLBACK,
+        'ccp_log_callback'              => self::DEFAULT_LOG_CALLBACK,
+        'ccp_log_file_legacy'           => self::DEFAULT_LOG_FILE_LEGACY,
+        'ccp_log_file_deprecated'       => self::DEFAULT_LOG_FILE_DEPRECATED
     ];
 
     /**
@@ -51,7 +62,7 @@ class GuzzleCcpLoggingMiddleware {
     private $nextHandler;
 
     /**
-     * GuzzleCcpLoggingMiddleware constructor.
+     * GuzzleCcpLogMiddleware constructor.
      * @param callable $nextHandler
      * @param array $defaultOptions
      */
@@ -93,14 +104,14 @@ class GuzzleCcpLoggingMiddleware {
                 // check header value for 199 code
                 if(preg_match('/199/i', $value)){
                     // "legacy" warning found in response headers
-                    if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
+                    if(is_callable($loggable = $options['ccp_log_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
                         // warning for legacy endpoint should be logged
-                        if(is_callable($log = $options['log_callback'])){
+                        if(is_callable($log = $options['ccp_log_callback'])){
                             $logData = [
                                 'url' => $request->getUri()->__toString()
                             ];
 
-                            $log($options['log_file_legacy'], 'notice', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
+                            $log($options['ccp_log_file_legacy'], 'notice', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
                         }
                     }
                 }
@@ -108,14 +119,14 @@ class GuzzleCcpLoggingMiddleware {
                 // check header value for 299 code
                 if(preg_match('/299/i', $value)){
                     // "deprecated" warning found in response headers
-                    if(is_callable($loggable = $options['is_loggable_callback']) ? $loggable('deprecated', $request, $response) : (bool)$loggable){
+                    if(is_callable($loggable = $options['ccp_log_loggable_callback']) ? $loggable('deprecated', $request, $response) : (bool)$loggable){
                         // warning for deprecated endpoint should be logged
-                        if(is_callable($log = $options['log_callback'])){
+                        if(is_callable($log = $options['ccp_log_callback'])){
                             $logData = [
                                 'url' => $request->getUri()->__toString()
                             ];
 
-                            $log($options['log_file_deprecated'], 'critical', $value ? : self::ERROR_RESOURCE_DEPRECATED, $logData, 'danger');
+                            $log($options['ccp_log_file_deprecated'], 'critical', $value ? : self::ERROR_RESOURCE_DEPRECATED, $logData, 'danger');
                         }
                     }
                 }
