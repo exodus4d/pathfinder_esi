@@ -11,7 +11,6 @@ namespace Exodus4D\ESI;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLogMiddleware;
 use GuzzleHttp\HandlerStack;
-use lib\Config;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -78,9 +77,15 @@ abstract class Ccp extends Api {
         return [
             'ccp_log_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
                 $loggable = true;
-                if(Config::inDownTimeRange() || !$this->isLoggableEndpoint($type, $request->getUri()->__toString())){
-                    $loggable = false;
+
+                if(is_callable($isLoggable = $this->getIsLoggable())){
+                    $loggable = $isLoggable($request);
                 }
+
+                if($loggable){
+                    $loggable = $this->isLoggableEndpoint($type, $request->getUri()->__toString());
+                }
+
                 return $loggable;
             },
             'ccp_log_callback' => $this->log()

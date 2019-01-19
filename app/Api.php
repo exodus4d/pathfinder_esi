@@ -16,13 +16,13 @@ use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\Psr6CacheStorage;
 use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
 use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
+use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
-use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
+use Exodus4D\ESI\Lib\Middleware\GuzzleRetryMiddleware;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
-use GuzzleRetry\GuzzleRetryMiddleware;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -83,9 +83,14 @@ abstract class Api extends \Prefab implements ApiInterface {
     const DEFAULT_RETRY_ON_STATUS                   = [429, 503, 504];
 
     /**
-     * default for: Retry request add "X-Retry-Counter" header
+     * default for: retry request add "X-Retry-Counter" header
      */
     const DEFAULT_RETRY_EXPOSE_RETRY_HEADER         = false;
+
+    /**
+     * default for: log requests that exceed "retryCountMax"
+     */
+    const DEFAULT_RETRY_LOG_ERROR                   = true;
 
     // ================================================================================================================
     // API class properties
@@ -231,6 +236,12 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @var bool
      */
     private $retryExposeRetryHeader                 = self::DEFAULT_RETRY_EXPOSE_RETRY_HEADER;
+
+    /**
+     * Retry Middleware log requests that exceed "retryCountMax"
+     * @var bool
+     */
+    private $retryLogError                          = self::DEFAULT_RETRY_LOG_ERROR;
 
     /**
      * Api constructor.
@@ -631,6 +642,18 @@ abstract class Api extends \Prefab implements ApiInterface {
             'expose_retry_header'       => $this->retryExposeRetryHeader,
             'default_retry_multiplier'  => 0.5,
             'on_retry_callback'         => function($attemptNumber, $delay, $request, $options, $response){
+
+                if(
+                    $this->retryLogError &&                             // log retry errors
+                    ($attemptNumber >= $options['max_retry_attempts'])  // retry limit reached
+                ){
+                    if(
+                        (is_callable($isLoggable = $this->getIsLoggable()) ? $isLoggable($request) : true) &&
+                        is_callable($log = $this->log())
+                    ){
+                        //$this->log()($this->getLogFile(), 'critical');
+                    }
+                }
                 var_dump($request->getUri()->getPath());
                 var_dump($delay);
                 var_dump($response->getStatusCode());
