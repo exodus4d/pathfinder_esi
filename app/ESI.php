@@ -644,10 +644,10 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions('', null, $urlParams);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if($response->error){
-            $routeData['error'] = $response->error;
-        }else{
+        if( !$response->error ){
             $routeData['route'] = array_unique( array_map('intval', (array)$response) );
+        }else{
+            $routeData['error'] = $response->error;
         }
 
         return $routeData;
