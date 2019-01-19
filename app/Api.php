@@ -59,39 +59,6 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     const DEFAULT_DEBUG_LEVEL                       = 0;
 
-    // Guzzle Retry Middleware defaults -------------------------------------------------------------------------------
-    // -> https://packagist.org/packages/caseyamcl/guzzle_retry_middleware
-
-    /**
-     * default for: activate middleware "retry requests"
-     */
-    const DEFAULT_RETRY_ENABLED                     = true;
-
-    /**
-     * default for: retry request count
-     */
-    const DEFAULT_RETRY_COUNT_MAX                   = 2;
-
-    /**
-     * default for: retry request "on timeout"
-     */
-    const DEFAULT_RETRY_ON_TIMEOUT                  = true;
-
-    /**
-     * default for: retry requests "on status"
-     */
-    const DEFAULT_RETRY_ON_STATUS                   = [429, 503, 504];
-
-    /**
-     * default for: retry request add "X-Retry-Counter" header
-     */
-    const DEFAULT_RETRY_EXPOSE_RETRY_HEADER         = false;
-
-    /**
-     * default for: log requests that exceed "retryCountMax"
-     */
-    const DEFAULT_RETRY_LOG_ERROR                   = true;
-
     // ================================================================================================================
     // API class properties
     // ================================================================================================================
@@ -212,36 +179,42 @@ abstract class Api extends \Prefab implements ApiInterface {
      * Retry Middleware enabled for request
      * @var bool
      */
-    private $retryEnabled                           = self::DEFAULT_RETRY_ENABLED;
+    private $retryEnabled                           = GuzzleRetryMiddleware::DEFAULT_RETRY_ENABLED;
 
     /**
      * Retry Middleware max retry count
      * @var int
      */
-    private $retryCountMax                          = self::DEFAULT_RETRY_COUNT_MAX;
+    private $retryMaxAttempts                       = GuzzleRetryMiddleware::DEFAULT_RETRY_MAX_ATTEMPTS;
+
+    /**
+     * Retry Middleware multiplier
+     * @var float
+     */
+    private $retryMultiplier                        = GuzzleRetryMiddleware::DEFAULT_RETRY_MULTIPLIER;
 
     /**
      * Retry Middleware retry on timeout
      * @var bool
      */
-    private $retryOnTimeout                         = self::DEFAULT_RETRY_ON_TIMEOUT;
+    private $retryOnTimeout                         = GuzzleRetryMiddleware::DEFAULT_RETRY_ON_TIMEOUT;
 
     /**
      * Retry Middleware retry on status
      * @var array
      */
-    private $retryOnStatus                          = self::DEFAULT_RETRY_ON_STATUS;
+    private $retryOnStatus                          = GuzzleRetryMiddleware::DEFAULT_RETRY_ON_STATUS;
 
     /**
      * @var bool
      */
-    private $retryExposeRetryHeader                 = self::DEFAULT_RETRY_EXPOSE_RETRY_HEADER;
+    private $retryExposeRetryHeader                 = GuzzleRetryMiddleware::DEFAULT_RETRY_EXPOSE_RETRY_HEADER;
 
     /**
-     * Retry Middleware log requests that exceed "retryCountMax"
+     * Retry Middleware log requests that exceed "retryMaxAttempts"
      * @var bool
      */
-    private $retryLogError                          = self::DEFAULT_RETRY_LOG_ERROR;
+    private $retryLogError                          = GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_ERROR;
 
     /**
      * Api constructor.
@@ -636,11 +609,11 @@ abstract class Api extends \Prefab implements ApiInterface {
     protected function getRetryMiddlewareConfig() : array {
         return [
             'retry_enabled'             => $this->retryEnabled,
-            'max_retry_attempts'        => $this->retryCountMax,
+            'max_retry_attempts'        => $this->retryMaxAttempts,
+            'default_retry_multiplier'  => $this->retryMultiplier,
             'retry_on_timeout'          => $this->retryOnTimeout,
             'retry_on_status'           => $this->retryOnStatus,
             'expose_retry_header'       => $this->retryExposeRetryHeader,
-            'default_retry_multiplier'  => 0.5,
 
             'retry_log_error'           => $this->retryLogError,
             'retry_loggable_callback'   => $this->getIsLoggable(),
