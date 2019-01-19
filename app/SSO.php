@@ -28,7 +28,7 @@ class SSO extends Ccp implements SsoInterface {
 
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $characterData = (new namespace\Mapper\Sso\Character($response))->getData();
         }
 
@@ -59,7 +59,7 @@ class SSO extends Ccp implements SsoInterface {
 
         $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
         }
 

@@ -66,7 +66,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $serverStatus = (new namespace\Mapper\ServerStatus($response))->getData();
         }
 
@@ -84,7 +84,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions('', $characterIds);
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if(!$response->error){
             foreach((array)$response as $affiliationData){
                 $characterAffiliationData[] = (new namespace\Mapper\CharacterAffiliation($affiliationData))->getData();
             }
@@ -104,7 +104,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $characterData = (new namespace\Mapper\Character($response))->getData();
             if( !empty($characterData) ){
                 $characterData['id'] = $characterId;
@@ -127,7 +127,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $locationData = (new namespace\Mapper\Location($response))->getData();
         }
 
@@ -147,7 +147,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
         }
 
@@ -167,7 +167,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
         }
 
@@ -185,7 +185,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $corporationData = (new namespace\Mapper\Corporation($response))->getData();
             if( !empty($corporationData) ){
                 $corporationData['id'] = $corporationId;
@@ -206,7 +206,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $allianceData = (new namespace\Mapper\Alliance($response))->getData();
             if( !empty($allianceData) ){
                 $allianceData['id'] = $allianceId;
@@ -232,7 +232,7 @@ class ESI extends Ccp implements EsiInterface {
 
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             foreach((array)$response as $characterRuleData){
                 $rolesData['roles'][(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
             }
@@ -253,7 +253,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $regionData = array_unique( array_map('intval', (array)$response) );
         }
 
@@ -271,7 +271,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $regionData = (new namespace\Mapper\Region($response))->getData();
         }
 
@@ -288,7 +288,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $constellationData = array_unique( array_map('intval', (array)$response) );
         }
 
@@ -306,7 +306,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $constellationData = (new namespace\Mapper\Constellation($response))->getData();
         }
 
@@ -323,7 +323,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $systemData = array_unique( array_map('intval', (array)$response) );
         }
 
@@ -341,7 +341,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $systemData = (new namespace\Mapper\System($response))->getData();
         }
 
@@ -359,7 +359,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $starData = (new namespace\Mapper\Universe\Star($response))->getData();
             if( !empty($starData) ){
                 $starData['id'] = $starId;
@@ -380,7 +380,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $planetData = (new namespace\Mapper\Universe\Planet($response))->getData();
         }
 
@@ -398,7 +398,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $stargateData = (new namespace\Mapper\Universe\Stargate($response))->getData();
         }
 
@@ -417,7 +417,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions('', $universeIds);
         $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             foreach((array)$response as $data){
                 // store category because $data get changed in Mappers
                 $category = $data->category;
@@ -466,7 +466,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             foreach((array)$response as $jumpData){
                 $systemJumps[$jumpData->system_id]['jumps'] = (int)$jumpData->ship_jumps;
             }
@@ -485,7 +485,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             foreach((array)$response as $killData){
                 $systemKills[$killData->system_id] = [
                     'npc_kills' => (int)$killData->npc_kills,
@@ -508,7 +508,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $categoryData = array_unique( array_map('intval', (array)$response) );
         }
 
@@ -526,7 +526,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $categoryData = (new namespace\Mapper\Universe\Category($response))->getData();
             if( !empty($categoryData) ){
                 $categoryData['id'] = $categoryId;
@@ -546,7 +546,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $groupData = array_unique( array_map('intval', (array)$response) );
         }
 
@@ -564,7 +564,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $groupData = (new namespace\Mapper\Universe\Group($response))->getData();
             if( !empty($groupData) ){
                 $groupData['id'] = $groupId;
@@ -587,7 +587,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
             if( !empty($structureData) ){
                 $structureData['id'] = $structureId;
@@ -609,7 +609,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $typesData = (new namespace\Mapper\Universe\Type($response))->getData();
         }
 
@@ -649,7 +649,7 @@ class ESI extends Ccp implements EsiInterface {
 
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error ){
+        if(!$response->error){
             $routeData['route'] = array_unique( array_map('intval', (array)$response) );
         }else{
             $routeData['error'] = $response->error;
@@ -734,7 +734,7 @@ class ESI extends Ccp implements EsiInterface {
 
         if($response->error){
             $searchData['error'] = $response->error;
-        }elseif( !empty($response) ){
+        }else{
             $searchData = (new namespace\Mapper\Search($response))->getData();
         }
 
@@ -760,7 +760,7 @@ class ESI extends Ccp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && is_array($response) ){
+        if(!$response->error){
             $npcCorporations = $response;
         }
 
