@@ -71,7 +71,7 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     /**
      * default for: log message format
      */
-    const DEFAULT_RETRY_LOG_FORMAT            = 'Max retry count of {count} exceeded. {method} {target} HTTP/{version} → {code} {phrase}';
+    const DEFAULT_RETRY_LOG_FORMAT            = 'RETRY error ({count} attempts) {method} {target} HTTP/{version} → {code} {phrase}';
 
     /**
      * default options can go here for middleware
@@ -129,10 +129,10 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
                     (is_callable($isLoggable = $options['retry_loggable_callback']) ? $isLoggable($request) : true) &&
                     is_callable($log = $options['retry_log_callback'])
                 ){
-                    $formatter = new MessageFormatter($options['retry_log_format']);
-                    $message = $formatter->format($request, $response);
+                    //$formatter = new MessageFormatter($options['retry_log_format']);
+                    //$message = $formatter->format($request, $response);
 
-                    //$message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
+                    $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
 
                     $log($options['retry_log_file'], 'critical', $message, [], 'warning');
                 }
