@@ -140,6 +140,16 @@ abstract class Api extends \Prefab implements ApiInterface {
     private $userAgent                              = '';
 
     /**
+     * Callback function that returns new CacheItemPoolInterface
+     * -> This is a PSR-6 compatible Cache pool
+     *    Used as Cache Backend in this API
+     *    e.g. RedisCachePool() or FilesystemCachePool()
+     * @see http://www.php-cache.com
+     * @var null|\Closure
+     */
+    private $getCachePool                           = null;
+
+    /**
      * Callback function that returns new Log object
      * that extends logging\LogInterface class
      * @var null|callable
@@ -356,6 +366,14 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * set a callback that returns instance of
+     * @param \Closure $cachePool
+     */
+    public function setCachePool(\Closure $cachePool){
+        $this->getCachePool = $cachePool;
+    }
+
+    /**
      * set a callback that returns an new Log object that implements LogInterface
      * @param callable $newLog
      */
@@ -545,12 +563,14 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @return callable|null
      */
     public function getCachePool() : ?\Closure {
+        return $this->getCachePool;
+        /*
         return function() : ?CacheItemPoolInterface {
             $client = new \Redis();
             $client->connect('localhost', 6379, 2);
             $client->select(2);
             return new RedisCachePool($client);
-        };
+        };*/
     }
 
     /**
@@ -689,7 +709,7 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @return CacheStorageInterface|null
      */
     protected function getCacheMiddlewareStorage() : ?CacheStorageInterface {
-        if(is_callable($this->getCachePool()) && !is_null($cachePool = $this->getCachePool()())){
+        if(is_callable($getCachePool = $this->getCachePool()) && !is_null($cachePool = $getCachePool())){
             return new Psr6CacheStorage($cachePool);
         }
         return null;
