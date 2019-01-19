@@ -71,7 +71,7 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     /**
      * default for: log message format
      */
-    const DEFAULT_RETRY_LOG_FORMAT            = 'RETRY ({attempt}/{maxRetry}) FAILED {method} {target} HTTP/{version} → {code} {phrase}';
+    const DEFAULT_RETRY_LOG_FORMAT            = '({attempt}/{maxRetry}) RETRY FAILED {method} {target} HTTP/{version} → {code} {phrase}';
 
     /**
      * default options can go here for middleware

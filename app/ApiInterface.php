@@ -78,6 +78,36 @@ interface ApiInterface {
     public function setNewLog(callable $newLog);
 
     /**
+     * @param callable $isLoggable
+     * @return mixed
+     */
+    public function setIsLoggable(callable $isLoggable);
+
+    /**
+     * @param bool $logEnabled
+     * @return mixed
+     */
+    public function setLogEnabled(bool $logEnabled);
+
+    /**
+     * @param bool $logStats
+     * @return mixed
+     */
+    public function setLogStats(bool $logStats);
+
+    /**
+     * @param string $logFile
+     * @return mixed
+     */
+    public function setLogFile(string $logFile);
+
+    /**
+     * @param string $logFile
+     * @return mixed
+     */
+    public function setRetryLogFile(string $logFile);
+
+    /**
      * @return string
      */
     public function getUrl() : string;

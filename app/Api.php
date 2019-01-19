@@ -176,45 +176,52 @@ abstract class Api extends \Prefab implements ApiInterface {
     // Guzzle Retry Middleware config ---------------------------------------------------------------------------------
 
     /**
-     * Retry Middleware enabled for request
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_ENABLED
      * @var bool
      */
     private $retryEnabled                           = GuzzleRetryMiddleware::DEFAULT_RETRY_ENABLED;
 
     /**
-     * Retry Middleware max retry count
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_MAX_ATTEMPTS
      * @var int
      */
     private $retryMaxAttempts                       = GuzzleRetryMiddleware::DEFAULT_RETRY_MAX_ATTEMPTS;
 
     /**
-     * Retry Middleware multiplier
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_MULTIPLIER
      * @var float
      */
     private $retryMultiplier                        = GuzzleRetryMiddleware::DEFAULT_RETRY_MULTIPLIER;
 
     /**
-     * Retry Middleware retry on timeout
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_ON_TIMEOUT
      * @var bool
      */
     private $retryOnTimeout                         = GuzzleRetryMiddleware::DEFAULT_RETRY_ON_TIMEOUT;
 
     /**
-     * Retry Middleware retry on status
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_ON_STATUS
      * @var array
      */
     private $retryOnStatus                          = GuzzleRetryMiddleware::DEFAULT_RETRY_ON_STATUS;
 
     /**
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_EXPOSE_RETRY_HEADER
      * @var bool
      */
     private $retryExposeRetryHeader                 = GuzzleRetryMiddleware::DEFAULT_RETRY_EXPOSE_RETRY_HEADER;
 
     /**
-     * Retry Middleware log requests that exceed "retryMaxAttempts"
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_ERROR
      * @var bool
      */
     private $retryLogError                          = GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_ERROR;
+
+    /**
+     * @see GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_FILE
+     * @var string
+     */
+    private $retryLogFile                           = GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_FILE;
 
     /**
      * Api constructor.
@@ -344,6 +351,14 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function setLogFile(string $logFile = GuzzleLogMiddleware::DEFAULT_LOG_FILE){
         $this->logFile = $logFile;
+    }
+
+    /**
+     * GuzzleRetryMiddleware config
+     * @param string $logFile
+     */
+    public function setRetryLogFile(string $logFile = GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_FILE){
+        $this->retryLogFile = $logFile;
     }
 
     /**
@@ -617,7 +632,8 @@ abstract class Api extends \Prefab implements ApiInterface {
 
             'retry_log_error'           => $this->retryLogError,
             'retry_loggable_callback'   => $this->getIsLoggable(),
-            'retry_log_callback'        => $this->log()
+            'retry_log_callback'        => $this->log(),
+            'retry_log_file'            => $this->retryLogFile
         ];
     }
 
