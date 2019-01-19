@@ -251,7 +251,11 @@ class GuzzleLogMiddleware {
             $statusCode = $response->getStatusCode();
             if($logError || $this->checkStatusCode($options, $statusCode)){
                 $logData['response'] = $this->logResponse($response);
-                $logData['cache'] = $this->logCache($response);
+
+                if($options['log_cache']){
+                    $logData['cache'] = $this->logCache($response, $options);
+                }
+
                 $logRequestData = true;
 
                 // if Error -> do not change log $level and $tag
@@ -336,8 +340,23 @@ class GuzzleLogMiddleware {
         }
     }
 
-    protected function logCache(ResponseInterface $response) : array {
+    /**
+     * log Cache information
+     * -> read from HTTP response headers -> set by GuzzleCacheMiddleware
+     * @param ResponseInterface $response
+     * @param array $options
+     * @return array
+     */
+    protected function logCache(ResponseInterface $response, array $options) : array {
+        $cacheStatusHeader = 'NULL';
 
+        if($response->hasHeader($options['log_cache_header'])){
+            $cacheStatusHeader = $response->getHeaderLine($options['log_cache_header']);
+        }
+
+        return [
+            'status' => $cacheStatusHeader
+        ];
     }
 
     /**
