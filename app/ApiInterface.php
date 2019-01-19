@@ -138,6 +138,12 @@ interface ApiInterface {
     public function setCacheDebugHeader(string $cacheDebugHeader);
 
     /**
+     * @param bool $retryEnabled
+     * @return mixed
+     */
+    public function setRetryEnabled(bool $retryEnabled);
+
+    /**
      * @param string $logFile
      * @return mixed
      */
@@ -201,5 +207,5 @@ interface ApiInterface {
     /**
      * @return callable|null
      */
-    public function getCachePool() : ?callable;
+    public function getCachePool() : ?\Closure;
 }

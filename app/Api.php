@@ -261,6 +261,10 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     private $retryLogFile                           = GuzzleRetryMiddleware::DEFAULT_RETRY_LOG_FILE;
 
+    // ================================================================================================================
+    // API class methods
+    // ================================================================================================================
+
     /**
      * Api constructor.
      * @param string $url
@@ -439,6 +443,13 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @param bool $retryEnabled
+     */
+    public function setRetryEnabled(bool $retryEnabled = GuzzleRetryMiddleware::DEFAULT_RETRY_ENABLED){
+        $this->retryEnabled = $retryEnabled;
+    }
+
+    /**
      * GuzzleRetryMiddleware config
      * @param string $logFile
      */
@@ -533,7 +544,7 @@ abstract class Api extends \Prefab implements ApiInterface {
     /**
      * @return callable|null
      */
-    public function getCachePool() : ?callable {
+    public function getCachePool() : ?\Closure {
         return function() : ?CacheItemPoolInterface {
             $client = new \Redis();
             $client->connect('localhost', 6379, 2);
@@ -546,7 +557,7 @@ abstract class Api extends \Prefab implements ApiInterface {
      * log callback function
      * @return \Closure
      */
-    protected function log() : callable {
+    protected function log() : \Closure {
         return function(string $action, string $level, string $message, array $data = [], string $tag = 'default'){
             if(is_callable($newLog = $this->getNewLog())){
                 /**
