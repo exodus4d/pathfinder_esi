@@ -144,13 +144,13 @@ class GuzzleLogMiddleware {
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 
-        var_dump('log--------');
-        var_dump($options['log_enabled']);
-        if(is_callable($loggable = $options['log_loggable_callback'])){
-            $test = $loggable($request);
-            var_dump('$test: ' . $test);
+        // deactivate this middleware a callback function is provided with response false
+        if(
+            $options['log_enabled'] &&
+            is_callable($loggable = $options['log_loggable_callback'])
+        ){
+            $options['log_enabled'] = $loggable($request);
         }
-
 
         $next = $this->nextHandler;
 
