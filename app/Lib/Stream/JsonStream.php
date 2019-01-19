@@ -10,9 +10,8 @@ namespace Exodus4D\ESI\Lib\Stream;
 
 
 use GuzzleHttp\Psr7\StreamDecoratorTrait;
-use Psr\Http\Message\StreamInterface;
 
-class JsonStream implements StreamInterface {
+class JsonStream implements JsonStreamInterface {
 
     // we need to "overwrite" the default Trait getContents() method
     // -> therefore we make it accessible as traitGetContents() and call it from

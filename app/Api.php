@@ -11,6 +11,7 @@ namespace Exodus4D\ESI;
 
 use Cache\Adapter\Redis\RedisCachePool;
 use lib\logging\LogInterface;
+use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\Psr6CacheStorage;
 use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
@@ -660,6 +661,13 @@ abstract class Api extends \Prefab implements ApiInterface {
         return $merged;
     }
 
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $options
+     * @param array $additionalOptions
+     * @return JsonStreamInterface|StreamInterface|null
+     */
     protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
         $body = null;
 
@@ -674,7 +682,6 @@ abstract class Api extends \Prefab implements ApiInterface {
             $body = $response->getBody();
             /*
             var_dump('response: ----');
-            var_dump('statuscode: ' . $response->getStatusCode());
             var_dump($response->getHeader('X-Guzzle-Cache'));*/
         }catch(TransferException $e){
             // Base Exception of Guzzle errors

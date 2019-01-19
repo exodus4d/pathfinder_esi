@@ -12,7 +12,14 @@ use Exodus4D\ESI\Config;
 
 class ESI extends Ccp implements EsiInterface {
 
+    /**
+     * error message for set waypoint
+     */
     const ERROR_ESI_WAYPOINT                        = 'Could not set waypoint.';
+
+    /**
+     * error message for open client window
+     */
     const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
     /**
@@ -114,13 +121,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['characters', 'location', 'GET'], [$characterId]);
+        $uri = $this->getEndpointURI(['characters', 'location', 'GET'], [$characterId]);
         $locationData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $locationData = (new namespace\Mapper\Location($response))->getData();
         }
 
@@ -134,13 +141,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['characters', 'ship', 'GET'], [$characterId]);
+        $uri = $this->getEndpointURI(['characters', 'ship', 'GET'], [$characterId]);
         $shipData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
         }
 
@@ -172,13 +179,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCorporationData(int $corporationId) : array {
-        $url = $this->getEndpointURL(['corporations', 'GET'], [$corporationId]);
+        $uri = $this->getEndpointURI(['corporations', 'GET'], [$corporationId]);
         $corporationData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $corporationData = (new namespace\Mapper\Corporation($response))->getData();
             if( !empty($corporationData) ){
                 $corporationData['id'] = $corporationId;
@@ -193,13 +200,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getAllianceData(int $allianceId) : array {
-        $url = $this->getEndpointURL(['alliances', 'GET'], [$allianceId]);
+        $uri = $this->getEndpointURI(['alliances', 'GET'], [$allianceId]);
         $allianceData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $allianceData = (new namespace\Mapper\Alliance($response))->getData();
             if( !empty($allianceData) ){
                 $allianceData['id'] = $allianceId;
@@ -215,14 +222,15 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getCorporationRoles(int $corporationId, string $accessToken) : array {
-        // 403 'Character cannot grant roles' error
-        $additionalOptions['suppressHTTPLogging'] = [403];
-
         $uri = $this->getEndpointURI(['corporations', 'roles', 'GET'], [$corporationId]);
         $rolesData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+
+        // 403 'Character cannot grant roles' error
+        $requestOptions['log_off_status'] = [403];
+
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if( !$response->error ){
             foreach((array)$response as $characterRuleData){
@@ -239,14 +247,14 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseRegions() : array {
-        $url = $this->getEndpointURL(['universe', 'regions', 'list', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'regions', 'list', 'GET']);
         $regionData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
-            $regionData = array_unique( array_map('intval', $response) );
+        if( !$response->error ){
+            $regionData = array_unique( array_map('intval', (array)$response) );
         }
 
         return $regionData;
@@ -257,13 +265,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseRegionData(int $regionId) : array {
-        $url = $this->getEndpointURL(['universe', 'regions', 'GET'], [$regionId]);
+        $uri = $this->getEndpointURI(['universe', 'regions', 'GET'], [$regionId]);
         $regionData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $regionData = (new namespace\Mapper\Region($response))->getData();
         }
 
@@ -274,14 +282,14 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseConstellations() : array{
-        $url = $this->getEndpointURL(['universe', 'constellations', 'list', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'constellations', 'list', 'GET']);
         $constellationData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
-            $constellationData = array_unique( array_map('intval', $response) );
+        if( !$response->error ){
+            $constellationData = array_unique( array_map('intval', (array)$response) );
         }
 
         return $constellationData;
@@ -292,13 +300,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseConstellationData(int $constellationId) : array {
-        $url = $this->getEndpointURL(['universe', 'constellations', 'GET'], [$constellationId]);
+        $uri = $this->getEndpointURI(['universe', 'constellations', 'GET'], [$constellationId]);
         $constellationData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $constellationData = (new namespace\Mapper\Constellation($response))->getData();
         }
 
@@ -309,14 +317,14 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseSystems() : array{
-        $url = $this->getEndpointURL(['universe', 'systems', 'list', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'systems', 'list', 'GET']);
         $systemData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
-            $systemData = array_unique( array_map('intval', $response) );
+        if( !$response->error ){
+            $systemData = array_unique( array_map('intval', (array)$response) );
         }
 
         return $systemData;
@@ -327,13 +335,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseSystemData(int $systemId) : array {
-        $url = $this->getEndpointURL(['universe', 'systems', 'GET'], [$systemId]);
+        $uri = $this->getEndpointURI(['universe', 'systems', 'GET'], [$systemId]);
         $systemData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $systemData = (new namespace\Mapper\System($response))->getData();
         }
 
@@ -345,13 +353,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseStarData(int $starId) : array {
-        $url = $this->getEndpointURL(['universe', 'stars', 'GET'], [$starId]);
+        $uri = $this->getEndpointURI(['universe', 'stars', 'GET'], [$starId]);
         $starData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $starData = (new namespace\Mapper\Universe\Star($response))->getData();
             if( !empty($starData) ){
                 $starData['id'] = $starId;
@@ -366,13 +374,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniversePlanetData(int $planetId) : array {
-        $url = $this->getEndpointURL(['universe', 'planets', 'GET'], [$planetId]);
+        $uri = $this->getEndpointURI(['universe', 'planets', 'GET'], [$planetId]);
         $planetData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $planetData = (new namespace\Mapper\Universe\Planet($response))->getData();
         }
 
@@ -384,13 +392,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseStargateData(int $stargateId) : array {
-        $url = $this->getEndpointURL(['universe', 'stargates', 'GET'], [$stargateId]);
+        $uri = $this->getEndpointURI(['universe', 'stargates', 'GET'], [$stargateId]);
         $stargateData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !$response->error && !empty($response) ){
+        if( !$response->error ){
             $stargateData = (new namespace\Mapper\Universe\Stargate($response))->getData();
         }
 
@@ -403,15 +411,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['universe', 'names', 'POST']);
+        $uri = $this->getEndpointURI(['universe', 'names', 'POST']);
         $universeData = [];
 
         $requestOptions = $this->getRequestOptions('', $universeIds);
-        $response = $this->request('POST', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if($response->error){
-            $universeData['error'] = $response->error;
-        }elseif( !empty($response) ){
+        if( !$response->error ){
             foreach((array)$response as $data){
                 // store category because $data get changed in Mappers
                 $category = $data->category;
@@ -443,6 +449,8 @@ class ESI extends Ccp implements EsiInterface {
                     $universeData[$category][] = $categoryData;
                 }
             }
+        }else{
+            $universeData['error'] = $response->error;
         }
 
         return $universeData;
@@ -452,13 +460,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseJumps() : array {
-        $url = $this->getEndpointURL(['universe', 'system_jumps', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'system_jumps', 'GET']);
         $systemJumps = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             foreach((array)$response as $jumpData){
                 $systemJumps[$jumpData->system_id]['jumps'] = (int)$jumpData->ship_jumps;
             }
@@ -471,13 +479,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseKills() : array {
-        $url = $this->getEndpointURL(['universe', 'system_kills', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'system_kills', 'GET']);
         $systemKills = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             foreach((array)$response as $killData){
                 $systemKills[$killData->system_id] = [
                     'npc_kills' => (int)$killData->npc_kills,
@@ -494,14 +502,14 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseCategories() : array {
-        $url = $this->getEndpointURL(['universe', 'categories', 'list', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'categories', 'list', 'GET']);
         $categoryData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
-            $categoryData = array_unique( array_map('intval', $response) );
+        if( !$response->error ){
+            $categoryData = array_unique( array_map('intval', (array)$response) );
         }
 
         return $categoryData;
@@ -512,13 +520,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseCategoryData(int $categoryId) : array {
-        $url = $this->getEndpointURL(['universe', 'categories', 'GET'], [$categoryId]);
+        $uri = $this->getEndpointURI(['universe', 'categories', 'GET'], [$categoryId]);
         $categoryData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $categoryData = (new namespace\Mapper\Universe\Category($response))->getData();
             if( !empty($categoryData) ){
                 $categoryData['id'] = $categoryId;
@@ -532,14 +540,14 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseGroups() : array {
-        $url = $this->getEndpointURL(['universe', 'groups', 'list', 'GET']);
+        $uri = $this->getEndpointURI(['universe', 'groups', 'list', 'GET']);
         $groupData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
-            $groupData = array_unique( array_map('intval', $response) );
+        if( !$response->error ){
+            $groupData = array_unique( array_map('intval', (array)$response) );
         }
 
         return $groupData;
@@ -550,13 +558,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseGroupData(int $groupId) : array {
-        $url = $this->getEndpointURL(['universe', 'groups', 'GET'], [$groupId]);
+        $uri = $this->getEndpointURI(['universe', 'groups', 'GET'], [$groupId]);
         $groupData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $groupData = (new namespace\Mapper\Universe\Group($response))->getData();
             if( !empty($groupData) ){
                 $groupData['id'] = $groupId;
@@ -573,13 +581,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['universe', 'structures', 'GET'], [$structureId]);
+        $uri = $this->getEndpointURI(['universe', 'structures', 'GET'], [$structureId]);
         $structureData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
             if( !empty($structureData) ){
                 $structureData['id'] = $structureId;
@@ -595,13 +603,13 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array {
-        $url = $this->getEndpointURL(['universe', 'types', 'GET'], [$typeId]);
+        $uri = $this->getEndpointURI(['universe', 'types', 'GET'], [$typeId]);
         $typesData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions, $additionalOptions);
+        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
 
-        if( !empty($response) ){
+        if( !$response->error ){
             $typesData = (new namespace\Mapper\Universe\Type($response))->getData();
         }
 
@@ -657,21 +665,20 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array {
-        $urlParams = [
+        $uri = $this->getEndpointURI(['ui', 'autopilot', 'waypoint', 'POST']);
+        $waypointData = [];
+
+        $query = [
             'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
             'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
             'destination_id'        => $systemId
         ];
 
-        $url = $this->getEndpointURL(['ui', 'autopilot', 'waypoint', 'POST'], [], $urlParams);
-        $waypointData = [];
-
-        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
-        $requestOptions = $this->getRequestOptions($accessToken, $urlParams);
-        $response = $this->request('POST', $url, $requestOptions);
+        $requestOptions = $this->getRequestOptions($accessToken, $query);
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         // "null" === success => There is no response body send...
-        if( !is_null($response) ){
+        if( $response->error ){
             $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
         }
 
@@ -684,19 +691,18 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function openWindow(int $targetId, string $accessToken) : array {
-        $urlParams = [
+        $uri = $this->getEndpointURI(['ui', 'openwindow', 'information', 'POST']);
+        $return = [];
+
+        $query = [
             'target_id' => $targetId
         ];
 
-        $url = $this->getEndpointURL(['ui', 'openwindow', 'information', 'POST'], [], $urlParams);
-        $return = [];
-
-        // need to be send in "content" vars as well! Otherwise "Content-Length" header is not send
-        $requestOptions = $this->getRequestOptions($accessToken, $urlParams);
-        $response = $this->request('POST', $url, $requestOptions);
+        $requestOptions = $this->getRequestOptions($accessToken, $query);
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         // "null" === success => There is no response body send...
-        if( !is_null($response) ){
+        if( $response->error ){
             $return['error'] = self::ERROR_ESI_WINDOW;
         }
 
@@ -710,22 +716,21 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function search(array $categories, string $search, bool $strict = false) : array {
-        $urlParams = [
+        $uri = $this->getEndpointURI(['search', 'GET']);
+        $searchData = [];
+
+        $query = [
             'categories'            => $categories,
             'search'                => $search,
             'strict'                => var_export( (bool)$strict, true),
         ];
 
-        $urlParams = $this->formatUrlParams($urlParams, [
+        $query = $this->formatUrlParams($query, [
             'categories' => [',']
         ]);
 
-        $url = $this->getEndpointURL(['search', 'GET'], [], $urlParams);
-
-        $searchData = [];
-
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $url, $requestOptions);
+        $requestOptions = $this->getRequestOptions('', null, $query);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if($response->error){
             $searchData['error'] = $response->error;
@@ -762,7 +767,12 @@ class ESI extends Ccp implements EsiInterface {
         return $npcCorporations;
     }
 
-    protected function formatUrlParams(array $urlParams = [], array $format = []) : array {
+    /**
+     * @param array $query
+     * @param array $format
+     * @return array
+     */
+    protected function formatUrlParams(array $query = [], array $format = []) : array {
 
         $formatter = function(&$item, $key, $params) use (&$formatter) {
             $params['depth'] = isset($params['depth']) ? ++$params['depth'] : 0;
@@ -776,9 +786,9 @@ class ESI extends Ccp implements EsiInterface {
             }
         };
 
-        array_walk($urlParams, $formatter, $format);
+        array_walk($query, $formatter, $format);
 
-        return $urlParams;
+        return $query;
     }
 
     /**
@@ -797,35 +807,6 @@ class ESI extends Ccp implements EsiInterface {
 
         return $uri;
     }
-
-    /**
-     * TODO remove
-     * get/build endpoint URL
-     * @param array $path
-     * @param array $placeholders
-     * @param array $params
-     * @return string
-     */
-    /*
-    protected function getEndpointURL(array $path = [], array $placeholders = [], array $params = []) : string {
-        $url = $this->getUrl() . Config\ESIConf::getEndpoint($path, $placeholders);
-
-        // add "datasource" parameter (SISI, TQ) (optional)
-        if( !empty($datasource = $this->getDataSource()) ){
-            $params['datasource'] = $datasource;
-        }
-        // overwrite endpoint version (debug)
-        if( !empty($endpointVersion = $this->getVersion()) ){
-            $url = preg_replace('/(v[\d]+|latest|dev|legacy)/',$endpointVersion, $url, 1);
-        }
-
-        if( !empty($params) ){
-            // add URL params
-            $url .= '?' . http_build_query($params, '', '&', PHP_QUERY_RFC3986 );
-        }
-
-        return $url;
-    }*/
 
     /**
      * get "default" request options for ESI endpoints
@@ -871,54 +852,38 @@ class ESI extends Ccp implements EsiInterface {
         return $options;
     }
 
-    /**
-     * @param string $url
-     * @param string $method
-     * @param string $accessToken
-     * @param array $additionalOptions
-     * @return null|array|\stdClass
-     */
     /*
     protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []){
         $responseBody = null;
-        $method = strtoupper($method);
 
         $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
 
-        if( \Audit::instance()->url($url) ){
-            // check if url is blocked (error limit exceeded)
-            if(!$webClient->isBlockedUrl($url)){
-                if( $webClient->checkRequestMethod($method) ){
-                    $requestOptions = [
-                        'timeout' => self::ESI_TIMEOUT,
-                        'method' => $method,
-                        'user_agent' => $this->getUserAgent(),
-                        'header' => [
-                            'Accept: application/json',
-                            'Expect:'
-                        ]
-                    ];
+        // check if url is blocked (error limit exceeded)
+        if(!$webClient->isBlockedUrl($url)){
+            $requestOptions = [
+                'timeout' => self::ESI_TIMEOUT,
+                'method' => $method,
+                'user_agent' => $this->getUserAgent(),
+                'header' => [
+                    'Accept: application/json',
+                    'Expect:'
+                ]
+            ];
 
-                    // add auth token if available (required for some endpoints)
-                    if( !empty($accessToken) ){
-                        $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
-                    }
-
-                    if( !empty($additionalOptions['content']) ){
-                        // "Content-Type" Header is required for POST requests
-                        $requestOptions['header'][] = 'Content-Type: application/json';
-
-                        $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
-                        unset($additionalOptions['content']);
-                    }
-
-                    $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-                }else{
-                    $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_METHOD, $method, $url));
-                }
+            // add auth token if available (required for some endpoints)
+            if( !empty($accessToken) ){
+                $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
             }
-        }else{
-            $webClient->getLogger('err_server')->write(sprintf(self::ERROR_ESI_URL, $url));
+
+            if( !empty($additionalOptions['content']) ){
+                // "Content-Type" Header is required for POST requests
+                $requestOptions['header'][] = 'Content-Type: application/json';
+
+                $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
+                unset($additionalOptions['content']);
+            }
+
+            $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
         }
 
         return $responseBody;
