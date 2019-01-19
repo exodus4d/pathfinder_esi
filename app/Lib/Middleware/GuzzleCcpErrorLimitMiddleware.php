@@ -106,8 +106,18 @@ class GuzzleCcpErrorLimitMiddleware {
         $next = $this->nextHandler;
 
         return $next($request, $options)->then(
-            $this->onFulfilled($request, $options)
+            $this->onFulfilled($request, $options),
+            $this->onRejected()
         );
+    }
+
+    protected function onRejected() : \Closure {
+        return function ($reason){
+var_dump('onRejact ccpErrorLimit');
+var_dump($reason->getResponse()->getHeaders());
+
+            return $reason;
+        };
     }
 
     /**
@@ -119,7 +129,8 @@ class GuzzleCcpErrorLimitMiddleware {
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure{
         return function (ResponseInterface $response) use ($request, $options) {
             $statusCode = $response->getStatusCode();
-
+var_dump('onFull ccpErrorLimit');
+var_dump($response->getHeaders());
             // client or server error responses are relevant for error limits
             // check for existing x-esi-error headers
             if(
