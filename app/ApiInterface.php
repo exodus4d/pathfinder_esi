@@ -102,6 +102,24 @@ interface ApiInterface {
     public function setLogFile(string $logFile);
 
     /**
+     * @param bool $cacheEnabled
+     * @return mixed
+     */
+    public function setCacheEnabled(bool $cacheEnabled);
+
+    /**
+     * @param bool $cacheDebug
+     * @return mixed
+     */
+    public function setCacheDebug(bool $cacheDebug);
+
+    /**
+     * @param string $cacheDebugHeader
+     * @return mixed
+     */
+    public function setCacheDebugHeader(string $cacheDebugHeader);
+
+    /**
      * @param string $logFile
      * @return mixed
      */

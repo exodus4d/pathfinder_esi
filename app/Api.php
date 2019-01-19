@@ -153,7 +153,7 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     private $isLoggable                             = null;
 
-    // Guzzle Log Middleware config ----------------------------------------------------------------------------------
+    // Guzzle Log Middleware config -----------------------------------------------------------------------------------
 
     /**
      * @see GuzzleLogMiddleware::DEFAULT_LOG_ENABLED
@@ -172,6 +172,26 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @var string
      */
     private $logFile                                = GuzzleLogMiddleware::DEFAULT_LOG_FILE;
+
+    // Guzzle Cache Middleware config ---------------------------------------------------------------------------------
+
+    /**
+     * @see GuzzleCacheMiddleware::DEFAULT_CACHE_ENABLED
+     * @var bool
+     */
+    private $cacheEnabled                           = GuzzleCacheMiddleware::DEFAULT_CACHE_ENABLED;
+
+    /**
+     * @see GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG
+     * @var bool
+     */
+    private $cacheDebug                             = GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG;
+
+    /**
+     * @see GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG_HEADER
+     * @var string
+     */
+    private $cacheDebugHeader                       = GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG_HEADER;
 
     // Guzzle Retry Middleware config ---------------------------------------------------------------------------------
 
@@ -351,6 +371,30 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function setLogFile(string $logFile = GuzzleLogMiddleware::DEFAULT_LOG_FILE){
         $this->logFile = $logFile;
+    }
+
+    /**
+     * GuzzleCacheMiddleware
+     * @param bool $cacheEnabled
+     */
+    public function setCacheEnabled(bool $cacheEnabled = GuzzleCacheMiddleware::DEFAULT_CACHE_ENABLED){
+        $this->cacheEnabled = $cacheEnabled;
+    }
+
+    /**
+     * GuzzleCacheMiddleware config
+     * @param bool $cacheDebug
+     */
+    public function setCacheDebug(bool $cacheDebug = GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG){
+        $this->cacheDebug = $cacheDebug;
+    }
+
+    /**
+     * GuzzleCacheMiddleware config
+     * @param string $cacheDebugHeader
+     */
+    public function setCacheDebugHeader(string $cacheDebugHeader = GuzzleCacheMiddleware::DEFAULT_CACHE_DEBUG_HEADER){
+        $this->cacheDebugHeader = $cacheDebugHeader;
     }
 
     /**
@@ -590,8 +634,9 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     protected function getCacheMiddlewareConfig() : array {
         return [
-            'cache_enabled'             => true,
-            'cache_debug'               => true
+            'cache_enabled'             => $this->cacheEnabled,
+            'cache_debug'               => $this->cacheDebug,
+            'cache_debug_header'        => $this->cacheDebugHeader
         ];
     }
 
