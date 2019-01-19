@@ -615,34 +615,31 @@ class ESI extends Ccp implements EsiInterface {
      * @return array
      */
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array {
-        // no error in case of error response
-        // ->(e.g. 503 if endpoint is temporary not available
-        $additionalOptions['suppressHTTPErrors'] = true;
+        $uri = $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId]);
+        $routeData = [];
 
-        // 404 'No route found' error
-        $additionalOptions['suppressHTTPLogging'] = [404];
-
-        $urlParams = [];
+        $query = [];
         if( !empty($options['avoid']) ){
-            $urlParams['avoid'] = $options['avoid'];
+            $query['avoid'] = $options['avoid'];
         }
         if( !empty($options['connections']) ){
-            $urlParams['connections'] = $options['connections'];
+            $query['connections'] = $options['connections'];
         }
         if( !empty($options['flag']) ){
-            $urlParams['flag'] = $options['flag'];
+            $query['flag'] = $options['flag'];
         }
 
-        $urlParams = $this->formatUrlParams($urlParams, [
+        $query = $this->formatUrlParams($query, [
             'connections' => [',', '|'],
             'avoid' => [',']
         ]);
 
-        $uri = $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId]);
-        $routeData = [];
+        $requestOptions = $this->getRequestOptions('', null, $query);
 
-        $requestOptions = $this->getRequestOptions('', null, $urlParams);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        // 404 'No route found' error -> should not be logged
+        $requestOptions['log_off_status'] = [404];
+
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if( !$response->error ){
             $routeData['route'] = array_unique( array_map('intval', (array)$response) );
