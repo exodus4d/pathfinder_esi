@@ -611,8 +611,8 @@ abstract class Api extends \Prefab implements ApiInterface {
             'retry_enabled'             => $this->retryEnabled,
             'max_retry_attempts'        => $this->retryMaxAttempts,
             'default_retry_multiplier'  => $this->retryMultiplier,
-            'retry_on_timeout'          => $this->retryOnTimeout,
             'retry_on_status'           => $this->retryOnStatus,
+            'retry_on_timeout'          => $this->retryOnTimeout,
             'expose_retry_header'       => $this->retryExposeRetryHeader,
 
             'retry_log_error'           => $this->retryLogError,

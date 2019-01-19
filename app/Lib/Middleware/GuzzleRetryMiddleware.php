@@ -30,14 +30,14 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     const DEFAULT_RETRY_MULTIPLIER              = 0.5;
 
     /**
-     * default for: retry request "on timeout"
-     */
-    const DEFAULT_RETRY_ON_TIMEOUT              = true;
-
-    /**
      * default for: retry requests "on status"
      */
     const DEFAULT_RETRY_ON_STATUS               = [429, 503, 504];
+
+    /**
+     * default for: retry request "on timeout"
+     */
+    const DEFAULT_RETRY_ON_TIMEOUT              = true;
 
     /**
      * default for: retry request add "X-Retry-Counter" header
@@ -67,15 +67,28 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
      */
     const ERROR_RETRY_COUNT_EXCEEDED            = 'Max retry count of %s exceeded. %s $s HTTP/%s → {code} {phrase}';
 
+    /**
+     * default options can go here for middleware
+     * @var array
+     */
     private $defaultOptions = [
         'retry_enabled'                         => self::DEFAULT_RETRY_ENABLED,
         'max_retry_attempts'                    => self::DEFAULT_RETRY_MAX_ATTEMPTS,
         'default_retry_multiplier'              => self::DEFAULT_RETRY_MULTIPLIER,
         'retry_on_status'                       => self::DEFAULT_RETRY_ON_STATUS,
         'retry_on_timeout'                      => self::DEFAULT_RETRY_ON_TIMEOUT,
-        'expose_retry_header'                   => self::DEFAULT_RETRY_EXPOSE_RETRY_HEADER
+        'expose_retry_header'                   => self::DEFAULT_RETRY_EXPOSE_RETRY_HEADER,
+
+        'retry_log_error'                       => self::DEFAULT_RETRY_LOG_ERROR,
+        'retry_loggable_callback'               => self::DEFAULT_RETRY_LOGGABLE_CALLBACK,
+        'retry_log_callback'                    => self::DEFAULT_RETRY_LOG_CALLBACK
     ];
 
+    /**
+     * GuzzleRetryMiddleware constructor.
+     * @param callable $nextHandler
+     * @param array $defaultOptions
+     */
     public function __construct(callable $nextHandler, array $defaultOptions = []){
         $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
 
