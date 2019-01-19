@@ -9,6 +9,7 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 
+use GuzzleHttp\MessageFormatter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -128,7 +129,10 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
                     (is_callable($isLoggable = $options['retry_loggable_callback']) ? $isLoggable($request) : true) &&
                     is_callable($log = $options['retry_log_callback'])
                 ){
-                    $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
+                    $formatter = new MessageFormatter($options['retry_log_format']);
+                    $message = $formatter->format($request, $response);
+
+                    //$message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
 
                     $log($options['retry_log_file'], 'critical', $message, [], 'warning');
                 }
