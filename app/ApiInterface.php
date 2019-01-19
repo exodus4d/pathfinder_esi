@@ -96,6 +96,18 @@ interface ApiInterface {
     public function setLogStats(bool $logStats);
 
     /**
+     * @param bool $logCache
+     * @return mixed
+     */
+    public function setLogCache(bool $logCache);
+
+    /**
+     * @param string $logCacheHeader
+     * @return mixed
+     */
+    public function setLogCacheHeader(string $logCacheHeader);
+
+    /**
      * @param string $logFile
      * @return mixed
      */

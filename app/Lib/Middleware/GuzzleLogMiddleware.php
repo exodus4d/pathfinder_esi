@@ -36,6 +36,16 @@ class GuzzleLogMiddleware {
     const DEFAULT_LOG_STATS             = false;
 
     /**
+     * default for: log cache info (if available)
+     */
+    const DEFAULT_LOG_CACHE             = false;
+
+    /**
+     * default for: cache info response Header (see GuzzleCacheMiddleware)
+     */
+    const DEFAULT_LOG_CACHE_HEADER      = 'X-Guzzle-Cache';
+
+    /**
      * default for: log requests with HTTP 5xx response
      */
     const DEFAULT_LOG_5XX               = true;
@@ -101,6 +111,8 @@ class GuzzleLogMiddleware {
         'log_format'                => self::DEFAULT_LOG_FORMAT,
         'log_error'                 => self::DEFAULT_LOG_ERROR,
         'log_stats'                 => self::DEFAULT_LOG_STATS,
+        'log_cache'                 => self::DEFAULT_LOG_CACHE,
+        'log_cache_header'          => self::DEFAULT_LOG_CACHE_HEADER,
         'log_5xx'                   => self::DEFAULT_LOG_5XX,
         'log_4xx'                   => self::DEFAULT_LOG_4XX,
         'log_3xx'                   => self::DEFAULT_LOG_3XX,
@@ -239,6 +251,7 @@ class GuzzleLogMiddleware {
             $statusCode = $response->getStatusCode();
             if($logError || $this->checkStatusCode($options, $statusCode)){
                 $logData['response'] = $this->logResponse($response);
+                $logData['cache'] = $this->logCache($response);
                 $logRequestData = true;
 
                 // if Error -> do not change log $level and $tag
@@ -321,6 +334,10 @@ class GuzzleLogMiddleware {
                 'error'                 => $exception->getMessage()
             ];
         }
+    }
+
+    protected function logCache(ResponseInterface $response) : array {
+
     }
 
     /**
