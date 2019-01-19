@@ -71,7 +71,7 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     /**
      * default for: log message format
      */
-    const DEFAULT_RETRY_LOG_FORMAT            = 'RETRY error ({count} attempts) {method} {target} HTTP/{version} → {code} {phrase}';
+    const DEFAULT_RETRY_LOG_FORMAT            = 'RETRY ({attempt}/{maxRetry}) FAILED {method} {target} HTTP/{version} → {code} {phrase}';
 
     /**
      * default options can go here for middleware
@@ -131,10 +131,16 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
                 ){
                     //$formatter = new MessageFormatter($options['retry_log_format']);
                     //$message = $formatter->format($request, $response);
+                    $logData = [
+                        'url'               => $request->getUri()->__toString(),
+                        'retryAttempt'      => $attemptNumber,
+                        'maxRetryAttempts'  => $options['max_retry_attempts']
+                    ];
 
-                    $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
+                    $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $options['max_retry_attempts'], $response);
 
-                    $log($options['retry_log_file'], 'critical', $message, [], 'warning');
+
+                    $log($options['retry_log_file'], 'critical', $message, $logData, 'warning');
                 }
             }
         };
@@ -144,12 +150,14 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
      * @param string $message
      * @param RequestInterface $request
      * @param int $attemptNumber
+     * @param int $maxRetryAttempts
      * @param ResponseInterface|null $response
      * @return string
      */
-    protected function getLogMessage(string $message, RequestInterface $request, int $attemptNumber, ?ResponseInterface $response = null) : string {
+    protected function getLogMessage(string $message, RequestInterface $request, int $attemptNumber, int $maxRetryAttempts, ?ResponseInterface $response = null) : string {
         $replace = [
-            '{count}'       => $attemptNumber,
+            '{attempt}'     => $attemptNumber,
+            '{maxRetry}'    => $maxRetryAttempts,
             '{method}'      => $request->getMethod(),
             '{target}'      => $request->getRequestTarget(),
             '{version}'     => $request->getProtocolVersion(),

@@ -617,30 +617,7 @@ abstract class Api extends \Prefab implements ApiInterface {
 
             'retry_log_error'           => $this->retryLogError,
             'retry_loggable_callback'   => $this->getIsLoggable(),
-            'retry_log_callback'        => $this->log(),
-            'retry_log_file'            => $this->getLogFile()
-/*
-            'on_retry_callback'         => function($attemptNumber, $delay, $request, $options, $response){
-
-                if(
-                    $this->retryLogError &&                             // log retry errors
-                    ($attemptNumber >= $options['max_retry_attempts'])  // retry limit reached
-                ){
-                    if(
-                        (is_callable($isLoggable = $this->getIsLoggable()) ? $isLoggable($request) : true) &&
-                        is_callable($log = $this->log())
-                    ){
-                        //$this->log()($this->getLogFile(), 'critical');
-                    }
-                }
-                var_dump($request->getUri()->getPath());
-                var_dump($delay);
-                var_dump($response->getStatusCode());
-                var_dump( $attemptNumber);
-                var_dump($options);
-                $test= null;
-
-            } */
+            'retry_log_callback'        => $this->log()
         ];
     }
 
