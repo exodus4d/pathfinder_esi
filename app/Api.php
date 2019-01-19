@@ -518,27 +518,6 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @return bool
-     */
-    public function getLogEnabled() : bool {
-        return $this->logEnabled;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getLogStats() : bool {
-        return $this->logStats;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogFile() : string {
-        return $this->logFile;
-    }
-
-    /**
      * @return callable|null
      */
     public function getCachePool() : ?callable {
@@ -646,15 +625,15 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     protected function getLogMiddlewareConfig() : array {
         return [
-            'log_enabled'               => $this->getLogEnabled(),
-            'log_stats'                 => $this->getLogStats(),
+            'log_enabled'               => $this->logEnabled,
+            'log_stats'                 => $this->logStats,
             'log_cache'                 => $this->logCache,
             'log_cache_header'          => $this->logCacheHeader,
             'log_5xx'                   => true,
             'log_4xx'                   => true,
             'log_loggable_callback'     => $this->getIsLoggable(),
             'log_callback'              => $this->log(),
-            'log_file'                  => $this->getLogFile()
+            'log_file'                  => $this->logFile
         ];
     }
 
