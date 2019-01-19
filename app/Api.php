@@ -180,6 +180,12 @@ abstract class Api extends \Prefab implements ApiInterface {
     private $logCacheHeader                         = GuzzleLogMiddleware::DEFAULT_LOG_CACHE_HEADER;
 
     /**
+     * @see GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS
+     * @var bool
+     */
+    private $logAllStatus                           = GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS;
+
+    /**
      * @see GuzzleLogMiddleware::DEFAULT_LOG_FILE
      * @var string
      */
@@ -391,6 +397,13 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function setLogCacheHeader(string $logCacheHeader = GuzzleLogMiddleware::DEFAULT_LOG_CACHE_HEADER){
         $this->logCacheHeader = $logCacheHeader;
+    }
+
+    /**
+     * @param bool $logAllStatus
+     */
+    public function setLogAllStatus(bool $logAllStatus = GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS){
+        $this->logAllStatus = $logAllStatus;
     }
 
     /**
@@ -631,6 +644,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             'log_cache_header'          => $this->logCacheHeader,
             'log_5xx'                   => true,
             'log_4xx'                   => true,
+            'log_all_status'            => $this->logAllStatus,
             'log_loggable_callback'     => $this->getIsLoggable(),
             'log_callback'              => $this->log(),
             'log_file'                  => $this->logFile
