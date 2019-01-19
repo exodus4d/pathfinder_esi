@@ -43,10 +43,10 @@ abstract class Ccp extends Api {
         parent::initStack($stack);
 
         // log "warning" headers from response -> "deprecated" or "legacy" endpoint request
-        $stack->after('log', GuzzleCcpLogMiddleware::factory($this->getCcpLogMiddlewareConfig()), 'ccp_log');
+        $stack->after('cache', GuzzleCcpLogMiddleware::factory($this->getCcpLogMiddlewareConfig()), 'ccp_log');
 
         // check response headers for ESI error limits
-        $stack->after('ccp_log', GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig()), 'ccp_error_limit');
+        $stack->after('retry', GuzzleCcpErrorLimitMiddleware::factory($this->getCcpErrorLimitMiddlewareConfig()), 'ccp_error_limit');
 
         /*
         // test "ccp_log" middleware. Legacy endpoint

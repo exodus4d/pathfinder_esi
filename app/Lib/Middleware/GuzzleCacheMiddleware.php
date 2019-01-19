@@ -110,36 +110,6 @@ class GuzzleCacheMiddleware {
         register_shutdown_function([$this, 'purgeReValidation']);
     }
 
-    /*
-     * cache response data for successful requests
-     * -> load data from cache rather than sending the request
-     * @param RequestInterface $request
-     * @param array $options
-     * @return FulfilledPromise
-     */
-    /*
-    public function __invoke(RequestInterface $request, array $options){
-        // Combine options with defaults specified by this middleware
-        $options = array_replace($this->defaultOptions, $options);
-
-        $next = $this->nextHandler;
-
-        // TODO
-        $cacheEntry = null;
-
-        if(!$response = $this->fetch($request)){
-            // response not cached
-            return $next($request, $options)->then(
-                $this->onFulfilled($request, $cacheEntry, $options),
-                $this->onRejected($cacheEntry)
-            );
-        }
-
-        $response = static::addDebugHeader($response, self::DEFAULT_CACHE_DEBUG_HEADER_HIT, $options);
-
-        return new FulfilledPromise($response);
-    }*/
-
     /**
      * Will be called at the end of the script
      */

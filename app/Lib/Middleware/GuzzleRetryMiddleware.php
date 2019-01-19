@@ -31,6 +31,9 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
 
     /**
      * default for: retry requests "on status"
+     * HTTP 429 "Too Many Requests"     (default)
+     * HTTP 503 "Service Unavailable"   (default)
+     * HTTP 504 "Gateway Timeout"
      */
     const DEFAULT_RETRY_ON_STATUS               = [429, 503, 504];
 
