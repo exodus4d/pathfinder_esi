@@ -63,9 +63,14 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     const DEFAULT_RETRY_LOG_CALLBACK            = null;
 
     /**
-     * error message for exceeded max retry count
+     * default for: name for log file
      */
-    const ERROR_RETRY_COUNT_EXCEEDED            = 'Max retry count of %s exceeded. %s $s HTTP/%s → {code} {phrase}';
+    const DEFAULT_RETRY_LOG_FILE                = 'retry_requests';
+
+    /**
+     * default for: log message format
+     */
+    const DEFAULT_RETRY_LOG_FORMAT            = 'Max retry count of {count} exceeded. {method} {target} HTTP/{version} → {code} {phrase}';
 
     /**
      * default options can go here for middleware
@@ -81,7 +86,9 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
 
         'retry_log_error'                       => self::DEFAULT_RETRY_LOG_ERROR,
         'retry_loggable_callback'               => self::DEFAULT_RETRY_LOGGABLE_CALLBACK,
-        'retry_log_callback'                    => self::DEFAULT_RETRY_LOG_CALLBACK
+        'retry_log_callback'                    => self::DEFAULT_RETRY_LOG_CALLBACK,
+        'retry_log_file'                        => self::DEFAULT_RETRY_LOG_FILE,
+        'retry_log_format'                      => self::DEFAULT_RETRY_LOG_FORMAT
     ];
 
     /**
@@ -90,14 +97,12 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
      * @param array $defaultOptions
      */
     public function __construct(callable $nextHandler, array $defaultOptions = []){
-        $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
-
         if($defaultOptions['retry_log_error']){
             // add callback function for error logging
             $defaultOptions['on_retry_callback'] = $this->retryCallback();
         }
 
-
+        $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
 
         parent::__construct($nextHandler, $this->defaultOptions);
     }
@@ -115,7 +120,40 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
             array $options,
             ?ResponseInterface $response = null
         ) : void {
-            var_dump('retry callback... ' . $attemptNumber);
+            if(
+                $options['retry_log_error'] &&                      // log retry errors
+                ($attemptNumber >= $options['max_retry_attempts'])  // retry limit reached
+            ){
+                if(
+                    (is_callable($isLoggable = $options['retry_loggable_callback']) ? $isLoggable($request) : true) &&
+                    is_callable($log = $options['retry_log_callback'])
+                ){
+                    $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $response);
+
+                    $log($options['retry_log_file'], 'critical', $message, [], 'warning');
+                }
+            }
         };
+    }
+
+    /**
+     * @param string $message
+     * @param RequestInterface $request
+     * @param int $attemptNumber
+     * @param ResponseInterface|null $response
+     * @return string
+     */
+    protected function getLogMessage(string $message, RequestInterface $request, int $attemptNumber, ?ResponseInterface $response = null) : string {
+        $replace = [
+            '{count}'       => $attemptNumber,
+            '{method}'      => $request->getMethod(),
+            '{target}'      => $request->getRequestTarget(),
+            '{version}'     => $request->getProtocolVersion(),
+
+            '{code}'        => $response ? $response->getStatusCode() : 'NULL',
+            '{phrase}'      => $response ? $response->getReasonPhrase() : ''
+        ];
+
+        return str_replace(array_keys($replace), array_values($replace), $message);
     }
 }

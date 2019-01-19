@@ -618,6 +618,7 @@ abstract class Api extends \Prefab implements ApiInterface {
             'retry_log_error'           => $this->retryLogError,
             'retry_loggable_callback'   => $this->getIsLoggable(),
             'retry_log_callback'        => $this->log(),
+            'retry_log_file'            => $this->getLogFile()
 /*
             'on_retry_callback'         => function($attemptNumber, $delay, $request, $options, $response){
 
