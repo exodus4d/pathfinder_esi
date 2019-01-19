@@ -9,7 +9,6 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 
-use GuzzleHttp\MessageFormatter;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -71,7 +70,7 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
     /**
      * default for: log message format
      */
-    const DEFAULT_RETRY_LOG_FORMAT            = '({attempt}/{maxRetry}) RETRY FAILED {method} {target} HTTP/{version} → {code} {phrase}';
+    const DEFAULT_RETRY_LOG_FORMAT              = '[{attempt}/{maxRetry}] RETRY FAILED {method} {target} HTTP/{version} → {code} {phrase}';
 
     /**
      * default options can go here for middleware
@@ -129,16 +128,14 @@ class GuzzleRetryMiddleware extends \GuzzleRetry\GuzzleRetryMiddleware {
                     (is_callable($isLoggable = $options['retry_loggable_callback']) ? $isLoggable($request) : true) &&
                     is_callable($log = $options['retry_log_callback'])
                 ){
-                    //$formatter = new MessageFormatter($options['retry_log_format']);
-                    //$message = $formatter->format($request, $response);
                     $logData = [
                         'url'               => $request->getUri()->__toString(),
                         'retryAttempt'      => $attemptNumber,
-                        'maxRetryAttempts'  => $options['max_retry_attempts']
+                        'maxRetryAttempts'  => $options['max_retry_attempts'],
+                        'delay'             => $delay
                     ];
 
                     $message = $this->getLogMessage($options['retry_log_format'], $request, $attemptNumber, $options['max_retry_attempts'], $response);
-
 
                     $log($options['retry_log_file'], 'critical', $message, $logData, 'warning');
                 }
