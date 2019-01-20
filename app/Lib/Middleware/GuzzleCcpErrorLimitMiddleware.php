@@ -19,16 +19,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     const CACHE_TAG_ERROR_LIMIT                 = 'ERROR_LIMIT';
 
     /**
-     * default for: callback function that stores $key, $value with $ttl in cache
-     */
-    const DEFAULT_SET_CACHE_VALUE               = null;
-
-    /**
-     * default for: callback function that reads $key from cache
-     */
-    const DEFAULT_GET_CACHE_VALUE               = null;
-
-    /**
      * default for: callback function for logging
      */
     const DEFAULT_LOG_CALLBACK                  = null;
@@ -68,8 +58,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'ccp_limit_set_cache_value'             => self::DEFAULT_SET_CACHE_VALUE,
-        'ccp_limit_get_cache_value'             => self::DEFAULT_GET_CACHE_VALUE,
         'ccp_limit_log_callback'                => self::DEFAULT_LOG_CALLBACK,
         'ccp_limit_log_file_critical'           => self::DEFAULT_LOG_FILE_CRITICAL,
         'ccp_limit_log_file_blocked'            => self::DEFAULT_LOG_FILE_BLOCKED,
@@ -135,20 +123,8 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
                 // get cache key from request URL
                 $cacheKey = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
-
-                $esiErrorRate = [];
-
                 $cacheItem = $this->cache()->getItem($cacheKey);
-                var_dump($cacheItem->isHit());
-                var_dump($cacheItem->get());
-                var_dump($cacheItem->getKey());
-                if($cacheItem->isHit()){
-
-                }
-
-                if(is_callable($getCacheValue = $options['ccp_limit_get_cache_value'])){
-                    $esiErrorRate = $getCacheValue($cacheKey);
-                }
+                $esiErrorRate = (array)$cacheItem->get();
 
                 // increase error count for this $url
                 $errorCount = (int)$esiErrorRate['count'] + 1;
@@ -198,9 +174,9 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                     $esiErrorRate['blocked'] = true;
                 }
 
-                if(is_callable($setCacheValue = $options['ccp_limit_set_cache_value'])){
-                    $setCacheValue($cacheKey, $esiErrorRate, $esiErrorLimitReset);
-                }
+                $cacheItem->set($esiErrorRate);
+                $cacheItem->expiresAfter($esiErrorLimitReset);
+                $this->cache()->save($cacheItem);
             }
 
             return $response;
