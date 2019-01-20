@@ -175,6 +175,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 }
 
                 $cacheItem->set($esiErrorRate);
+                $cacheItem->setTags([self::CACHE_TAG_ERROR_LIMIT]);
                 $cacheItem->expiresAfter($esiErrorLimitReset);
                 $this->cache()->save($cacheItem);
             }

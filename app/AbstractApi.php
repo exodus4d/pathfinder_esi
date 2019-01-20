@@ -138,7 +138,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     private $userAgent                              = '';
 
     /**
-     * Callback function that returns new CacheItemPoolInterface
+     * Callback function that returns new TaggableCacheItemPoolInterface
      * -> This is a PSR-6 compatible Cache pool
      *    Used as Cache Backend in this API
      *    e.g. RedisCachePool() or FilesystemCachePool()
@@ -698,7 +698,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * get instance of a CacheStore that is used in GuzzleCacheMiddleware
      * -> we use a PSR-6 compatible CacheStore that can handle any $cachePool
-     *    that implements the PSR-6 CacheItemPoolInterface
+     *    that implements the PSR-6 TaggableCacheItemPoolInterface
      *    (e.g. an adapter for Redis -> more adapters here: http://www.php-cache.com)
      * @return CacheStorageInterface|null
      */

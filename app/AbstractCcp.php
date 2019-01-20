@@ -98,15 +98,6 @@ abstract class AbstractCcp extends AbstractApi {
      */
     protected function getCcpErrorLimitMiddlewareConfig() : array {
         return [
-            'ccp_limit_set_cache_value' => function(string $key, array $value, int $ttl = 0){
-                // clear existing cache key first -> otherwise f3 updates existing key and ignores new $ttl
-                $f3 = \Base::instance();
-                $f3->clear($key);
-                $f3->set($key, $value, $ttl);
-            },
-            'ccp_limit_get_cache_value' => function(string $key){
-                return \Base::instance()->get($key);
-            },
             'ccp_limit_log_callback' => $this->log()
         ];
     }
