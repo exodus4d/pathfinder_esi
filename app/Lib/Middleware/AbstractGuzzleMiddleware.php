@@ -49,10 +49,14 @@ abstract class AbstractGuzzleMiddleware {
 
     }
 
+    /**
+     * get "normalized" url (ids in path get replaced)
+     * @param string $url
+     * @return string
+     */
     protected function getNormalizedUrl(string $url) : string {
         $urlParts = parse_url($url);
-        $path = preg_replace('/\/(\d+)\//', '/x/', $urlParts['path']);
-
-        return http_build_url($urlParts, ['path' => $path]);
+        $urlParts['path'] = preg_replace('/\/(\d+)\//', '/x/', $urlParts['path']);
+        return $urlParts['scheme'] . '://' . $urlParts['host'] . $urlParts['path'];
     }
 }

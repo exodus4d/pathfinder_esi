@@ -207,7 +207,10 @@ class GuzzleLogMiddleware {
      */
     protected function onRejected(RequestInterface $request, array $options) : \Closure {
         return function ($reason) use ($request, $options) {
-            if($options['log_enabled']){
+            if(
+                $options['log_enabled'] &&
+                $reason instanceof \Exception
+            ){
                 $response = null;
                 if(($reason instanceof RequestException) && $reason->hasResponse()){
                     $response = $reason->getResponse();
