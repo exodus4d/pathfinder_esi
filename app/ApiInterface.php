@@ -72,16 +72,16 @@ interface ApiInterface {
     public function setUserAgent(string $userAgent);
 
     /**
-     * @param callable $newLog
+     * @param \Closure $newLog
      * @return mixed
      */
-    public function setNewLog(callable $newLog);
+    public function setNewLog(\Closure $newLog);
 
     /**
-     * @param callable $isLoggable
+     * @param \Closure $isLoggable
      * @return mixed
      */
-    public function setIsLoggable(callable $isLoggable);
+    public function setIsLoggable(\Closure $isLoggable);
 
     /**
      * @param bool $logEnabled
@@ -200,12 +200,13 @@ interface ApiInterface {
     public function getUserAgent() : string;
 
     /**
-     * @return callable|null
-     */
-    public function getNewLog() : ?callable;
-
-    /**
-     * @return callable|null
+     * @return \Closure|null
      */
     public function getCachePool() : ?\Closure;
+
+    /**
+     * @return \Closure|null
+     */
+    public function getNewLog() : ?\Closure;
+
 }

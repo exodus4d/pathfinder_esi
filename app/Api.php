@@ -9,7 +9,6 @@
 namespace Exodus4D\ESI;
 
 
-use Cache\Adapter\Redis\RedisCachePool;
 use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
@@ -23,7 +22,6 @@ use Exodus4D\ESI\Lib\Middleware\GuzzleRetryMiddleware;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Http\Message\StreamInterface;
 
 abstract class Api extends \Prefab implements ApiInterface {
@@ -375,17 +373,17 @@ abstract class Api extends \Prefab implements ApiInterface {
 
     /**
      * set a callback that returns an new Log object that implements LogInterface
-     * @param callable $newLog
+     * @param \Closure $newLog
      */
-    public function setNewLog(callable $newLog){
+    public function setNewLog(\Closure $newLog){
         $this->getLog = $newLog;
     }
 
     /**
      * set a callback that returns true/false, param: ResponseInterface
-     * @param callable $isLoggable
+     * @param \Closure $isLoggable
      */
-    public function setIsLoggable(callable $isLoggable){
+    public function setIsLoggable(\Closure $isLoggable){
         $this->isLoggable = $isLoggable;
     }
 
@@ -546,9 +544,16 @@ abstract class Api extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @return \Closure|null
+     */
+    public function getCachePool() : ?\Closure {
+        return $this->getCachePool;
+    }
+
+    /**
      * @return callable|null
      */
-    public function getNewLog() : ?callable {
+    public function getNewLog() : ?\Closure {
         return $this->getLog;
     }
 
@@ -557,20 +562,6 @@ abstract class Api extends \Prefab implements ApiInterface {
      */
     public function getIsLoggable() : ?callable {
         return $this->isLoggable;
-    }
-
-    /**
-     * @return callable|null
-     */
-    public function getCachePool() : ?\Closure {
-        return $this->getCachePool;
-        /*
-        return function() : ?CacheItemPoolInterface {
-            $client = new \Redis();
-            $client->connect('localhost', 6379, 2);
-            $client->select(2);
-            return new RedisCachePool($client);
-        };*/
     }
 
     /**
@@ -709,7 +700,7 @@ abstract class Api extends \Prefab implements ApiInterface {
      * @return CacheStorageInterface|null
      */
     protected function getCacheMiddlewareStorage() : ?CacheStorageInterface {
-        if(is_callable($getCachePool = $this->getCachePool()) && !is_null($cachePool = $getCachePool())){
+        if(is_callable($this->getCachePool) && !is_null($cachePool = ($this->getCachePool)())){
             return new Psr6CacheStorage($cachePool);
         }
         return null;
