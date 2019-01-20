@@ -9,7 +9,7 @@
 namespace Exodus4D\ESI;
 
 
-class SSO extends Ccp implements SsoInterface {
+class SSO extends AbstractCcp implements SsoInterface {
 
     /**
      * verify character data by "access_token"

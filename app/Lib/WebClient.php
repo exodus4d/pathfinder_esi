@@ -33,9 +33,9 @@ class WebClient {
      * WebClient constructor.
      * @param string $baseUri
      * @param array $config
-     * @param callable|null $initStack modify handler Stack by ref
+     * @param \Closure|null $initStack modify handler Stack by ref
      */
-    public function __construct(string $baseUri, array $config = [], ?callable $initStack = null){
+    public function __construct(string $baseUri, array $config = [], ?\Closure $initStack = null){
         // use cURLHandler for all requests
         $handler = new CurlHandler();
         // new Stack for the Handler, manages Middleware for requests

@@ -24,7 +24,7 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\StreamInterface;
 
-abstract class Api extends \Prefab implements ApiInterface {
+abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * default for: accepted response type
@@ -621,7 +621,10 @@ abstract class Api extends \Prefab implements ApiInterface {
             'debug'             => $this->getDebugRequests(),
             'headers'           => [
                 'User-Agent'    => $this->getUserAgent()
-            ]
+            ],
+
+            // custom config
+            'get_cache_pool'    => $this->getCachePool()    // make cachePool available in Middlewares
         ];
     }
 

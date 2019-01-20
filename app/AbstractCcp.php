@@ -14,7 +14,7 @@ use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-abstract class Ccp extends Api {
+abstract class AbstractCcp extends AbstractApi {
 
     // loggable limits ================================================================================================
     // ESI endpoints that return warning headers (e.g. "resource_legacy", "resource_deprecated") will get logged

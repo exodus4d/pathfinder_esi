@@ -72,6 +72,12 @@ interface ApiInterface {
     public function setUserAgent(string $userAgent);
 
     /**
+     * @param \Closure $cachePool
+     * @return mixed
+     */
+    public function setCachePool(\Closure $cachePool);
+
+    /**
      * @param \Closure $newLog
      * @return mixed
      */

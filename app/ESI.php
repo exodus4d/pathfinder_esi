@@ -10,7 +10,7 @@ namespace Exodus4D\ESI;
 
 use Exodus4D\ESI\Config;
 
-class ESI extends Ccp implements EsiInterface {
+class ESI extends AbstractCcp implements EsiInterface {
 
     /**
      * error message for set waypoint
