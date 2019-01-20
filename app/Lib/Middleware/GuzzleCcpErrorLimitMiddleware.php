@@ -133,12 +133,11 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 // block further api calls for this URL until error limit is reset/clear
                 $blockUrl = false;
 
-                // get "normalized" url path without params/placeholders
-                $urlPath = $this->getNormalizedUrlPath($request->getUri()->__toString());
-                $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
+                // get cache key from request URL
+                $cacheKey = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
 
                 $esiErrorRate = [];
-$test = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
+
                 if(is_callable($getCacheValue = $options['ccp_limit_get_cache_value'])){
                     $esiErrorRate = $getCacheValue($cacheKey);
                 }
