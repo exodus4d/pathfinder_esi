@@ -9,6 +9,39 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 
+use Cache\Adapter\Void\VoidCachePool;
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Message\RequestInterface;
+
 abstract class AbstractGuzzleMiddleware {
 
+    /**
+     * @var null|\Closure
+     */
+    private $getCachePool = null;
+
+    /**
+     * @param RequestInterface $request
+     * @param array $options
+     */
+    public function __invoke(RequestInterface $request, array $options){
+        if(is_callable($options['get_cache_pool'])){
+            $this->getCachePool = $options['get_cache_pool'];
+        }
+    }
+
+    /**
+     * get PSR-6 CachePool instance
+     * @return CacheItemPoolInterface
+     */
+    protected function cache() : CacheItemPoolInterface {
+        if(!is_null($this->getCachePool)){
+            // return should be a full working PSR-6 Cache pool instance
+            return ($this->getCachePool)();
+        }else{
+            // no Cache pool provided -> use default "void" Cache Pool
+            // -> no storage at all! Dummy PSR-6
+            return new VoidCachePool();
+        }
+    }
 }

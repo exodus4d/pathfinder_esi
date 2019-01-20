@@ -11,7 +11,7 @@ namespace Exodus4D\ESI\Lib\Middleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class GuzzleCcpErrorLimitMiddleware {
+class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
     /**
      * cache key prefix for error limits
@@ -100,6 +100,8 @@ class GuzzleCcpErrorLimitMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
+        parent::__invoke($request, $options);
+
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
 
