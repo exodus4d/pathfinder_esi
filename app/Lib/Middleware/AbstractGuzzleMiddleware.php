@@ -45,8 +45,27 @@ abstract class AbstractGuzzleMiddleware {
         }
     }
 
-    protected function getKeyFromUrl(string $url) : string {
+    /**
+     * get a hashed key from $request URL
+     * @see cacheKeyFromUrl()
+     * @param RequestInterface $request
+     * @param string $tag
+     * @return string
+     */
+    protected function cacheKeyFromRequestUrl(RequestInterface $request, string $tag = '') : string {
+        return $this->cacheKeyFromUrl($request->getUri()->__toString(), $tag);
+    }
 
+    /**
+     * get a hashed key from $url
+     * -> $url gets normalized and GET params are stripped
+     * -> $tag can be used to get multiple unique keys for same $url
+     * @param string $tag
+     * @param string $url
+     * @return string
+     */
+    protected function cacheKeyFromUrl(string $url, string $tag = '') : string {
+        return $this->hashKey($this->getNormalizedUrl($url) . $tag);
     }
 
     /**
@@ -58,5 +77,15 @@ abstract class AbstractGuzzleMiddleware {
         $urlParts = parse_url($url);
         $urlParts['path'] = preg_replace('/\/(\d+)\//', '/x/', $urlParts['path']);
         return $urlParts['scheme'] . '://' . $urlParts['host'] . $urlParts['path'];
+    }
+
+    /**
+     * get valid PSR-6 key name
+     * @see http://www.php-cache.com/en/latest/introduction/#cache-keys
+     * @param string $key
+     * @return string
+     */
+    protected function hashKey(string $key) : string {
+        return sha1($key);
     }
 }

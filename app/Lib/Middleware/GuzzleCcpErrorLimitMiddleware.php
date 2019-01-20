@@ -14,9 +14,9 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
     /**
-     * cache key prefix for error limits
+     * cache tag for error limits
      */
-    const CACHE_KEY_PREFIX_ERROR_LIMIT          = 'CACHED_ERROR_LIMIT_';
+    const CACHE_TAG_ERROR_LIMIT                 = 'ERROR_LIMIT';
 
     /**
      * default for: callback function that stores $key, $value with $ttl in cache
@@ -138,7 +138,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
 
                 $esiErrorRate = [];
-
+$test = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
                 if(is_callable($getCacheValue = $options['ccp_limit_get_cache_value'])){
                     $esiErrorRate = $getCacheValue($cacheKey);
                 }
