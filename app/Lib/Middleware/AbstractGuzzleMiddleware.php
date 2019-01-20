@@ -44,4 +44,15 @@ abstract class AbstractGuzzleMiddleware {
             return new VoidCachePool();
         }
     }
+
+    protected function getKeyFromUrl(string $url) : string {
+
+    }
+
+    protected function getNormalizedUrl(string $url) : string {
+        $urlParts = parse_url($url);
+        $path = preg_replace('/\/(\d+)\//', '/x/', $urlParts['path']);
+
+        return http_build_url($urlParts, ['path' => $path]);
+    }
 }

@@ -138,6 +138,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 $cacheKey = self::CACHE_KEY_PREFIX_ERROR_LIMIT . $urlPath;
 
                 $esiErrorRate = [];
+
                 if(is_callable($getCacheValue = $options['ccp_limit_get_cache_value'])){
                     $esiErrorRate = $getCacheValue($cacheKey);
                 }
