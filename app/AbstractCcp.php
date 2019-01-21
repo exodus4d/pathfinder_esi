@@ -11,29 +11,12 @@ namespace Exodus4D\ESI;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLogMiddleware;
 use GuzzleHttp\HandlerStack;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 abstract class AbstractCcp extends AbstractApi {
 
     // loggable limits ================================================================================================
     // ESI endpoints that return warning headers (e.g. "resource_legacy", "resource_deprecated") will get logged
     // To prevent big file I/O on these log files, errors get "throttled" and not all of them get logged
-
-    /**
-     * Cache key for "loggable limits"
-     */
-    const CACHE_KEY_LOGGABLE_LIMIT              = 'CACHED_LOGGABLE_LIMIT';
-
-    /**
-     * Time interval used for error inspection (seconds)
-     */
-    const LOGGABLE_COUNT_INTERVAL               = 60;
-
-    /**
-     * Log first "2" errors that occur for an endpoint within "60" (LOGGABLE_COUNT_INTERVAL) seconds interval
-     */
-    const LOGGABLE_COUNT_MAX_URL                = 2;
 
     /**
      * see parent
@@ -75,19 +58,7 @@ abstract class AbstractCcp extends AbstractApi {
      */
     protected function getCcpLogMiddlewareConfig() : array {
         return [
-            'ccp_log_loggable_callback' => function(string $type, RequestInterface $request, ResponseInterface $response = null) : bool {
-                $loggable = true;
-
-                if(is_callable($isLoggable = $this->getIsLoggable())){
-                    $loggable = $isLoggable($request);
-                }
-
-                if($loggable){
-                    $loggable = $this->isLoggableEndpoint($type, $request->getUri()->__toString());
-                }
-
-                return $loggable;
-            },
+            'ccp_log_loggable_callback' => $this->getIsLoggable(),
             'ccp_log_callback' => $this->log()
         ];
     }
@@ -100,35 +71,5 @@ abstract class AbstractCcp extends AbstractApi {
         return [
             'ccp_limit_log_callback' => $this->log()
         ];
-    }
-
-    /**
-     * checks whether a request should be logged or not
-     * -> if a request url is already logged with a certain $type,
-     *      it will not get logged the next time until self::LOGGABLE_COUNT_INTERVAL
-     *      expires (this helps to reduce log file I/O)
-     * @param string $type
-     * @param string $urlPath
-     * @return bool
-     */
-    protected function isLoggableEndpoint(string $type, string $urlPath) : bool {
-        $loggable = false;
-        $f3 = \Base::instance();
-
-        if(!$f3->exists(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit)){
-            $loggableLimit = [];
-        }
-
-        // increase counter
-        $count = (int)$loggableLimit[$urlPath][$type]['count']++;
-
-        // check counter for given $urlPath
-        if($count < self::LOGGABLE_COUNT_MAX_URL){
-            // loggable error count exceeded...
-            $loggable = true;
-            $f3->set(self::CACHE_KEY_LOGGABLE_LIMIT, $loggableLimit, self::LOGGABLE_COUNT_INTERVAL);
-        }
-
-        return $loggable;
     }
 }
