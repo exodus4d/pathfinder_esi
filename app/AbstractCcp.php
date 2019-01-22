@@ -14,10 +14,6 @@ use GuzzleHttp\HandlerStack;
 
 abstract class AbstractCcp extends AbstractApi {
 
-    // loggable limits ================================================================================================
-    // ESI endpoints that return warning headers (e.g. "resource_legacy", "resource_deprecated") will get logged
-    // To prevent big file I/O on these log files, errors get "throttled" and not all of them get logged
-
     /**
      * see parent
      * @param HandlerStack $stack

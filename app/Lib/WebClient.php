@@ -12,13 +12,12 @@ namespace Exodus4D\ESI\Lib;
 
 use Exodus4D\ESI\Lib\Stream\JsonStream;
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
-use GuzzleHttp\Handler\CurlHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
@@ -45,12 +44,7 @@ class WebClient {
         if(is_callable($initStack)){
             $initStack($stack);
         }
-/*
-        $stack->push(Middleware::tap(function($request){
-            var_dump('tab middleware ---');
-            var_dump($request->getHeaders());
-        }));
-*/
+
         // Client default configuration
         $config['handler'] = $stack;
         $config['base_uri'] = $baseUri;
@@ -130,6 +124,8 @@ class WebClient {
     }
 
     /**
+     * pipe all functions right into the Client
+     * @see Client
      * @param string $name
      * @param array $arguments
      * @return array|mixed
@@ -140,16 +136,7 @@ class WebClient {
         if(is_object($this->client)){
             if( method_exists($this->client, $name) ){
                 $return  = call_user_func_array([$this->client, $name], $arguments);
-            }else{
-                // TODO
-                /*
-                $errorMsg = $this->getMissingMethodError(get_class($this->client), $name);
-                $this->getLogger('ERROR')->write($errorMsg);
-                \Base::instance()->error(501, $errorMsg);*/
             }
-        }else{
-            // TODO
-            //\Base::instance()->error(501, self::ERROR_CLIENT_INVALID);
         }
 
         return $return;

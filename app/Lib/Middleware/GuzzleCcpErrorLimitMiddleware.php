@@ -19,6 +19,11 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     const CACHE_TAG_ERROR_LIMIT                 = 'ERROR_LIMIT';
 
     /**
+     * default for: global enable this middleware
+     */
+    const DEFAULT_LOG_ENABLED                   = true;
+
+    /**
      * default for: callback function for logging
      */
     const DEFAULT_LOG_CALLBACK                  = null;
@@ -58,6 +63,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @var array
      */
     private $defaultOptions = [
+        'ccp_limit_enabled'                     => self::DEFAULT_LOG_ENABLED,
         'ccp_limit_log_callback'                => self::DEFAULT_LOG_CALLBACK,
         'ccp_limit_log_file_critical'           => self::DEFAULT_LOG_FILE_CRITICAL,
         'ccp_limit_log_file_blocked'            => self::DEFAULT_LOG_FILE_BLOCKED,
@@ -88,12 +94,17 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
+        $next = $this->nextHandler;
+
+        if(!$options['ccp_limit_enabled']){
+            // middleware disabled -> skip
+            return $next($request, $options);
+        }
+
         parent::__invoke($request, $options);
 
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
-
-        $next = $this->nextHandler;
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options)

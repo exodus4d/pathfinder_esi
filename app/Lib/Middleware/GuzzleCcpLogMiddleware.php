@@ -31,6 +31,11 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
     const CACHE_TAG_DEPRECATED_LIMIT    = 'DEPRECATED_LIMIT';
 
     /**
+     * default for: global enable this middleware
+     */
+    const DEFAULT_LOG_ENABLED           = true;
+
+    /**
      * default for: Log first "2" errors that occur for an endpoint within "X" seconds
      * @see DEFAULT_LOG_LIMIT_COUNT_TTL
      */
@@ -77,6 +82,7 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
      * @var array
      */
     private $defaultOptions = [
+        'ccp_log_enabled'               => self::DEFAULT_LOG_ENABLED,
         'ccp_log_count_max'             => self::DEFAULT_LOG_COUNT_MAX,
         'ccp_log_limit_count_ttl'       => self::DEFAULT_LOG_LIMIT_COUNT_TTL,
         'ccp_log_loggable_callback'     => self::DEFAULT_LOG_LOGGABLE_CALLBACK,
@@ -107,12 +113,17 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
+        $next = $this->nextHandler;
+
+        if(!$options['ccp_log_enabled']){
+            // middleware disabled -> skip
+            return $next($request, $options);
+        }
+
         parent::__invoke($request, $options);
 
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
-
-        $next = $this->nextHandler;
 
         return $next($request, $options)
             ->then(
@@ -147,18 +158,6 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
                             }
                         }
                     }
-
-                    /*
-                    if(is_callable($loggable = $options['ccp_log_loggable_callback']) ? $loggable('legacy', $request, $response) : (bool)$loggable){
-                        // warning for legacy endpoint should be logged
-                        if(is_callable($log = $options['ccp_log_callback'])){
-                            $logData = [
-                                'url' => $request->getUri()->__toString()
-                            ];
-
-                            $log($options['ccp_log_file_legacy'], 'notice', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
-                        }
-                    }*/
                 }
 
                 // check header value for 299 code

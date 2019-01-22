@@ -768,9 +768,6 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
              */
             $response = $this->getClient()->send($request, $options);
             $body = $response->getBody();
-            /*
-            var_dump('response: ----');
-            var_dump($response->getHeader('X-Guzzle-Cache'));*/
         }catch(TransferException $e){
             // Base Exception of Guzzle errors
             // -> this includes "expected" errors like 4xx responses (ClientException)
