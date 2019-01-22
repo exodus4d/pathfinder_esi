@@ -126,10 +126,15 @@ class GuzzleCacheMiddleware {
      * @throws \Exception
      */
     public function __invoke(RequestInterface $request, array $options){
+        $next = $this->nextHandler;
+
+        if(!$options['cache_enabled']){
+            // middleware disabled -> skip
+            return $next($request, $options);
+        }
+
         // Combine options with defaults specified by this middleware
         $options = array_replace($this->defaultOptions, $options);
-
-        $next = $this->nextHandler;
 
         // check if request HTTP Method can be cached -----------------------------------------------------------------
         if(!in_array(strtoupper($request->getMethod()), (array)$options['cache_http_methods'])){

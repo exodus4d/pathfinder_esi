@@ -646,7 +646,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         // -> add somewhere to stack BOTTOM so that it runs at the end catches errors from previous middlewares
         $stack->push(GuzzleLogMiddleware::factory($this->getLogMiddlewareConfig()), 'log');
 
-        // cache responses based on the response Headers and cache configuration6
+        // cache responses based on the response Headers and cache configuration
         $stack->push(GuzzleCacheMiddleware::factory(
             $this->getCacheMiddlewareConfig(),
             $this->getCacheMiddlewareStrategy()
