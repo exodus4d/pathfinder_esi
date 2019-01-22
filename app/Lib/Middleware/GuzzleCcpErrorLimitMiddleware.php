@@ -94,6 +94,9 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
+        // Combine options with defaults specified by this middleware
+        $options = array_replace($this->defaultOptions, $options);
+
         $next = $this->nextHandler;
 
         if(!$options['ccp_limit_enabled']){
@@ -102,9 +105,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
         }
 
         parent::__invoke($request, $options);
-
-        // Combine options with defaults specified by this middleware
-        $options = array_replace($this->defaultOptions, $options);
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options)
