@@ -91,6 +91,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @see https://developers.eveonline.com/blog/article/esi-error-limits-go-live
      * @param RequestInterface $request
      * @param array $options
+     * @throws \Psr\Cache\InvalidArgumentException
      * @return mixed
      */
     public function __invoke(RequestInterface $request, array $options){
@@ -103,6 +104,12 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
             // middleware disabled -> skip
             return $next($request, $options);
         }
+
+        // check if Request Endpoint is blocked
+        if($this->isBlocked($request)){
+            var_dump('blocked');
+        }
+
 
         parent::__invoke($request, $options);
 
@@ -195,12 +202,24 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     }
 
     /**
-     * convert $url into normalized URL for cache key
-     * @param string $url
-     * @return string
+     * @param RequestInterface $request
+     * @return bool
+     * @throws \Psr\Cache\InvalidArgumentException
      */
-    protected function getNormalizedUrlPath(string $url) : string {
-        return preg_replace('/\//', '_', parse_url(strtok(preg_replace('/\/(\d+)\//', '/x/', $url), '?'), PHP_URL_PATH));
+    protected function isBlocked(RequestInterface $request) : bool {
+        $blocked = false;
+
+        $cacheKey = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
+        $cacheItem = $this->cache()->getItem($cacheKey);
+        if($cacheItem->isHit()){
+            // check if it is blocked
+            $esiErrorRate = (array)$cacheItem->get();
+            if($esiErrorRate['blocked']){
+                $blocked = true;
+            }
+        }
+
+        return $blocked;
     }
 
     /**
