@@ -329,13 +329,16 @@ class GuzzleLogMiddleware {
      * @return array
      */
     protected function logReason(?\Exception $exception) : array {
-        if($exception instanceof RequestException){
-            $handlerContext = $exception->getHandlerContext();
+        if(
+            ($exception instanceof RequestException) &&
+            !empty($handlerContext = $exception->getHandlerContext())
+        ){
             return [
                 'errno'                 => $handlerContext['errno'],
                 'error'                 => $handlerContext['error']
             ];
         }else{
+            // other Exception OR RequestException without handlerContext data
             return [
                 'errno'                 => 'NULL',
                 'error'                 => $exception->getMessage()

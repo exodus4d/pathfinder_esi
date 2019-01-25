@@ -8,6 +8,7 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -109,7 +110,9 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
         // check if Request Endpoint is blocked
         if($this->isBlocked($request)){
-            var_dump('blocked');
+            return \GuzzleHttp\Promise\rejection_for(
+                new RequestException('Hello blocked', $request)
+            );
         }
 
         return $next($request, $options)->then(
