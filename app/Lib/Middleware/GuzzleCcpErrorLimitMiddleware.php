@@ -105,13 +105,12 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
             return $next($request, $options);
         }
 
+        parent::__invoke($request, $options);
+
         // check if Request Endpoint is blocked
         if($this->isBlocked($request)){
             var_dump('blocked');
         }
-
-
-        parent::__invoke($request, $options);
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options)
@@ -151,6 +150,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 if($response->hasHeader('x-esi-error-limited')){
                     // request url is blocked until new error limit becomes reset
                     // -> this should never happen
+                    $blockUrl = true;
 
                     if(is_callable($log = $options['ccp_limit_log_callback'])){
                         $logData = [
@@ -171,6 +171,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                         $errorCount > (int)$options['ccp_limit_error_count_max_url'] ||
                         $esiErrorLimitRemain < (int)$options['ccp_limit_error_count_remain_total']
                     ){
+                        // ... reached critical limit -> mark as blocked
                         $blockUrl = true;
 
                         // log critical limit reached
