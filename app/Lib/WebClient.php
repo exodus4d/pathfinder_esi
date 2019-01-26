@@ -20,7 +20,13 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 
+/**
+ * Class WebClient
+ * @package Exodus4D\ESI\Lib
+ * @method Client send(RequestInterface $request, array $options = [])
+ */
 class WebClient {
 
     /**
@@ -125,7 +131,6 @@ class WebClient {
 
     /**
      * pipe all functions right into the Client
-     * @see Client
      * @param string $name
      * @param array $arguments
      * @return array|mixed
