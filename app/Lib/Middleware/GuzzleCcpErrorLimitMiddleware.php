@@ -8,7 +8,7 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
-use GuzzleHttp\Exception\RequestException;
+
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;

@@ -143,7 +143,7 @@ class GuzzleLogMiddleware {
      */
     public function __construct(callable $nextHandler, array $defaultOptions = []){
         $this->nextHandler = $nextHandler;
-        $this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
+        $this->defaultOptions = $this->mergeOptions($this->defaultOptions, $defaultOptions);
     }
 
     /**
@@ -154,7 +154,7 @@ class GuzzleLogMiddleware {
      */
     public function __invoke(RequestInterface $request, array $options){
         // Combine options with defaults specified by this middleware
-        $options = array_replace($this->defaultOptions, $options);
+        $options = $this->mergeOptions($this->defaultOptions, $options);
 
         // deactivate this middleware a callback function is provided with response false
         if(
@@ -445,6 +445,20 @@ class GuzzleLogMiddleware {
         ];
 
         return str_replace(array_keys($replace), array_values($replace), $message);
+    }
+
+    /**
+     * merge middleware options
+     * @param array $options
+     * @param array $optionsNew
+     * @return array
+     */
+    protected function mergeOptions(array $options = [], array $optionsNew = []) : array {
+        // array options must be merged rather than replaced
+        $optionsNew['log_on_status'] = array_unique(array_merge((array)$options['log_on_status'], (array)$optionsNew['log_on_status']));
+        $optionsNew['log_off_status'] = array_unique(array_merge((array)$options['log_off_status'], (array)$optionsNew['log_off_status']));
+
+        return array_replace($options, $optionsNew);
     }
 
     /**
