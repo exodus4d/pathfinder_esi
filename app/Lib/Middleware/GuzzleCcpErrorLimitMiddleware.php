@@ -33,6 +33,11 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     const DEFAULT_LIMIT_HTTP_STATUS         = 420;
 
     /**
+     * default for: HTTP status phrase for DEFAULT_LIMIT_HTTP_STATUS code
+     */
+    const DEFAULT_LIMIT_HTTP_PHRASE         = 'Error limited';
+
+    /**
      * default for: log error for endpoint if error count exceeds limit in the current error window
      * -> CCP blocks endpoint           -> after 100 error responses within 60s
      *    we log warnings for endpoints -> after  80 error responses within 60s
@@ -61,11 +66,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     const DEFAULT_LOG_FILE_BLOCKED          = 'esi_resource_blocked';
 
     /**
-     * error message for requests that can not be processed because of blocked
-     */
-    const ERROR_REQUEST_BLOCKED             = 'Request error: Blocked for (%ss)';
-
-    /**
      * error message for response HTTP header "x-esi-error-limited" - Blocked endpoint
      */
     const ERROR_RESPONSE_BLOCKED            = "Response error: Blocked for (%ss)";
@@ -89,6 +89,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     private $defaultOptions = [
         'ccp_limit_enabled'                 => self::DEFAULT_LIMIT_ENABLED,
         'ccp_limit_http_status'             => self::DEFAULT_LIMIT_HTTP_STATUS,
+        'ccp_limit_http_phrase'             => self::DEFAULT_LIMIT_HTTP_PHRASE,
         'ccp_limit_error_count_max'         => self::DEFAULT_LIMIT_COUNT_MAX,
         'ccp_limit_error_count_remain'      => self::DEFAULT_LIMIT_COUNT_REMAIN,
         'ccp_limit_log_callback'            => self::DEFAULT_LOG_CALLBACK,
@@ -134,7 +135,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
         // check if Request Endpoint is blocked
         if(!is_null($blockedUntil = $this->isBlockedUntil($request))){
-            $blockedSeconds = $blockedUntil->getTimestamp() - time();
 
             return new FulfilledPromise(
                 new Response(
@@ -142,14 +142,7 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                     [],
                     null,
                     '1.1',
-                    'Error limited'
-                )
-            );
-
-            return \GuzzleHttp\Promise\rejection_for(
-                new RequestException(
-                    sprintf(self::ERROR_REQUEST_BLOCKED, $blockedSeconds),
-                    $request
+                    $options['ccp_limit_http_phrase']
                 )
             );
         }
@@ -201,6 +194,9 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                     $level      = 'alert';
                     $tag        = 'danger';
                     $message    = sprintf(self::ERROR_RESPONSE_BLOCKED, $esiErrorLimitReset);
+
+                    // the expected response HTTP status 420 is "unofficial", add proper phrase
+                    $response = $response->withStatus($response->getStatusCode(), $options['ccp_limit_http_phrase']);
                 }
 
                 // check limits HTTP Header ---------------------------------------------------------------------------
