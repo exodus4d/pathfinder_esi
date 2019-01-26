@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI\Lib\Middleware;
 
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -22,7 +24,26 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     /**
      * default for: global enable this middleware
      */
-    const DEFAULT_LOG_ENABLED               = true;
+    const DEFAULT_LIMIT_ENABLED             = true;
+
+    /**
+     * default for: HTTP status response code for requests to "blocked" endpoints
+     * @see https://esi.evetech.net status codes
+     */
+    const DEFAULT_LIMIT_HTTP_STATUS         = 420;
+
+    /**
+     * default for: log error for endpoint if error count exceeds limit in the current error window
+     * -> CCP blocks endpoint           -> after 100 error responses within 60s
+     *    we log warnings for endpoints -> after  80 error responses within 60s
+     */
+    const DEFAULT_LIMIT_COUNT_MAX           = 80;
+
+    /**
+     * default for: log error and block endpoint if
+     * -> less then 10 errors remain left in current error window
+     */
+    const DEFAULT_LIMIT_COUNT_REMAIN        = 10;
 
     /**
      * default for: callback function for logging
@@ -40,19 +61,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     const DEFAULT_LOG_FILE_BLOCKED          = 'esi_resource_blocked';
 
     /**
-     * default for: log error for endpoint if error count exceeds limit in the current error window
-     * -> CCP blocks endpoint           -> after 100 error responses within 60s
-     *    we log warnings for endpoints -> after  80 error responses within 60s
-     */
-    const DEFAULT_ERROR_COUNT_MAX           = 80;
-
-    /**
-     * default for: log error and block endpoint if
-     * -> less then 10 errors remain left in current error window
-     */
-    const DEFAULT_ERROR_COUNT_REMAIN        = 10;
-
-    /**
      * error message for requests that can not be processed because of blocked
      */
     const ERROR_REQUEST_BLOCKED             = 'Request error: Blocked for (%ss)';
@@ -64,13 +72,13 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
     /**
      * error message for response HTTP header "x-esi-error-limit-remain" that:
-     * -> falls below "critical" DEFAULT_ERROR_COUNT_REMAIN limit
+     * -> falls below "critical" DEFAULT_LIMIT_COUNT_REMAIN limit
      */
     const ERROR_RESPONSE_LIMIT_BELOW        = 'Response error: [%2s < %2s] Rate falls below critical limit. Blocked for (%ss)';
 
     /**
      * error message for response HTTP header "x-esi-error-limit-remain" that:
-     * -> exceed "critical" DEFAULT_ERROR_COUNT_MAX limit
+     * -> exceed "critical" DEFAULT_LIMIT_COUNT_MAX limit
      */
     const ERROR_RESPONSE_LIMIT_ABOVE        = 'Response error: [%2s > %2s] Rate exceeded critical limit. Blocked for (%ss)';
 
@@ -79,12 +87,13 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
      * @var array
      */
     private $defaultOptions = [
-        'ccp_limit_enabled'                 => self::DEFAULT_LOG_ENABLED,
+        'ccp_limit_enabled'                 => self::DEFAULT_LIMIT_ENABLED,
+        'ccp_limit_http_status'             => self::DEFAULT_LIMIT_HTTP_STATUS,
+        'ccp_limit_error_count_max'         => self::DEFAULT_LIMIT_COUNT_MAX,
+        'ccp_limit_error_count_remain'      => self::DEFAULT_LIMIT_COUNT_REMAIN,
         'ccp_limit_log_callback'            => self::DEFAULT_LOG_CALLBACK,
         'ccp_limit_log_file_critical'       => self::DEFAULT_LOG_FILE_CRITICAL,
-        'ccp_limit_log_file_blocked'        => self::DEFAULT_LOG_FILE_BLOCKED,
-        'ccp_limit_error_count_max'         => self::DEFAULT_ERROR_COUNT_MAX,
-        'ccp_limit_error_count_remain'      => self::DEFAULT_ERROR_COUNT_REMAIN
+        'ccp_limit_log_file_blocked'        => self::DEFAULT_LOG_FILE_BLOCKED
     ];
 
     /**
@@ -126,6 +135,17 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
         // check if Request Endpoint is blocked
         if(!is_null($blockedUntil = $this->isBlockedUntil($request))){
             $blockedSeconds = $blockedUntil->getTimestamp() - time();
+
+            return new FulfilledPromise(
+                new Response(
+                    $options['ccp_limit_http_status'],
+                    [],
+                    null,
+                    '1.1',
+                    'Error limited'
+                )
+            );
+
             return \GuzzleHttp\Promise\rejection_for(
                 new RequestException(
                     sprintf(self::ERROR_REQUEST_BLOCKED, $blockedSeconds),
