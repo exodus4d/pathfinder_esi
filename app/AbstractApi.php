@@ -754,10 +754,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * @param string $method
      * @param string $uri
      * @param array $options
-     * @param array $additionalOptions
      * @return JsonStreamInterface|StreamInterface|null
      */
-    protected function request(string $method, string $uri, array $options = [], array $additionalOptions = []) : ?StreamInterface {
+    protected function request(string $method, string $uri, array $options = []) : ?StreamInterface {
         $body = null;
 
         try{

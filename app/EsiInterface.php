@@ -32,26 +32,23 @@ interface EsiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterLocationData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterShipData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterOnlineData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $corporationId
@@ -125,10 +122,9 @@ interface EsiInterface {
 
     /**
      * @param array $universeIds
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array;
+    public function getUniverseNamesData(array $universeIds) : array;
 
     /**
      * @return array
@@ -165,17 +161,15 @@ interface EsiInterface {
     /**
      * @param int $structureId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array;
+    public function getUniverseStructureData(int $structureId, string $accessToken) : array;
 
     /**
      * @param int $typeId
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array;
+    public function getUniverseTypesData(int $typeId) : array;
 
     /**
      * @param int $sourceId

@@ -117,15 +117,14 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
+    public function getCharacterLocationData(int $characterId, string $accessToken) : array {
         $uri = $this->getEndpointURI(['characters', 'location', 'GET'], [$characterId]);
         $locationData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $locationData = (new namespace\Mapper\Location($response))->getData();
@@ -137,15 +136,14 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
+    public function getCharacterShipData(int $characterId, string $accessToken) : array {
         $uri = $this->getEndpointURI(['characters', 'ship', 'GET'], [$characterId]);
         $shipData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $shipData = (new namespace\Mapper\Ship($response))->getData();
@@ -157,15 +155,14 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array {
+    public function getCharacterOnlineData(int $characterId, string $accessToken) : array {
         $uri = $this->getEndpointURI(['characters', 'online', 'GET'], [$characterId]);
         $onlineData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $onlineData = (new namespace\Mapper\Online($response))->getData();
@@ -407,15 +404,14 @@ class ESI extends AbstractCcp implements EsiInterface {
 
     /**
      * @param array $universeIds
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array {
+    public function getUniverseNamesData(array $universeIds) : array {
         $uri = $this->getEndpointURI(['universe', 'names', 'POST']);
         $universeData = [];
 
         $requestOptions = $this->getRequestOptions('', $universeIds);
-        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             foreach((array)$response as $data){
@@ -577,15 +573,14 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @param int $structureId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array {
+    public function getUniverseStructureData(int $structureId, string $accessToken) : array {
         $uri = $this->getEndpointURI(['universe', 'structures', 'GET'], [$structureId]);
         $structureData = [];
 
         $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $structureData = (new namespace\Mapper\Universe\Structure($response))->getData();
@@ -599,15 +594,14 @@ class ESI extends AbstractCcp implements EsiInterface {
 
     /**
      * @param int $typeId
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array {
+    public function getUniverseTypesData(int $typeId) : array {
         $uri = $this->getEndpointURI(['universe', 'types', 'GET'], [$typeId]);
         $typesData = [];
 
         $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $typesData = (new namespace\Mapper\Universe\Type($response))->getData();
@@ -842,42 +836,4 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         return $options;
     }
-
-    /*
-    protected function request(string $url, string $method = 'GET', string $accessToken = '', array $additionalOptions = []){
-        $responseBody = null;
-
-        $webClient = namespace\Lib\WebClient::instance($this->getDebugLevel(), $this->getDebugLogRequests());
-
-        // check if url is blocked (error limit exceeded)
-        if(!$webClient->isBlockedUrl($url)){
-            $requestOptions = [
-                'timeout' => self::ESI_TIMEOUT,
-                'method' => $method,
-                'user_agent' => $this->getUserAgent(),
-                'header' => [
-                    'Accept: application/json',
-                    'Expect:'
-                ]
-            ];
-
-            // add auth token if available (required for some endpoints)
-            if( !empty($accessToken) ){
-                $requestOptions['header'][] = 'Authorization: Bearer ' . $accessToken;
-            }
-
-            if( !empty($additionalOptions['content']) ){
-                // "Content-Type" Header is required for POST requests
-                $requestOptions['header'][] = 'Content-Type: application/json';
-
-                $requestOptions['content'] =  json_encode($additionalOptions['content'], JSON_UNESCAPED_SLASHES);
-                unset($additionalOptions['content']);
-            }
-
-            $responseBody = $webClient->request($url, $requestOptions, $additionalOptions);
-        }
-
-        return $responseBody;
-    }
-    */
 }

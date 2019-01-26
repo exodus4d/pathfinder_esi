@@ -45,10 +45,9 @@ class SSO extends AbstractCcp implements SsoInterface {
      *      $requestParams['refresh_token]  = 'XXXX'
      * @param array $credentials
      * @param array $requestParams
-     * @param array $additionalOptions
      * @return array
      */
-    public function getAccessData(array $credentials, array $requestParams = [], array $additionalOptions = []) : array {
+    public function getAccessData(array $credentials, array $requestParams = []) : array {
         $uri = $this->getVerifyAuthorizationCodeEndpointURI();
         $accessData = [];
 
@@ -57,7 +56,7 @@ class SSO extends AbstractCcp implements SsoInterface {
             'auth' => $credentials
         ];
 
-        $response = $this->request('POST', $uri, $requestOptions, $additionalOptions)->getContents();
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             $accessData = (new namespace\Mapper\Sso\Access($response))->getData();

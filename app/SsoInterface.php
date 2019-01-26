@@ -20,9 +20,8 @@ interface SsoInterface {
     /**
      * @param array $credentials
      * @param array $requestParams
-     * @param array $additionalOptions
      * @return array
      */
-    public function getAccessData(array $credentials, array $requestParams = [], array $additionalOptions = []) : array;
+    public function getAccessData(array $credentials, array $requestParams = []) : array;
 
 }
