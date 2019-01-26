@@ -6,10 +6,10 @@
  * Time: 22:53
  */
 
-namespace Exodus4D\ESI\Lib\Cache\Strategy;
+namespace Exodus4D\ESI\Lib\Middleware\Cache\Strategy;
 
 
-use Exodus4D\ESI\Lib\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Middleware\Cache\CacheEntry;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 

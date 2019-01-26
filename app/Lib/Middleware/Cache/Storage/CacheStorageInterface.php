@@ -6,10 +6,10 @@
  * Time: 16:25
  */
 
-namespace Exodus4D\ESI\Lib\Cache\Storage;
+namespace Exodus4D\ESI\Lib\Middleware\Cache\Storage;
 
 
-use Exodus4D\ESI\Lib\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Middleware\Cache\CacheEntry;
 
 interface CacheStorageInterface {
 

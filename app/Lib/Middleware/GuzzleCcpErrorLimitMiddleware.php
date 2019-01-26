@@ -17,59 +17,74 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
     /**
      * cache tag for error limits
      */
-    const CACHE_TAG_ERROR_LIMIT                 = 'ERROR_LIMIT';
+    const CACHE_TAG_ERROR_LIMIT             = 'ERROR_LIMIT';
 
     /**
      * default for: global enable this middleware
      */
-    const DEFAULT_LOG_ENABLED                   = true;
+    const DEFAULT_LOG_ENABLED               = true;
 
     /**
      * default for: callback function for logging
      */
-    const DEFAULT_LOG_CALLBACK                  = null;
+    const DEFAULT_LOG_CALLBACK              = null;
 
     /**
      * default for: name for log file width "critical" error limit warnings
      */
-    const DEFAULT_LOG_FILE_CRITICAL             = 'esi_resource_critical';
+    const DEFAULT_LOG_FILE_CRITICAL         = 'esi_resource_critical';
 
     /**
      * default for: name for log file with "blocked" errors
      */
-    const DEFAULT_LOG_FILE_BLOCKED              = 'esi_resource_blocked';
+    const DEFAULT_LOG_FILE_BLOCKED          = 'esi_resource_blocked';
 
     /**
-     * default for: log error when this error count is reached for a single API endpoint in the current error window
+     * default for: log error for endpoint if error count exceeds limit in the current error window
+     * -> CCP blocks endpoint           -> after 100 error responses within 60s
+     *    we log warnings for endpoints -> after  80 error responses within 60s
      */
-    const DEFAULT_ERROR_COUNT_MAX_URL           = 30;
+    const DEFAULT_ERROR_COUNT_MAX           = 80;
 
     /**
-     * default for: log error if less then this errors remain in current error window (all endpoints)
+     * default for: log error and block endpoint if
+     * -> less then 10 errors remain left in current error window
      */
-    const DEFAULT_ERROR_COUNT_REMAIN_TOTAL      = 10;
+    const DEFAULT_ERROR_COUNT_REMAIN        = 10;
 
     /**
-     * error message for endpoints that hit "critical" amount of error responses
+     * error message for requests that can not be processed because of blocked
      */
-    const ERROR_LIMIT_CRITICAL                  = 'Error rate reached critical amount';
+    const ERROR_REQUEST_BLOCKED             = 'Request error: Blocked for (%ss)';
 
     /**
-     * error message for blocked endpoints
+     * error message for response HTTP header "x-esi-error-limited" - Blocked endpoint
      */
-    const ERROR_LIMIT_EXCEEDED                  = 'Error rate limit exceeded! API endpoint blocked';
+    const ERROR_RESPONSE_BLOCKED            = "Response error: Blocked for (%ss)";
+
+    /**
+     * error message for response HTTP header "x-esi-error-limit-remain" that:
+     * -> falls below "critical" DEFAULT_ERROR_COUNT_REMAIN limit
+     */
+    const ERROR_RESPONSE_LIMIT_BELOW        = 'Response error: [%2s < %2s] Rate falls below critical limit. Blocked for (%ss)';
+
+    /**
+     * error message for response HTTP header "x-esi-error-limit-remain" that:
+     * -> exceed "critical" DEFAULT_ERROR_COUNT_MAX limit
+     */
+    const ERROR_RESPONSE_LIMIT_ABOVE        = 'Response error: [%2s > %2s] Rate exceeded critical limit. Blocked for (%ss)';
 
     /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
-        'ccp_limit_enabled'                     => self::DEFAULT_LOG_ENABLED,
-        'ccp_limit_log_callback'                => self::DEFAULT_LOG_CALLBACK,
-        'ccp_limit_log_file_critical'           => self::DEFAULT_LOG_FILE_CRITICAL,
-        'ccp_limit_log_file_blocked'            => self::DEFAULT_LOG_FILE_BLOCKED,
-        'ccp_limit_error_count_max_url'         => self::DEFAULT_ERROR_COUNT_MAX_URL,
-        'ccp_limit_error_count_remain_total'    => self::DEFAULT_ERROR_COUNT_REMAIN_TOTAL
+        'ccp_limit_enabled'                 => self::DEFAULT_LOG_ENABLED,
+        'ccp_limit_log_callback'            => self::DEFAULT_LOG_CALLBACK,
+        'ccp_limit_log_file_critical'       => self::DEFAULT_LOG_FILE_CRITICAL,
+        'ccp_limit_log_file_blocked'        => self::DEFAULT_LOG_FILE_BLOCKED,
+        'ccp_limit_error_count_max'         => self::DEFAULT_ERROR_COUNT_MAX,
+        'ccp_limit_error_count_remain'      => self::DEFAULT_ERROR_COUNT_REMAIN
     ];
 
     /**
@@ -109,9 +124,13 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
         parent::__invoke($request, $options);
 
         // check if Request Endpoint is blocked
-        if($this->isBlocked($request)){
+        if(!is_null($blockedUntil = $this->isBlockedUntil($request))){
+            $blockedSeconds = $blockedUntil->getTimestamp() - time();
             return \GuzzleHttp\Promise\rejection_for(
-                new RequestException('Hello blocked', $request)
+                new RequestException(
+                    sprintf(self::ERROR_REQUEST_BLOCKED, $blockedSeconds),
+                    $request
+                )
             );
         }
 
@@ -138,9 +157,6 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
             ){
                 $esiErrorLimitReset = (int)$response->getHeaderLine('x-esi-error-limit-reset');
 
-                // block further api calls for this URL until error limit is reset/clear
-                $blockUrl = false;
-
                 // get cache key from request URL
                 $cacheKey = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
                 $cacheItem = $this->cache()->getItem($cacheKey);
@@ -150,54 +166,90 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
                 $errorCount = (int)$esiErrorRate['count'] + 1;
                 $esiErrorRate['count'] = $errorCount;
 
+                // default log data
+                $action = $level = $tag = $message = '';
+                $esiErrorLimitRemain = 0;
+                $blockUrl = false;
+
+                // check blocked HTTP Header --------------------------------------------------------------------------
                 if($response->hasHeader('x-esi-error-limited')){
                     // request url is blocked until new error limit becomes reset
                     // -> this should never happen
                     $blockUrl = true;
 
-                    if(is_callable($log = $options['ccp_limit_log_callback'])){
-                        $logData = [
-                            'url'           => $request->getUri()->__toString(),
-                            'errorCount'    => $errorCount,
-                            'esiLimitReset' => $esiErrorLimitReset
-                        ];
-
-                        $log($options['ccp_limit_log_file_blocked'], 'critical', self::ERROR_LIMIT_EXCEEDED, $logData, 'danger');
-                    }
+                    $action     = $options['ccp_limit_log_file_blocked'];
+                    $level      = 'alert';
+                    $tag        = 'danger';
+                    $message    = sprintf(self::ERROR_RESPONSE_BLOCKED, $esiErrorLimitReset);
                 }
 
-                if($response->hasHeader('x-esi-error-limit-remain')){
+                // check limits HTTP Header ---------------------------------------------------------------------------
+                if( !$blockUrl && $response->hasHeader('x-esi-error-limit-remain')){
                     // remaining errors left until reset/clear
                     $esiErrorLimitRemain = (int)$response->getHeaderLine('x-esi-error-limit-remain');
 
-                    if(
-                        $errorCount > (int)$options['ccp_limit_error_count_max_url'] ||
-                        $esiErrorLimitRemain < (int)$options['ccp_limit_error_count_remain_total']
-                    ){
-                        // ... reached critical limit -> mark as blocked
+                    $belowCriticalLimit = $esiErrorLimitRemain < (int)$options['ccp_limit_error_count_remain'];
+                    $aboveCriticalLimit = $errorCount > (int)$options['ccp_limit_error_count_max'];
+
+                    if($belowCriticalLimit){
+                        // ... falls below critical limit
+                        // requests to this endpoint might be blocked soon!
+                        // -> pre-block future requests to this endpoint on our side
+                        //    this should help to block requests for e.g. specific user
                         $blockUrl = true;
 
-                        // log critical limit reached
-                        if(is_callable($log = $options['ccp_limit_log_callback'])){
-                            $logData = [
-                                'url'               => $request->getUri()->__toString(),
-                                'errorCount'        => $errorCount,
-                                'esiLimitReset'     => $esiErrorLimitReset,
-                                'esiLimitRemain'    => $esiErrorLimitRemain
-                            ];
+                        $action     = $options['ccp_limit_log_file_blocked'];
+                        $level      = 'alert';
+                        $tag        = 'danger';
+                        $message    = sprintf(self::ERROR_RESPONSE_LIMIT_BELOW,
+                            $esiErrorLimitRemain,
+                            $options['ccp_limit_error_count_remain'],
+                            $esiErrorLimitReset
+                        );
+                    }elseif($aboveCriticalLimit){
+                        // ... above critical limit
 
-                            $log($options['ccp_limit_log_file_critical'], 'warning', self::ERROR_LIMIT_CRITICAL, $logData, 'warning');
-                        }
+                        $action     = $options['ccp_limit_log_file_critical'];
+                        $level      = 'critical';
+                        $tag        = 'warning';
+                        $message    = sprintf(self::ERROR_RESPONSE_LIMIT_ABOVE,
+                            $errorCount,
+                            $options['ccp_limit_error_count_max'],
+                            $esiErrorLimitReset
+                        );
                     }
                 }
 
+                // log ------------------------------------------------------------------------------------------------
+                if(
+                    !empty($action) &&
+                    is_callable($log = $options['ccp_limit_log_callback'])
+                ){
+                    $logData = [
+                        'url'               => $request->getUri()->__toString(),
+                        'errorCount'        => $errorCount,
+                        'esiLimitReset'     => $esiErrorLimitReset,
+                        'esiLimitRemain'    => $esiErrorLimitRemain
+                    ];
+
+                    $log($action, $level, $message, $logData, $tag);
+                }
+
+                // update cache ---------------------------------------------------------------------------------------
                 if($blockUrl){
                     // to many error, block uri until error limit reset
                     $esiErrorRate['blocked'] = true;
                 }
 
+                $expiresAt = new \DateTime('+' . $esiErrorLimitReset . 'seconds');
+
+                // add expire time to cache item
+                // -> used to get left ttl for item
+                //    and/or for throttle write logs
+                $esiErrorRate['expiresAt']  = $expiresAt;
+
                 $cacheItem->set($esiErrorRate);
-                $cacheItem->expiresAfter($esiErrorLimitReset);
+                $cacheItem->expiresAt($expiresAt);
                 $this->cache()->save($cacheItem);
             }
 
@@ -207,11 +259,11 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
 
     /**
      * @param RequestInterface $request
-     * @return bool
+     * @return \DateTime|null
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    protected function isBlocked(RequestInterface $request) : bool {
-        $blocked = false;
+    protected function isBlockedUntil(RequestInterface $request) : ?\DateTime {
+        $blockedUntil = null;
 
         $cacheKey = $this->cacheKeyFromRequestUrl($request, self::CACHE_TAG_ERROR_LIMIT);
         $cacheItem = $this->cache()->getItem($cacheKey);
@@ -219,11 +271,11 @@ class GuzzleCcpErrorLimitMiddleware extends AbstractGuzzleMiddleware {
             // check if it is blocked
             $esiErrorRate = (array)$cacheItem->get();
             if($esiErrorRate['blocked']){
-                $blocked = true;
+                $blockedUntil = $esiErrorRate['expiresAt'];
             }
         }
 
-        return $blocked;
+        return $blockedUntil;
     }
 
     /**

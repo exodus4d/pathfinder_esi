@@ -6,7 +6,7 @@
  * Time: 20:23
  */
 
-namespace Exodus4D\ESI\Lib\Cache;
+namespace Exodus4D\ESI\Lib\Middleware\Cache;
 
 
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;

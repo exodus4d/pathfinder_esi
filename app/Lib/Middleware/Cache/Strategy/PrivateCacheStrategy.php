@@ -6,12 +6,12 @@
  * Time: 22:58
  */
 
-namespace Exodus4D\ESI\Lib\Cache\Strategy;
+namespace Exodus4D\ESI\Lib\Middleware\Cache\Strategy;
 
 
-use Exodus4D\ESI\Lib\Cache\CacheEntry;
-use Exodus4D\ESI\Lib\Cache\Storage\CacheStorageInterface;
-use Exodus4D\ESI\Lib\Cache\Storage\VolatileRuntimeStorage;
+use Exodus4D\ESI\Lib\Middleware\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Middleware\Cache\Storage\CacheStorageInterface;
+use Exodus4D\ESI\Lib\Middleware\Cache\Storage\VolatileRuntimeStorage;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCacheMiddleware;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

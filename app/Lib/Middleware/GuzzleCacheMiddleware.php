@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
-use Exodus4D\ESI\Lib\Cache\CacheEntry;
-use Exodus4D\ESI\Lib\Cache\Strategy\CacheStrategyInterface;
-use Exodus4D\ESI\Lib\Cache\Strategy\PrivateCacheStrategy;
+use Exodus4D\ESI\Lib\Middleware\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\CacheStrategyInterface;
+use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\PrivateCacheStrategy;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Promise\FulfilledPromise;
@@ -407,7 +407,8 @@ class GuzzleCacheMiddleware {
      */
     public static function inArrayDeep(array $array, string $search) : bool {
         $found = false;
-        array_walk($array, function($value, $key, $search) use (&$found) {
+        array_walk($array, function($value, /** @noinspection PhpUnusedParameterInspection */
+                                    $key, $search) use (&$found) {
             if(!$found && is_array($value) && in_array($search, $value)){
                 $found = true;
             }
@@ -423,7 +424,8 @@ class GuzzleCacheMiddleware {
      */
     public static function arrayKeyDeep(array $array, string $searchKey) : string {
         $found = '';
-        array_walk($array, function($value, $key, $searchKey) use (&$found) {
+        array_walk($array, function($value, /** @noinspection PhpUnusedParameterInspection */
+                                    $key, $searchKey) use (&$found) {
             if(empty($found) && is_array($value) && array_key_exists($searchKey, $value)){
                 $found = (string)$value[$searchKey];
             }

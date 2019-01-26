@@ -6,10 +6,10 @@
  * Time: 19:42
  */
 
-namespace Exodus4D\ESI\Lib\Cache\Storage;
+namespace Exodus4D\ESI\Lib\Middleware\Cache\Storage;
 
 
-use Exodus4D\ESI\Lib\Cache\CacheEntry;
+use Exodus4D\ESI\Lib\Middleware\Cache\CacheEntry;
 
 class VolatileRuntimeStorage implements CacheStorageInterface {
 
