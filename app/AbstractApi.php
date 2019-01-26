@@ -670,6 +670,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             'log_5xx'                   => true,
             'log_4xx'                   => true,
             'log_all_status'            => $this->logAllStatus,
+            'log_off_status'            => [420],                   // error rate limit -> logged by other middleware
             'log_loggable_callback'     => $this->getIsLoggable(),
             'log_callback'              => $this->log(),
             'log_file'                  => $this->logFile
