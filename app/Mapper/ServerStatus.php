@@ -12,6 +12,9 @@ use data\mapper;
 
 class ServerStatus extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'start_time'        => 'startTime',
         'players'           => 'playerCount',

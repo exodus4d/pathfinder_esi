@@ -11,6 +11,9 @@ namespace Exodus4D\ESI\Config;
 
 class ESIConf extends \Prefab {
 
+    /**
+     * Swagger endpoint configuration
+     */
     const SWAGGER_SPEC  = [
         'status' => [
             'GET' => '/v1/status/'

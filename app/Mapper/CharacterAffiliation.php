@@ -12,6 +12,9 @@ use data\mapper;
 
 class CharacterAffiliation extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'character_id' => ['character' => 'id'],
 

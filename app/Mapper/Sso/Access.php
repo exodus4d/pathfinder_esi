@@ -12,6 +12,9 @@ use data\mapper;
 
 class Access extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'access_token'      => 'accessToken',
         'token_type'        => 'tokenType',

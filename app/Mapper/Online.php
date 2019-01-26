@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: exodu
+ * User: Exodus4D
  * Date: 10.06.2017
  * Time: 02:18
  */
@@ -12,6 +12,9 @@ use data\mapper;
 
 class Online extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'online' => 'online',
         'logins' => 'logins'
@@ -23,7 +26,7 @@ class Online extends mapper\AbstractIterator {
      */
     public function getData(){
 
-        $convertTime = function($iterator){
+        $convertTime = function(\Iterator $iterator){
             return (new \DateTime($iterator->current()))->format('Y-m-d H:i:s');
         };
 

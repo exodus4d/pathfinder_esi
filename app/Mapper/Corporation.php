@@ -12,6 +12,9 @@ use data\mapper;
 
 class Corporation extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
