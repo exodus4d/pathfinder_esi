@@ -668,7 +668,7 @@ class ESI extends AbstractCcp implements EsiInterface {
             'destination_id'        => $systemId
         ];
 
-        $requestOptions = $this->getRequestOptions($accessToken, $query);
+        $requestOptions = $this->getRequestOptions($accessToken, null, $query);
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         // "null" === success => There is no response body send...
@@ -692,7 +692,7 @@ class ESI extends AbstractCcp implements EsiInterface {
             'target_id' => $targetId
         ];
 
-        $requestOptions = $this->getRequestOptions($accessToken, $query);
+        $requestOptions = $this->getRequestOptions($accessToken, null, $query);
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         // "null" === success => There is no response body send...
