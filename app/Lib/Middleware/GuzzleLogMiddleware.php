@@ -8,6 +8,8 @@
 
 namespace Exodus4D\ESI\Lib\Middleware;
 
+use Exodus4D\ESI\Lib\Stream\JsonStream;
+use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\TransferStats;
 use Psr\Http\Message\RequestInterface;
@@ -313,11 +315,15 @@ class GuzzleLogMiddleware {
      * @return array
      */
     protected function logResponse(ResponseInterface $response) : array {
+        // response body might contain additional error message
+        $errorMessage = $this->getErrorMessageFromResponseBody($response);
+
         return [
             'code'                      => $response->getStatusCode(),
             'phrase'                    => $response->getReasonPhrase(),
             'version'                   => $response->getProtocolVersion(),
-            'res_header_content-length' => $response->getHeaderLine('content-length')
+            'res_header_content-length' => $response->getHeaderLine('content-length'),
+            'error_msg'                 => $errorMessage
         ];
     }
 
@@ -375,6 +381,48 @@ class GuzzleLogMiddleware {
         return [
             'time'                      => (string)$stats->getTransferTime()
         ];
+    }
+
+    /**
+     * Some APIs provide additional error information in response body
+     * E.g. is there is a HTTP 4xx/5xx $response, the body might have:
+     * -> A: JSON response: {"error":"Some error message"}
+     * -> B: TEXT response: 'Some error message'
+     * @param ResponseInterface $response
+     * @return string
+     */
+    protected function getErrorMessageFromResponseBody(ResponseInterface $response) : string {
+        $error = '';
+
+        $body = $response->getBody();
+        if($body->isReadable()){
+            $contentTypeHeader = strtolower($response->getHeaderLine('Content-Type'));
+            if(strpos($contentTypeHeader, 'application/json') !== false){
+                // we expect json encoded content
+                // -> check if $body is already wrapped in JsonStream (e.g. from previous Middlewares,..)
+                if(!($body instanceof JsonStreamInterface)){
+                    // ... create temp JsonStream
+                    $jsonBody = new JsonStream($body);
+                    $content = $jsonBody->getContents();
+                }else{
+                    // ... already JsonStream -> get content
+                    $content = $body->getContents();
+                }
+
+                // ... check if "error" key exists in content, with error message
+                if(is_string($content->error)){
+                    $error = $content->error;
+                }
+            }else{
+                // no Json encoded content expected -> simple text
+                $error = $body->getContents();
+            }
+
+            // rewind $body for next access. !important!
+            $body->rewind();
+        }
+
+        return $error;
     }
 
     /**
