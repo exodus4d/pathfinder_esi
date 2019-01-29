@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI\Client;
 
 
+use Exodus4D\ESI\Mapper;
+
 class Github extends AbstractApi implements GitHubInterface {
 
     /**
@@ -20,6 +22,12 @@ class Github extends AbstractApi implements GitHubInterface {
         $releasesData = [];
 
         $response = $this->request('GET', $uri)->getContents();
+
+        if(!$response->error){
+            foreach((array)$response as $data){
+                $releasesData[] = (new Mapper\GitHub\Release($data))->getData();
+            }
+        }
 
         return $releasesData;
     }
