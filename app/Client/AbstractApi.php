@@ -6,10 +6,11 @@
  * Time: 20:24
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
 
 use lib\logging\LogInterface;
+use Exodus4D\ESI\Lib\WebClient;
 use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
@@ -282,9 +283,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @return Lib\WebClient
+     * @return WebClient
      */
-    protected function getClient() : namespace\Lib\WebClient {
+    protected function getClient() : WebClient {
         if(!$this->client){
             $this->client = $this->initClient();
         }
@@ -595,10 +596,10 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * init new webClient for this Api
-     * @return Lib\WebClient
+     * @return WebClient
      */
-    protected function initClient() : namespace\Lib\WebClient {
-        return new namespace\Lib\WebClient(
+    protected function initClient() : WebClient {
+        return new WebClient(
             $this->getUrl(),
             $this->getClientConfig(),
             function(HandlerStack &$stack){

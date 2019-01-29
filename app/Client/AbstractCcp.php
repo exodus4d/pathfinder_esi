@@ -6,7 +6,7 @@
  * Time: 18:41
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLogMiddleware;

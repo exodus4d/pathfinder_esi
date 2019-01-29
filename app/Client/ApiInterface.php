@@ -6,7 +6,7 @@
  * Time: 20:45
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
 
 interface ApiInterface {

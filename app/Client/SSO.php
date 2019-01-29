@@ -6,8 +6,10 @@
  * Time: 16:21
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
+
+use Exodus4D\ESI\Mapper;
 
 class SSO extends AbstractCcp implements SsoInterface {
 
@@ -29,7 +31,7 @@ class SSO extends AbstractCcp implements SsoInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $characterData = (new namespace\Mapper\Sso\Character($response))->getData();
+            $characterData = (new Mapper\Sso\Character($response))->getData();
         }
 
         return $characterData;
@@ -59,7 +61,7 @@ class SSO extends AbstractCcp implements SsoInterface {
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $accessData = (new namespace\Mapper\Sso\Access($response))->getData();
+            $accessData = (new Mapper\Sso\Access($response))->getData();
         }
 
         return $accessData;

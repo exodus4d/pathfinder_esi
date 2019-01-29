@@ -6,7 +6,7 @@
  * Time: 16:23
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
 
 interface SsoInterface {

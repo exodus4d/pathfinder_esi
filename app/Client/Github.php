@@ -1,0 +1,64 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Exodus 4D
+ * Date: 28.01.2019
+ * Time: 22:38
+ */
+
+namespace Exodus4D\ESI\Client;
+
+
+class Github extends AbstractApi implements GitHubInterface {
+
+    /**
+     * @param string $projectName
+     * @return array
+     */
+    public function getProjectReleases(string $projectName) : array {
+        $uri = $this->getReleasesEndpointURI($projectName);
+        $releasesData = [];
+
+        $response = $this->request('GET', $uri)->getContents();
+
+        return $releasesData;
+    }
+
+    /**
+     * @param string $context
+     * @param string $markdown
+     * @return string
+     */
+    public function markdownToHtml(string $context, string $markdown) : string {
+        $uri = $this->getMarkdownToHtmlEndpointURI();
+        $html = '';
+
+        $requestOptions = [
+            'json' => [
+                'text' => $markdown,
+                'mode' => 'gfm',
+                'context' => $context
+            ]
+        ];
+
+        $response = $this->request('POST', $uri, $requestOptions)->getContents();
+
+
+        return $html;
+    }
+
+    /**
+     * @param string $projectName e.g. "exodus4d/pathfinder"
+     * @return string
+     */
+    protected function getReleasesEndpointURI(string $projectName) : string {
+        return '/repos/' . $projectName . '/releases';
+    }
+
+    /**
+     * @return string
+     */
+    protected function getMarkdownToHtmlEndpointURI() : string {
+        return '/markdown';
+    }
+}
