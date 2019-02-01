@@ -15,11 +15,16 @@ use Psr\Http\Message\ResponseInterface;
 class GuzzleJsonMiddleware {
 
     /**
+     * default for: global enable this middleware
+     */
+    const DEFAULT_JSON_ENABLED          = true;
+
+    /**
      * default options can go here for middleware
      * @var array
      */
     private $defaultOptions = [
-
+        'json_enabled'                  => self::DEFAULT_JSON_ENABLED
     ];
 
     /**
@@ -52,7 +57,9 @@ class GuzzleJsonMiddleware {
         $next = $this->nextHandler;
 
         // set "Accept" header json
-        $request = $request->withHeader('Accept', 'application/json');
+        if($options['json_enabled']){
+            $request = $request->withHeader('Accept', 'application/json');
+        }
 
         return $next($request, $options)->then(
             $this->onFulfilled($request, $options)
@@ -68,8 +75,11 @@ class GuzzleJsonMiddleware {
     protected function onFulfilled(RequestInterface $request, array $options) : \Closure{
         return function (ResponseInterface $response) use ($request, $options){
             // decode Json response body
-            $jsonStream = new JsonStream($response->getBody());
-            return $response->withBody($jsonStream);
+            if($options['json_enabled']){
+                $jsonStream = new JsonStream($response->getBody());
+                $response = $response->withBody($jsonStream);
+            }
+            return $response;
         };
     }
 
