@@ -24,10 +24,16 @@ class ESI extends AbstractCcp implements EsiInterface {
     const ERROR_ESI_WINDOW                          = 'Could not open client window.';
 
     /**
-     * @var string $esiDataSource                   DataSource 'singularity' || 'tranquility'
-     * @var string $endpointVersion                 Overwrite versioned endpoint URL (for testing)
+     * DataSource 'singularity' || 'tranquility'
+     * @var string $esiDataSource
      */
-    private $esiDataSource, $endpointVersion   = '';
+    private $esiDataSource                          = '';
+
+    /**
+     * Overwrite versioned endpoint URL (for testing)
+     * @var string
+     */
+    private $endpointVersion                        = '';
 
     /**
      * @param string $dataSource

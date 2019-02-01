@@ -761,9 +761,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         $body = null;
 
         try{
-            // get new request
             $request = $this->getClient()->newRequest($method, $uri);
-
             /**
              * @var $response Response
              */
@@ -778,8 +776,6 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         }catch(\Exception $e){
             // Hard fail! Any other type of error
             // -> e.g. RuntimeException,...
-            // TODO trigger Error...
-
             $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
         }
 
