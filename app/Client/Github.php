@@ -42,6 +42,7 @@ class Github extends AbstractApi implements GitHubInterface {
         $html = '';
 
         $requestOptions = [
+            'json_enabled' => false, // disable JSON Middleware
             'json' => [
                 'text' => $markdown,
                 'mode' => 'gfm',
