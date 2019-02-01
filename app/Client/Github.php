@@ -51,6 +51,9 @@ class Github extends AbstractApi implements GitHubInterface {
 
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
+        if(!$response->error){
+            $html = (string)$response;
+        }
 
         return $html;
     }
