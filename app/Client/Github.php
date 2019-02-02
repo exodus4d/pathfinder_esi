@@ -15,13 +15,21 @@ class Github extends AbstractApi implements GitHubInterface {
 
     /**
      * @param string $projectName
+     * @param int $count
      * @return array
      */
-    public function getProjectReleases(string $projectName) : array {
+    public function getProjectReleases(string $projectName, int $count = 1) : array {
         $uri = $this->getReleasesEndpointURI($projectName);
         $releasesData = [];
 
-        $response = $this->request('GET', $uri)->getContents();
+        $requestOptions = [
+            'query' => [
+                'page' => 1,
+                'per_page' => $count
+            ]
+        ];
+
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
             foreach((array)$response as $data){

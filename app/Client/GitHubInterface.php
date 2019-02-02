@@ -13,9 +13,10 @@ interface GitHubInterface {
 
     /**
      * @param string $projectName
+     * @param int $count
      * @return array
      */
-    public function getProjectReleases(string $projectName) : array;
+    public function getProjectReleases(string $projectName, int $count) : array;
 
     /**
      * @param string $context
