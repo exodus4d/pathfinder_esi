@@ -34,6 +34,7 @@ $client = new \Exodus4D\ESI\Client\Github('https://api.github.com');
 // configure client [→ check ApiInterface() for methods]
 $client->setTimeout(3);                     // Timeout of the request (seconds)
 $client->setUserAgent('My Example App');    // User-Agent Header (string)
+$client->setDecodeContent('gzip, deflate'); // Accept-Encoding Header
 $client->setDebugLevel(3);                  // Debug level [0-3]
 $client->setNewLog(function() : \Closure {  // Callback for new LogInterface
    return function(string $action, string $level = 'warning') : logging\LogInterface {
@@ -144,6 +145,12 @@ Requests to endpoints that return a `warning` HTTP Header for `deprecated` /or `
 #### [GuzzleCcpErrorLimitMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleCcpErrorLimitMiddleware.php)
 Failed _ESI_ requests (4xx/5xx status code) implement the concept of "Error Rate Limiting" (→ blog: [ESI error rate limiting](https://developers.eveonline.com/blog/article/esi-error-limits-go-live)).
 In case a request failed multiple times in a period, this _Middleware_ keeps track of logging this **and** _pre-block_ requests (e.g. for a user) an endpoint before _CCP_ actual does.
+
+### Content Encoding
+The default configuration for "[decode-content](http://docs.guzzlephp.org/en/stable/request-options.html#decode-content)" is `true` → decode "_gzip_" or "_deflate_" responses.<br />
+Most APIs will only send compressed response data if `Accept-Encoding` HTTP Header found in request. A `string` value will add this Header and response data gets decoded.
+
+`$client->setDecodeContent('gzip, deflate');`
 
 ## Bug report
 Issues can be tracked here: https://github.com/exodus4d/pathfinder/issues
