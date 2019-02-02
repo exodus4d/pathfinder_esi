@@ -743,6 +743,25 @@ class ESI extends AbstractCcp implements EsiInterface {
     }
 
     /**
+     * @param string $version
+     * @return array
+     */
+    public function apiStatus(string $version) : array {
+        $uri = $this->getEndpointURI(['meta', 'status', 'GET']);
+        $apiStatus = [];
+
+        $requestOptions = [
+            'query' => [
+                'version' => 'latest'
+            ]
+        ];
+
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        return $apiStatus;
+    }
+
+    /**
      * @param int $corporationId
      * @return bool
      */

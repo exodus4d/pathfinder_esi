@@ -15,6 +15,11 @@ class ESIConf extends \Prefab {
      * Swagger endpoint configuration
      */
     const SWAGGER_SPEC  = [
+        'meta' => [
+            'status' => [
+                'GET' => 'status.json'
+            ]
+        ],
         'status' => [
             'GET' => '/v1/status/'
         ],
@@ -47,7 +52,7 @@ class ESIConf extends \Prefab {
         ],
         'universe' => [
             'names' => [
-                'POST' => '/v2/universe/names/'
+                'POST' => '/v3/universe/names/'
             ],
             'system_jumps' => [
                 'GET' => ' /v1/universe/system_jumps/'

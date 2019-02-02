@@ -154,7 +154,7 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
                                     'url' => $request->getUri()->__toString()
                                 ];
 
-                                $log($options['ccp_log_file_legacy'], 'notice', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
+                                $log($options['ccp_log_file_legacy'], 'info', $value ? : self::ERROR_RESOURCE_LEGACY, $logData, 'information');
                             }
                         }
                     }
@@ -171,7 +171,7 @@ class GuzzleCcpLogMiddleware extends AbstractGuzzleMiddleware {
                                     'url' => $request->getUri()->__toString()
                                 ];
 
-                                $log($options['ccp_log_file_deprecated'], 'critical', $value ? : self::ERROR_RESOURCE_DEPRECATED, $logData, 'danger');
+                                $log($options['ccp_log_file_deprecated'], 'warning', $value ? : self::ERROR_RESOURCE_DEPRECATED, $logData, 'warning');
                             }
                         }
                     }

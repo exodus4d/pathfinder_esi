@@ -203,6 +203,12 @@ interface EsiInterface {
     public function search(array $categories, string $search, bool $strict = false) : array;
 
     /**
+     * @param string $version
+     * @return array
+     */
+    public function apiStatus(string $version) : array;
+
+    /**
      * @param int $corporationId
      * @return bool
      */
