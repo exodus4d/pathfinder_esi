@@ -29,7 +29,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * default for: accepted response type
-     * -> Affects "Accept" HTTP Header
+     * -> affects "Accept" request HTTP Header
      */
     const DEFAULT_ACCEPT_TYPE                       = 'json';
 
@@ -47,6 +47,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * default for: read timeout
      */
     const DEFAULT_READ_TIMEOUT                      = 10.0;
+
+    /**
+     * default for: auto decode responses with encoded body
+     * -> checks "Content-Encoding" response HTTP Header for 'gzip' or 'deflate' value
+     * @see http://docs.guzzlephp.org/en/stable/request-options.html#decode-content
+     */
+    const DEFAULT_DECODE_CONTENT                    = true;
 
     /**
      * default for: debug requests
@@ -101,6 +108,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * @var float
      */
     private $readTimeout                            = self::DEFAULT_READ_TIMEOUT;
+
+    /**
+     * decode response body
+     * @see http://docs.guzzlephp.org/en/stable/request-options.html#decode-content
+     * @var bool|array|string
+     */
+    private $decodeContent                          = self::DEFAULT_DECODE_CONTENT;
 
     /**
      * HTTP proxy
@@ -329,6 +343,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @param array|bool|string $decodeContent
+     */
+    public function setDecodeContent($decodeContent = self::DEFAULT_DECODE_CONTENT){
+        $this->decodeContent = $decodeContent;
+    }
+
+    /**
      * @param null|string|array $proxy
      */
     public function setProxy($proxy){
@@ -510,6 +531,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @return array|bool|string
+     */
+    public function getDecodeContent(){
+        return $this->decodeContent;
+    }
+
+    /**
      * @return array|string|null
      */
     public function getProxy(){
@@ -617,6 +645,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             'timeout'           => $this->getTimeout(),
             'connect_timeout'   => $this->getConnectTimeout(),
             'read_timeout'      => $this->getReadTimeout(),
+            'decode_content'    => $this->getDecodeContent(),
             'proxy'             => $this->getProxy(),
             'verify'            => $this->getVerify(),
             'debug'             => $this->getDebugRequests(),

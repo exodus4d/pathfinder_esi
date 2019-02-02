@@ -42,6 +42,12 @@ interface ApiInterface {
     public function setReadTimeout(float $readTimeout);
 
     /**
+     * @param $decodeContent
+     * @return mixed
+     */
+    public function setDecodeContent($decodeContent);
+
+    /**
      * @param $proxy
      * @return mixed
      */
@@ -179,6 +185,11 @@ interface ApiInterface {
      * @return float
      */
     public function getReadTimeout() : float;
+
+    /**
+     * @return mixed
+     */
+    public function getDecodeContent();
 
     /**
      * @return mixed
