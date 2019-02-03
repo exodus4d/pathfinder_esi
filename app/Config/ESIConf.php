@@ -161,9 +161,10 @@ class ESIConf extends \Prefab {
                 // get version from route and remove it
                 $version = self::stripVersion($value);
                 $endpointsData[] = [
-                    'method' => strtolower($key),
-                    'route' => $value,
-                    'version' => $version
+                    'method'    => strtolower($key),
+                    'route'     => $value,
+                    'version'   => $version,
+                    'status'    => null
                 ];
             }
         });
