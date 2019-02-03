@@ -771,8 +771,9 @@ class ESI extends AbstractCcp implements EsiInterface {
         array_walk_recursive($in, function($value, $key) use (&$out){
             if(is_string($value) && !empty($value)){
                 $out[] = [
-                    'method' => $key,
-                    'route' => $value
+                    'method' => strtolower($key),
+                    'route' => $value,
+                    'version' => (preg_match('/^\/(v\d{1})\//', $value, $matches) == 1) ? $matches[1] : null
                 ];
             }
         });

@@ -30,7 +30,7 @@ class EsiStatus extends mapper\AbstractIterator {
     public function getData(){
 
         $normalize = function(\Iterator $iterator){
-            return preg_replace('/\/\{(\w+)\}\//', '/{x}/', $iterator->current());
+            return preg_replace('/\/\{(\w+)\}/', '/{x}', $iterator->current());
         };
 
         self::$map['route'] = $normalize;
