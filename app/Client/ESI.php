@@ -758,6 +758,14 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
+        if(!$response->error){
+            foreach((array)$response as $status){
+                $apiStatus['status'][(string)$status->route] = (new Mapper\EsiStatus($status))->getData();
+            }
+        }else{
+            $apiStatus['error'] = $response->error;
+        }
+
         return $apiStatus;
     }
 
