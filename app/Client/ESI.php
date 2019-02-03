@@ -746,9 +746,9 @@ class ESI extends AbstractCcp implements EsiInterface {
      * @param string $version
      * @return array
      */
-    public function apiStatus(string $version = 'last') : array {
+    public function getStatus(string $version = 'last') : array {
         $uri = $this->getEndpointURI(['meta', 'status', 'GET']);
-        $apiStatus = [];
+        $statusData = [];
 
         $requestOptions = [
             'query' => [
@@ -760,29 +760,45 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         if(!$response->error){
             foreach((array)$response as $status){
-                $apiStatus['status'][] = (new Mapper\EsiStatus($status))->getData();
+                $statusData['status'][] = (new Mapper\EsiStatus($status))->getData();
             }
         }else{
-            $apiStatus['error'] = $response->error;
+            $statusData['error'] = $response->error;
         }
 
-        $in = Config\ESIConf::SWAGGER_SPEC;
-        $out = [];
-        array_walk_recursive($in, function($value, $key) use (&$out){
-            if(is_string($value) && !empty($value)){
-                // get version from route and remove it
-                $version = Config\ESIConf::stripVersion($value);
-                $out[] = [
-                    'method' => strtolower($key),
-                    'route' => $value,
-                    'version' => $version
-                ];
-            }
-        });
-
-
-        return $apiStatus;
+        return $statusData;
     }
+
+    /**
+     * @param string $version
+     * @return array
+     */
+    public function getStatusForRoutes(string $version = 'last') : array {
+        // data for all configured ESI endpoints
+        $statusData = [
+            'status' => Config\ESIConf::getEndpointsData()
+        ];
+
+        $statusDataAll = $this->getStatus($version);
+        if(!isset($statusDataAll['error'])){
+            foreach((array)$statusData['status'] as &$data){
+                foreach((array)$statusDataAll['status'] as $status){
+                    if(
+                        $status['route'] == $data['route'] &&
+                        $status['method'] == $data['method']
+                    ){
+                        $data['status'] = $status['status'];
+                        continue;
+                    }
+                }
+            }
+        }else{
+            $statusData['error'] = $statusDataAll['error'];
+        }
+
+        return $statusData;
+    }
+
 
     /**
      * @param int $corporationId

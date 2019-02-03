@@ -206,7 +206,13 @@ interface EsiInterface {
      * @param string $version
      * @return array
      */
-    public function apiStatus(string $version) : array;
+    public function getStatus(string $version) : array;
+
+    /**
+     * @param string $version
+     * @return array
+     */
+    public function getStatusForRoutes(string $version) : array;
 
     /**
      * @param int $corporationId

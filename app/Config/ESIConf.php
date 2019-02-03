@@ -149,6 +149,29 @@ class ESIConf extends \Prefab {
     }
 
     /**
+     * get endpoint data for all configured ESI endpoints
+     * @return array
+     */
+    static function getEndpointsData() : array {
+        $endpointsData = [];
+        $conf = self::SWAGGER_SPEC;
+
+        array_walk_recursive($conf, function($value, $key) use (&$endpointsData){
+            if(is_string($value) && !empty($value)){
+                // get version from route and remove it
+                $version = self::stripVersion($value);
+                $endpointsData[] = [
+                    'method' => strtolower($key),
+                    'route' => $value,
+                    'version' => $version
+                ];
+            }
+        });
+
+        return $endpointsData;
+    }
+
+    /**
      * get an ESI endpoint path
      * @param array $path
      * @param array $placeholders
