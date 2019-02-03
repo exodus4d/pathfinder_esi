@@ -781,13 +781,13 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         $statusDataAll = $this->getStatus($version);
         if(!isset($statusDataAll['error'])){
-            foreach((array)$statusData['status'] as &$data){
+            foreach((array)$statusData['status'] as $key => $data){
                 foreach((array)$statusDataAll['status'] as $status){
                     if(
                         $status['route'] == $data['route'] &&
                         $status['method'] == $data['method']
                     ){
-                        $data['status'] = $status['status'];
+                        $statusData['status'][$key]['status'] = $status['status'];
                         break;
                     }
                 }
