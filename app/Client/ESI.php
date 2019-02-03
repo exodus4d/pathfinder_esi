@@ -746,13 +746,13 @@ class ESI extends AbstractCcp implements EsiInterface {
      * @param string $version
      * @return array
      */
-    public function apiStatus(string $version) : array {
+    public function apiStatus(string $version = 'last') : array {
         $uri = $this->getEndpointURI(['meta', 'status', 'GET']);
         $apiStatus = [];
 
         $requestOptions = [
             'query' => [
-                'version' => 'latest'
+                'version' => $version
             ]
         ];
 
@@ -765,6 +765,10 @@ class ESI extends AbstractCcp implements EsiInterface {
         }else{
             $apiStatus['error'] = $response->error;
         }
+
+        $test = Config\ESIConf::filterFilterRecursive($apiStatus['status'], function($value, $key){
+            return $key === 'GET';
+        });
 
         return $apiStatus;
     }
