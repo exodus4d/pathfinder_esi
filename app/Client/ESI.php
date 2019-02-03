@@ -791,6 +791,7 @@ class ESI extends AbstractCcp implements EsiInterface {
                         $status['method'] == $data['method']
                     ){
                         $statusData['status'][$key]['status'] = $status['status'];
+                        $statusData['status'][$key]['tags']   = $status['tags'];
                         break;
                     }
                 }
