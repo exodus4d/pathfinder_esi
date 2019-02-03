@@ -18,6 +18,7 @@ class EsiStatus extends mapper\AbstractIterator {
     protected static $map = [
         'endpoint'      => 'endpoint',
         'method'        => 'method',
+        'route'         => 'route',
         'status'        => 'status',
         'tags'          => 'tags'
     ];

@@ -760,7 +760,7 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         if(!$response->error){
             foreach((array)$response as $status){
-                $apiStatus['status'][(string)$status->route] = (new Mapper\EsiStatus($status))->getData();
+                $apiStatus['status'][] = (new Mapper\EsiStatus($status))->getData();
             }
         }else{
             $apiStatus['error'] = $response->error;
