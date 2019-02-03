@@ -22,4 +22,20 @@ class EsiStatus extends mapper\AbstractIterator {
         'status'        => 'status',
         'tags'          => 'tags'
     ];
+
+    /**
+     * map iterator
+     * @return array
+     */
+    public function getData(){
+
+        $normalize = function(\Iterator $iterator){
+            return preg_replace('/\/\{(\w+)\}\//', '/{x}/', $iterator->current());
+        };
+
+        self::$map['route'] = $normalize;
+
+        return parent::getData();
+    }
+
 }

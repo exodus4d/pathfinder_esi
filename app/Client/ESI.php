@@ -772,7 +772,7 @@ class ESI extends AbstractCcp implements EsiInterface {
             if(is_string($value) && !empty($value)){
                 $out[] = [
                     'method' => $key,
-                    'endpoint' => $value
+                    'route' => $value
                 ];
             }
         });
