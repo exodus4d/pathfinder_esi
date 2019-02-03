@@ -766,7 +766,7 @@ class ESI extends AbstractCcp implements EsiInterface {
             $apiStatus['error'] = $response->error;
         }
 
-        $test = Config\ESIConf::filterFilterRecursive($apiStatus['status'], function($value, $key){
+        $test = Config\ESIConf::filterFilterRecursive(Config\ESIConf::SWAGGER_SPEC, function($value, $key){
             return $key === 'GET';
         });
 
