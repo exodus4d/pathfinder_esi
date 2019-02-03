@@ -127,6 +127,28 @@ class ESIConf extends \Prefab {
     ];
 
     /**
+     * removes version from $endpoint
+     * -> return found version
+     * @param string $endpoint
+     * @return string|null
+     */
+    static function stripVersion(string &$endpoint) : ?string {
+        $version = null;
+        $endpoint = preg_replace_callback(
+            '/^\/(v\d{1})\//',
+            function($matches) use (&$version){
+                // set found version and strip it from $endpoint
+                $version = $matches[1];
+                return '/';
+            },
+            $endpoint,
+            1
+        );
+
+        return $version;
+    }
+
+    /**
      * get an ESI endpoint path
      * @param array $path
      * @param array $placeholders

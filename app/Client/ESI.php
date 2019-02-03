@@ -770,10 +770,12 @@ class ESI extends AbstractCcp implements EsiInterface {
         $out = [];
         array_walk_recursive($in, function($value, $key) use (&$out){
             if(is_string($value) && !empty($value)){
+                // get version from route and remove it
+                $version = Config\ESIConf::stripVersion($value);
                 $out[] = [
                     'method' => strtolower($key),
                     'route' => $value,
-                    'version' => (preg_match('/^\/(v\d{1})\//', $value, $matches) == 1) ? $matches[1] : null
+                    'version' => $version
                 ];
             }
         });
