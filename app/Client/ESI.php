@@ -803,7 +803,6 @@ class ESI extends AbstractCcp implements EsiInterface {
         return $statusData;
     }
 
-
     /**
      * @param int $corporationId
      * @return bool
