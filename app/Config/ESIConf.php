@@ -17,7 +17,7 @@ class ESIConf extends \Prefab {
     const SWAGGER_SPEC  = [
         'meta' => [
             'status' => [
-                'GET' => 'status.json'
+                'GET' => '/status.json'
             ]
         ],
         'status' => [
