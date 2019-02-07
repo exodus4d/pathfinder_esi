@@ -24,4 +24,19 @@ interface SsoInterface {
      */
     public function getAccessData(array $credentials, array $requestParams = []) : array;
 
+    /**
+     * @return string
+     */
+    public function getAuthorizationEndpointURI() : string;
+
+    /**
+     * @return string
+     */
+    public function getVerifyUserEndpointURI() : string;
+
+    /**
+     * @return string
+     */
+    public function getVerifyAuthorizationCodeEndpointURI() : string;
+
 }

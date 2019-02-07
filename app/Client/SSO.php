@@ -70,14 +70,21 @@ class SSO extends AbstractCcp implements SsoInterface {
     /**
      * @return string
      */
-    protected function getVerifyUserEndpointURI() : string {
+    public function getAuthorizationEndpointURI() : string {
+        return '/oauth/authorize';
+    }
+
+    /**
+     * @return string
+     */
+    public function getVerifyUserEndpointURI() : string {
         return '/oauth/verify';
     }
 
     /**
      * @return string
      */
-    protected function getVerifyAuthorizationCodeEndpointURI() : string {
+    public function getVerifyAuthorizationCodeEndpointURI() : string {
         return '/oauth/token';
     }
 }
