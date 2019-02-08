@@ -20,7 +20,7 @@ class Release extends mapper\AbstractIterator {
         'name'          => 'name',
         'prerelease'    => 'prerelease',
         'published_at'  => 'publishedAt',
-        'url'           => 'url',
+        'html_url'      => 'url',
         'tarball_url'   => 'urlTarBall',
         'zipball_url'   => 'urlZipBall',
         'body'          => 'body'
