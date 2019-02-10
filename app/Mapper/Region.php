@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: exodu
+ * User: Exodus4D
  * Date: 29.07.2017
  * Time: 14:49
  */
@@ -12,6 +12,9 @@ use data\mapper;
 
 class Region extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'region_id' => 'id',
         'name' => 'name',

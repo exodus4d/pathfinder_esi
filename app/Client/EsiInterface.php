@@ -1,27 +1,15 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: Exodus4D
- * Date: 26.03.2017
- * Time: 20:45
+ * User: Exodus 4D
+ * Date: 26.12.2018
+ * Time: 20:27
  */
 
-namespace Exodus4D\ESI;
+namespace Exodus4D\ESI\Client;
 
 
-interface ApiInterface {
-
-    /**
-     * set user agent string.
-     * -> send in HEADERS
-     * @param string $userAgent
-     */
-    public function setUserAgent(string $userAgent);
-
-    /**
-     * @return string
-     */
-    public function getUserAgent();
+interface EsiInterface {
 
     /**
      * @return array
@@ -44,26 +32,23 @@ interface ApiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterLocationData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterShipData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterShipData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken, array $additionalOptions = []) : array;
+    public function getCharacterOnlineData(int $characterId, string $accessToken) : array;
 
     /**
      * @param int $corporationId
@@ -137,10 +122,9 @@ interface ApiInterface {
 
     /**
      * @param array $universeIds
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseNamesData(array $universeIds, array $additionalOptions = []) : array;
+    public function getUniverseNamesData(array $universeIds) : array;
 
     /**
      * @return array
@@ -177,17 +161,15 @@ interface ApiInterface {
     /**
      * @param int $structureId
      * @param string $accessToken
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken, array $additionalOptions = []) : array;
+    public function getUniverseStructureData(int $structureId, string $accessToken) : array;
 
     /**
      * @param int $typeId
-     * @param array $additionalOptions
      * @return array
      */
-    public function getUniverseTypesData(int $typeId, array $additionalOptions = []) : array;
+    public function getUniverseTypesData(int $typeId) : array;
 
     /**
      * @param int $sourceId
@@ -196,7 +178,7 @@ interface ApiInterface {
      * @return array
      */
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array;
-    
+
     /**
      * @param int $systemId
      * @param string $accessToken
@@ -204,7 +186,7 @@ interface ApiInterface {
      * @return array
      */
     public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array;
-    
+
     /**
      * @param int $targetId
      * @param string $accessToken
@@ -220,7 +202,19 @@ interface ApiInterface {
      */
     public function search(array $categories, string $search, bool $strict = false) : array;
 
-        /**
+    /**
+     * @param string $version
+     * @return array
+     */
+    public function getStatus(string $version) : array;
+
+    /**
+     * @param string $version
+     * @return array
+     */
+    public function getStatusForRoutes(string $version) : array;
+
+    /**
      * @param int $corporationId
      * @return bool
      */

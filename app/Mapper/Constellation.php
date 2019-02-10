@@ -12,6 +12,9 @@ use data\mapper;
 
 class Constellation extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'constellation_id' => 'id',
         'name' => 'name',

@@ -12,6 +12,9 @@ use data\mapper;
 
 class System extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'id'                => 'id',
         'system_id'         => 'id',

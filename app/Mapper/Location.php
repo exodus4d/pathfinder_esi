@@ -12,6 +12,9 @@ use data\mapper;
 
 class Location extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'solar_system_id'   => ['system' => 'id'],
 

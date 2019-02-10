@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: exodu
+ * User: Exodus4D
  * Date: 19.05.2018
  * Time: 01:43
  */
@@ -12,6 +12,9 @@ use data\mapper;
 
 class Planet extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'planet_id'         => 'id',
         'name'              => 'name',

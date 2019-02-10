@@ -12,6 +12,9 @@ use data\mapper;
 
 class Ship extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'ship_type_id' => ['ship' => 'typeId'],
 

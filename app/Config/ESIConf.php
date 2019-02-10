@@ -11,7 +11,15 @@ namespace Exodus4D\ESI\Config;
 
 class ESIConf extends \Prefab {
 
+    /**
+     * Swagger endpoint configuration
+     */
     const SWAGGER_SPEC  = [
+        'meta' => [
+            'status' => [
+                'GET' => '/status.json'
+            ]
+        ],
         'status' => [
             'GET' => '/v1/status/'
         ],
@@ -44,13 +52,13 @@ class ESIConf extends \Prefab {
         ],
         'universe' => [
             'names' => [
-                'POST' => '/v2/universe/names/'
+                'POST' => '/v3/universe/names/'
             ],
             'system_jumps' => [
-                'GET' => ' /v1/universe/system_jumps/'
+                'GET' => '/v1/universe/system_jumps/'
             ],
             'system_kills' => [
-                'GET' => ' /v2/universe/system_kills/'
+                'GET' => '/v2/universe/system_kills/'
             ],
             'regions' => [
                 'GET' => '/v1/universe/regions/{x}/',
@@ -117,6 +125,52 @@ class ESIConf extends \Prefab {
             'GET' => '/v2/search/'
         ]
     ];
+
+    /**
+     * removes version from $endpoint
+     * -> return found version
+     * @param string $endpoint
+     * @return string|null
+     */
+    static function stripVersion(string &$endpoint) : ?string {
+        $version = null;
+        $endpoint = preg_replace_callback(
+            '/^\/(v\d{1})\//',
+            function($matches) use (&$version){
+                // set found version and strip it from $endpoint
+                $version = $matches[1];
+                return '/';
+            },
+            $endpoint,
+            1
+        );
+
+        return $version;
+    }
+
+    /**
+     * get endpoint data for all configured ESI endpoints
+     * @return array
+     */
+    static function getEndpointsData() : array {
+        $endpointsData = [];
+        $conf = self::SWAGGER_SPEC;
+
+        array_walk_recursive($conf, function($value, $key) use (&$endpointsData){
+            if(is_string($value) && !empty($value)){
+                // get version from route and remove it
+                $version = self::stripVersion($value);
+                $endpointsData[] = [
+                    'method'    => strtolower($key),
+                    'route'     => $value,
+                    'version'   => $version,
+                    'status'    => null
+                ];
+            }
+        });
+
+        return $endpointsData;
+    }
 
     /**
      * get an ESI endpoint path

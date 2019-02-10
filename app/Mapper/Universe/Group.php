@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: exodu
+ * User: Exodus4D
  * Date: 14.04.2018
  * Time: 02:03
  */
@@ -12,6 +12,9 @@ use data\mapper;
 
 class Group extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'name'              => 'name',
         'published'         => 'published',

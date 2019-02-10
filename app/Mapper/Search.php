@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: exodu
+ * User: Exodus4D
  * Date: 21.04.2018
  * Time: 15:20
  */
@@ -12,6 +12,9 @@ use data\mapper;
 
 class Search extends mapper\AbstractIterator {
 
+    /**
+     * @var array
+     */
     protected static $map = [
         'agent'             => 'agent',
         'alliance'          => 'alliance',
