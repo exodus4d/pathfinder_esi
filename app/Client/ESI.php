@@ -261,8 +261,8 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            foreach((array)$response as $factionData){
-                $factionData['factions'][(int)$factionData->faction_id] = (new Mapper\Universe\Faction($factionData))->getData();
+            foreach((array)$response as $data){
+                $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
             }
         }else{
             $factionData['error'] = $response->error;
