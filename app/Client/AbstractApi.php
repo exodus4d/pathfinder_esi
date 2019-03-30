@@ -669,7 +669,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
         if($this->getAcceptType() == 'json'){
             // json middleware prepares request and response for JSON data
-            $stack->push( GuzzleJsonMiddleware::factory(), 'json');
+            $stack->push(GuzzleJsonMiddleware::factory(), 'json');
         }
 
         // error log middleware logs all request errors

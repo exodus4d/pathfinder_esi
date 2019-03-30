@@ -54,6 +54,11 @@ class ESIConf extends \Prefab {
             'names' => [
                 'POST' => '/v3/universe/names/'
             ],
+            'factions' => [
+                'list' => [
+                    'GET' => '/v2/universe/factions/'
+                ]
+            ],
             'system_jumps' => [
                 'GET' => '/v1/universe/system_jumps/'
             ],
