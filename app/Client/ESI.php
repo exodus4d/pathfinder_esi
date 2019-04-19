@@ -136,7 +136,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $clonesData['homeLocation'] = (new Mapper\CharacterClone($response->home_location))->getData();
+            $clonesData['home'] = (new Mapper\CharacterClone($response->home_location))->getData();
         }else{
             $clonesData['error'] = $response->error;
         }
