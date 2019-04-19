@@ -77,7 +77,6 @@ class ESI extends AbstractCcp implements EsiInterface {
             $serverStatus['status'] = (new Mapper\ServerStatus($response))->getData();
         }else{
             $serverStatus['error'] = $response->error;
-
         }
 
         return $serverStatus;
@@ -122,6 +121,27 @@ class ESI extends AbstractCcp implements EsiInterface {
         }
 
         return $characterData;
+    }
+
+    /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @return array
+     */
+    public function getCharacterClonesData(int $characterId, string $accessToken) : array {
+        $uri = $this->getEndpointURI(['characters', 'clones', 'GET'], [$characterId]);
+        $clonesData = [];
+
+        $requestOptions = $this->getRequestOptions($accessToken);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if(!$response->error){
+            $clonesData['homeLocation'] = (new Mapper\CharacterClone($response->home_location))->getData();
+        }else{
+            $clonesData['error'] = $response->error;
+        }
+
+        return $clonesData;
     }
 
     /**

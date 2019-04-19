@@ -34,6 +34,13 @@ interface EsiInterface {
      * @param string $accessToken
      * @return array
      */
+    public function getCharacterClonesData(int $characterId, string $accessToken) : array;
+
+    /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @return array
+     */
     public function getCharacterLocationData(int $characterId, string $accessToken) : array;
 
     /**
