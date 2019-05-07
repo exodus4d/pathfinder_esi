@@ -77,7 +77,6 @@ class ESI extends AbstractCcp implements EsiInterface {
             $serverStatus['status'] = (new Mapper\ServerStatus($response))->getData();
         }else{
             $serverStatus['error'] = $response->error;
-
         }
 
         return $serverStatus;
@@ -122,6 +121,27 @@ class ESI extends AbstractCcp implements EsiInterface {
         }
 
         return $characterData;
+    }
+
+    /**
+     * @param int $characterId
+     * @param string $accessToken
+     * @return array
+     */
+    public function getCharacterClonesData(int $characterId, string $accessToken) : array {
+        $uri = $this->getEndpointURI(['characters', 'clones', 'GET'], [$characterId]);
+        $clonesData = [];
+
+        $requestOptions = $this->getRequestOptions($accessToken);
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if(!$response->error){
+            $clonesData['home'] = (new Mapper\CharacterClone($response->home_location))->getData();
+        }else{
+            $clonesData['error'] = $response->error;
+        }
+
+        return $clonesData;
     }
 
     /**
@@ -240,14 +260,52 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            foreach((array)$response as $characterRuleData){
-                $rolesData['roles'][(int)$characterRuleData->character_id] = array_map('strtolower', (array)$characterRuleData->roles);
+            foreach((array)$response as $characterRoleData){
+                $rolesData['roles'][(int)$characterRoleData->character_id] = array_map('strtolower', (array)$characterRoleData->roles);
             }
         }else{
             $rolesData['error'] = $response->error;
         }
 
         return $rolesData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUniverseFactions() : array {
+        $uri = $this->getEndpointURI(['universe', 'factions', 'list', 'GET']);
+        $factionData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if(!$response->error){
+            foreach((array)$response as $data){
+                $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
+            }
+        }else{
+            $factionData['error'] = $response->error;
+        }
+
+        return $factionData;
+    }
+
+    /**
+     * @param int $factionId
+     * @return array
+     */
+    public function getUniverseFactionData(int $factionId) : array {
+        $factionDataAll = $this->getUniverseFactions();
+        $factionData = [];
+
+        if(isset($factionDataAll['error'])){
+            $factionData = $factionDataAll;
+        }elseif(is_array($factionDataAll['factions']) && array_key_exists($factionId, $factionDataAll['factions'])){
+            $factionData = $factionDataAll['factions'][$factionId];
+        }
+
+        return $factionData;
     }
 
     /**
@@ -288,7 +346,7 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @return array
      */
-    public function getUniverseConstellations() : array{
+    public function getUniverseConstellations() : array {
         $uri = $this->getEndpointURI(['universe', 'constellations', 'list', 'GET']);
         $constellationData = [];
 
@@ -323,7 +381,7 @@ class ESI extends AbstractCcp implements EsiInterface {
     /**
      * @return array
      */
-    public function getUniverseSystems() : array{
+    public function getUniverseSystems() : array {
         $uri = $this->getEndpointURI(['universe', 'systems', 'list', 'GET']);
         $systemData = [];
 

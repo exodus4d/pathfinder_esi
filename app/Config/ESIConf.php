@@ -40,6 +40,9 @@ class ESIConf extends \Prefab {
             'affiliation' => [
                 'POST' => '/v1/characters/affiliation/'
             ],
+            'clones' => [
+                'GET' => '/v3/characters/{x}/clones/'
+            ],
             'location' => [
                 'GET' => '/v1/characters/{x}/location/'
             ],
@@ -53,6 +56,11 @@ class ESIConf extends \Prefab {
         'universe' => [
             'names' => [
                 'POST' => '/v3/universe/names/'
+            ],
+            'factions' => [
+                'list' => [
+                    'GET' => '/v2/universe/factions/'
+                ]
             ],
             'system_jumps' => [
                 'GET' => '/v1/universe/system_jumps/'
