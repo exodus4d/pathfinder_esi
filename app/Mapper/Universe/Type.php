@@ -42,8 +42,8 @@ class Type extends mapper\AbstractIterator {
             $dogmaAttributes = [];
             foreach((array)$iterator->current() as $data){
                 $dogmaAttributes[] = [
-                    'attributeId'   => (int)$data['attribute_id'],
-                    'value'         => (float)$data['value']
+                    'attributeId'   => (int)$data->attribute_id,
+                    'value'         => (float)$data->value
                 ];
             }
             return $dogmaAttributes;
