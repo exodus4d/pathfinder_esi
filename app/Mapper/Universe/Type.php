@@ -28,6 +28,7 @@ class Type extends mapper\AbstractIterator {
         'capacity'          => 'capacity',
         'portion_size'      => 'portionSize',
         'mass'              => 'mass',
-        'graphic_id'        => 'graphicId'
+        'graphic_id'        => 'graphicId',
+        'dogma_attributes'  => 'dogmaAttributes'
     ];
 }
