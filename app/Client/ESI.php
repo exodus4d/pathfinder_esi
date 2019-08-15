@@ -9,7 +9,7 @@
 namespace Exodus4D\ESI\Client;
 
 use Exodus4D\ESI\Config;
-use Exodus4D\ESI\Mapper;
+use Exodus4D\ESI\Mapper\Esi as Mapper;
 
 class ESI extends AbstractCcp implements EsiInterface {
 
@@ -74,7 +74,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $serverStatus['status'] = (new Mapper\ServerStatus($response))->getData();
+            $serverStatus['status'] = (new Mapper\Status\Status($response))->getData();
         }else{
             $serverStatus['error'] = $response->error;
         }
@@ -95,7 +95,7 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         if(!$response->error){
             foreach((array)$response as $affiliationData){
-                $characterAffiliationData[] = (new Mapper\CharacterAffiliation($affiliationData))->getData();
+                $characterAffiliationData[] = (new Mapper\Character\Affiliation($affiliationData))->getData();
             }
         }
 
@@ -114,7 +114,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $characterData = (new Mapper\Character($response))->getData();
+            $characterData = (new Mapper\Character\Character($response))->getData();
             if( !empty($characterData) ){
                 $characterData['id'] = $characterId;
             }
@@ -136,7 +136,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $clonesData['home'] = (new Mapper\CharacterClone($response->home_location))->getData();
+            $clonesData['home'] = (new Mapper\Character\CharacterClone($response->home_location))->getData();
         }else{
             $clonesData['error'] = $response->error;
         }
@@ -157,7 +157,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $locationData = (new Mapper\Location($response))->getData();
+            $locationData = (new Mapper\Character\Location($response))->getData();
         }
 
         return $locationData;
@@ -176,7 +176,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $shipData = (new Mapper\Ship($response))->getData();
+            $shipData = (new Mapper\Character\Ship($response))->getData();
         }
 
         return $shipData;
@@ -195,7 +195,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $onlineData = (new Mapper\Online($response))->getData();
+            $onlineData = (new Mapper\Character\Online($response))->getData();
         }
 
         return $onlineData;
@@ -213,7 +213,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $corporationData = (new Mapper\Corporation($response))->getData();
+            $corporationData = (new Mapper\Corporation\Corporation($response))->getData();
             if( !empty($corporationData) ){
                 $corporationData['id'] = $corporationId;
             }
@@ -234,7 +234,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $allianceData = (new Mapper\Alliance($response))->getData();
+            $allianceData = (new Mapper\Alliance\Alliance($response))->getData();
             if( !empty($allianceData) ){
                 $allianceData['id'] = $allianceId;
             }
@@ -337,7 +337,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $regionData = (new Mapper\Region($response))->getData();
+            $regionData = (new Mapper\Universe\Region($response))->getData();
         }
 
         return $regionData;
@@ -372,7 +372,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $constellationData = (new Mapper\Constellation($response))->getData();
+            $constellationData = (new Mapper\Universe\Constellation($response))->getData();
         }
 
         return $constellationData;
@@ -407,7 +407,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
         if(!$response->error){
-            $systemData = (new Mapper\System($response))->getData();
+            $systemData = (new Mapper\Universe\System($response))->getData();
         }
 
         return $systemData;
@@ -487,20 +487,20 @@ class ESI extends AbstractCcp implements EsiInterface {
                 $category = $data->category;
                 switch($category){
                     case 'character':
-                        $categoryData = (new Mapper\Character($data))->getData();
+                        $categoryData = (new Mapper\Character\Character($data))->getData();
                         break;
                     case 'alliance':
-                        $categoryData = (new Mapper\Alliance($data))->getData();
+                        $categoryData = (new Mapper\Alliance\Alliance($data))->getData();
                         break;
                     case 'corporation':
-                        $categoryData = (new Mapper\Corporation($data))->getData();
+                        $categoryData = (new Mapper\Corporation\Corporation($data))->getData();
                         break;
                     case 'station':
-                        $categoryData = (new Mapper\Station($data))->getData();
+                        $categoryData = (new Mapper\Universe\Station($data))->getData();
                         break;
                     case 'solar_system':
                         $category = 'system';
-                        $categoryData = (new Mapper\System($data))->getData();
+                        $categoryData = (new Mapper\Universe\System($data))->getData();
                         break;
                     case 'inventory_type':
                         $category = 'inventoryType';
@@ -679,6 +679,26 @@ class ESI extends AbstractCcp implements EsiInterface {
     }
 
     /**
+     * @param int $attributeId
+     * @return array
+     */
+    public function getDogmaAttributeData(int $attributeId) : array {
+        $uri = $this->getEndpointURI(['dogma', 'attributes', 'GET'], [$attributeId]);
+        $attributeData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if($response->error){
+            $attributeData['error'] = $response->error;
+        }else{
+            $attributeData = (new Mapper\Dogma\Attribute($response))->getData();
+        }
+
+        return $attributeData;
+    }
+
+    /**
      * @param int $sourceId
      * @param int $targetId
      * @param array $options
@@ -797,7 +817,7 @@ class ESI extends AbstractCcp implements EsiInterface {
         if($response->error){
             $searchData['error'] = $response->error;
         }else{
-            $searchData = (new Mapper\Search($response))->getData();
+            $searchData = (new Mapper\Search\Search($response))->getData();
         }
 
         return $searchData;
@@ -821,7 +841,7 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         if(!$response->error){
             foreach((array)$response as $status){
-                $statusData['status'][] = (new Mapper\EsiStatus($status))->getData();
+                $statusData['status'][] = (new Mapper\Status($status))->getData();
             }
         }else{
             $statusData['error'] = $response->error;

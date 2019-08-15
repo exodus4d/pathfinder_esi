@@ -6,11 +6,11 @@
  * Time: 00:22
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi;
 
 use data\mapper;
 
-class EsiStatus extends mapper\AbstractIterator {
+class Status extends mapper\AbstractIterator {
 
     /**
      * @var array

@@ -2,27 +2,27 @@
 /**
  * Created by PhpStorm.
  * User: Exodus4D
- * Date: 19.05.2018
- * Time: 01:43
+ * Date: 14.10.2017
+ * Time: 15:40
  */
 
-namespace Exodus4D\ESI\Mapper\Universe;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 
-class Planet extends mapper\AbstractIterator {
+class Structure extends mapper\AbstractIterator {
 
     /**
      * @var array
      */
     protected static $map = [
-        'planet_id'         => 'id',
         'name'              => 'name',
-        'system_id'         => 'systemId',
+        'solar_system_id'   => 'systemId',
         'type_id'           => 'typeId',
+        'owner_id'          => 'ownerId',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',
-        'z'                 => 'z'
+        'z'                 => 'z',
     ];
 }

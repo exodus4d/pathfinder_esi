@@ -2,15 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: Exodus4D
- * Date: 01.04.2017
- * Time: 00:09
+ * Date: 31.03.2017
+ * Time: 23:00
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Corporation;
 
 use data\mapper;
 
-class Alliance extends mapper\AbstractIterator {
+class Corporation extends mapper\AbstractIterator {
 
     /**
      * @var array
@@ -18,6 +18,7 @@ class Alliance extends mapper\AbstractIterator {
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
+        'member_count'      => 'memberCount',
         'ticker'            => 'ticker'
     ];
 }

@@ -3,14 +3,14 @@
  * Created by PhpStorm.
  * User: Exodus4D
  * Date: 14.04.2018
- * Time: 02:03
+ * Time: 00:26
  */
 
-namespace Exodus4D\ESI\Mapper\Universe;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 
-class Group extends mapper\AbstractIterator {
+class Category extends mapper\AbstractIterator {
 
     /**
      * @var array
@@ -18,7 +18,6 @@ class Group extends mapper\AbstractIterator {
     protected static $map = [
         'name'              => 'name',
         'published'         => 'published',
-        'category_id'       => 'categoryId',
-        'types'             => 'types'
+        'groups'            => 'groups'
     ];
 }

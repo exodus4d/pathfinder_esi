@@ -53,6 +53,11 @@ class ESIConf extends \Prefab {
                 'GET' => '/v2/characters/{x}/online/'
             ]
         ],
+        'dogma' => [
+            'attributes' => [
+                'GET' => '/v1/dogma/attributes/{x}/'
+            ]
+        ],
         'universe' => [
             'names' => [
                 'POST' => '/v3/universe/names/'

@@ -179,6 +179,12 @@ interface EsiInterface {
     public function getUniverseTypesData(int $typeId) : array;
 
     /**
+     * @param int $attributeId
+     * @return array
+     */
+    public function getDogmaAttributeData(int $attributeId) : array;
+
+    /**
      * @param int $sourceId
      * @param int $targetId
      * @param array $options
