@@ -31,4 +31,20 @@ class Type extends mapper\AbstractIterator {
         'graphic_id'        => 'graphicId',
         'dogma_attributes'  => 'dogmaAttributes'
     ];
+
+    /**
+     * map iterator
+     * @return array
+     */
+    public function getData(){
+
+        $normalize = function(\Iterator $iterator){
+            var_dump($iterator->current());
+            return 'abc';
+        };
+
+        self::$map['dogma_attributes'] = $normalize;
+
+        return parent::getData();
+    }
 }
