@@ -29,7 +29,7 @@ class Type extends mapper\AbstractIterator {
         'portion_size'      => 'portionSize',
         'mass'              => 'mass',
         'graphic_id'        => 'graphicId',
-        'dogma_attributes'  => 'dogmaAttributes'
+        'dogma_attributes'  => 'dogma_attributes'
     ];
 
     /**
@@ -38,12 +38,18 @@ class Type extends mapper\AbstractIterator {
      */
     public function getData(){
 
-        $normalize = function(\Iterator $iterator){
-            var_dump($iterator->current());
-            return 'abc';
+        $normalizeDogmaAttributes = function(\Iterator $iterator){
+            $dogmaAttributes = [];
+            foreach((array)$iterator->current() as $data){
+                $dogmaAttributes[] = [
+                    'attributeId'   => (int)$data['attribute_id'],
+                    'value'         => (float)$data['value']
+                ];
+            }
+            return $dogmaAttributes;
         };
 
-        self::$map['dogma_attributes'] = $normalize;
+        self::$map['dogma_attributes'] = $normalizeDogmaAttributes;
 
         return parent::getData();
     }
