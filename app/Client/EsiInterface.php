@@ -208,6 +208,11 @@ interface EsiInterface {
     public function openWindow(int $targetId, string $accessToken) : array;
 
     /**
+     * @return array
+     */
+    public function getSovereigntyMap() : array;
+
+    /**
      * @param array $categories
      * @param string $search
      * @param bool $strict

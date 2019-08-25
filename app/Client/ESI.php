@@ -792,6 +792,27 @@ class ESI extends AbstractCcp implements EsiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getSovereigntyMap() : array {
+        $uri = $this->getEndpointURI(['sovereignty', 'map', 'GET']);
+        $sovData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if(!$response->error){
+            foreach((array)$response as $data){
+                $sovData['map'][(int)$data->system_id] = (new Mapper\Sovereignty\Map($data))->getData();
+            }
+        }else{
+            $sovData['error'] = $response->error;
+        }
+
+        return $sovData;
+    }
+
+    /**
      * @param array $categories
      * @param string $search
      * @param bool $strict

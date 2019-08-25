@@ -134,6 +134,11 @@ class ESIConf extends \Prefab {
                 ]
             ]
         ],
+        'sovereignty' => [
+            'map' => [
+                'GET' => '/v1/sovereignty/map/'
+            ]
+        ],
         'search' => [
             'GET' => '/v2/search/'
         ]
