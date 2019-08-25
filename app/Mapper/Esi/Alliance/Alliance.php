@@ -18,6 +18,8 @@ class Alliance extends mapper\AbstractIterator {
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
-        'ticker'            => 'ticker'
+        'ticker'            => 'ticker',
+        'date_founded'      => 'dateFounded',
+        'faction_id'        => 'factionId'
     ];
 }

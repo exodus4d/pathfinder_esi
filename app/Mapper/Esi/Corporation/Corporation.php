@@ -18,7 +18,10 @@ class Corporation extends mapper\AbstractIterator {
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
+        'ticker'            => 'ticker',
+        'date_founded'      => 'dateFounded',
         'member_count'      => 'memberCount',
-        'ticker'            => 'ticker'
+        'faction_id'        => 'factionId',
+        'alliance_id'       => 'allianceId'
     ];
 }
