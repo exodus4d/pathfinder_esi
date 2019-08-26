@@ -13,7 +13,7 @@ class Map extends mapper\AbstractIterator {
     protected static $map = [
         'system_id'         => 'systemId',
         'faction_id'        => 'factionId',
-        'corporation_id'    => 'corporationId',
-        'alliance_id'       => 'allianceId'
+        'alliance_id'       => 'allianceId',
+        'corporation_id'    => 'corporationId'
     ];
 }

@@ -217,6 +217,8 @@ class ESI extends AbstractCcp implements EsiInterface {
             if( !empty($corporationData) ){
                 $corporationData['id'] = $corporationId;
             }
+        }else{
+            $corporationData['error'] = $response->error;
         }
 
         return $corporationData;
@@ -238,6 +240,8 @@ class ESI extends AbstractCcp implements EsiInterface {
             if( !empty($allianceData) ){
                 $allianceData['id'] = $allianceId;
             }
+        }else{
+            $allianceData['error'] = $response->error;
         }
 
         return $allianceData;
