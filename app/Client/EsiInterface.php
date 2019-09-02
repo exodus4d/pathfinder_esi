@@ -185,6 +185,11 @@ interface EsiInterface {
     public function getDogmaAttributeData(int $attributeId) : array;
 
     /**
+     * @return array
+     */
+    public function getFactionWarSystems() : array;
+
+    /**
      * @param int $sourceId
      * @param int $targetId
      * @param array $options

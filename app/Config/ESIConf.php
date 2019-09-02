@@ -58,6 +58,11 @@ class ESIConf extends \Prefab {
                 'GET' => '/v1/dogma/attributes/{x}/'
             ]
         ],
+        'fw' => [
+            'systems' => [
+                'GET' => '/v2/fw/systems/'
+            ]
+        ],
         'universe' => [
             'names' => [
                 'POST' => '/v3/universe/names/'

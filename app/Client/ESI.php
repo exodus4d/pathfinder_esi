@@ -703,6 +703,27 @@ class ESI extends AbstractCcp implements EsiInterface {
     }
 
     /**
+     * @return array
+     */
+    public function getFactionWarSystems() : array {
+        $uri = $this->getEndpointURI(['fw', 'systems', 'GET']);
+        $systemsData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if($response->error){
+            $systemsData['error'] = $response->error;
+        }else{
+            foreach((array)$response as $data){
+                $systemsData['systems'][(int)$data->solar_system_id] = (new Mapper\FactionWarfare\System($data))->getData();
+            }
+        }
+
+        return $systemsData;
+    }
+
+    /**
      * @param int $sourceId
      * @param int $targetId
      * @param array $options
