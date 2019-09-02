@@ -16,7 +16,7 @@ class System extends mapper\AbstractIterator {
      * @var array
      */
     protected static $map = [
-        'solar_system_id'           => 'id',
+        'solar_system_id'           => 'systemId',
         'owner_faction_id'          => 'ownerFactionId',
         'occupier_faction_id'       => 'occupierFactionId',
         'contested'                 => 'contested',
