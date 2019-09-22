@@ -286,7 +286,6 @@ class ESI extends AbstractCcp implements EsiInterface {
 
         if($response->error){
             $factionData['error'] = $response->error;
-
         }else{
             foreach((array)$response as $data){
                 $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
@@ -693,7 +692,9 @@ class ESI extends AbstractCcp implements EsiInterface {
         $requestOptions = $this->getRequestOptions($accessToken);
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if(!$response->error){
+        if($response->error){
+            $structureData['error'] = $response->error;
+        }else{
             $structureData = (new Mapper\Universe\Structure($response))->getData();
             if( !empty($structureData) ){
                 $structureData['id'] = $structureId;
