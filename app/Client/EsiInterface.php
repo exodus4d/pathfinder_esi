@@ -79,6 +79,28 @@ interface EsiInterface {
     /**
      * @return array
      */
+    public function getUniverseFactions() : array;
+
+    /**
+     * @param int $factionId
+     * @return array
+     */
+    public function getUniverseFactionData(int $factionId) : array;
+
+    /**
+     * @return array
+     */
+    public function getUniverseRaces() : array;
+
+    /**
+     * @param int $raceId
+     * @return array
+     */
+    public function getUniverseRaceData(int $raceId) : array;
+
+    /**
+     * @return array
+     */
     public function getUniverseRegions() : array;
 
     /**
@@ -171,6 +193,12 @@ interface EsiInterface {
      * @return array
      */
     public function getUniverseStructureData(int $structureId, string $accessToken) : array;
+
+    /**
+     * @param int $stationId
+     * @return array
+     */
+    public function getUniverseStationData(int $stationId) : array;
 
     /**
      * @param int $typeId

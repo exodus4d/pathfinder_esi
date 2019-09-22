@@ -78,6 +78,11 @@ class ESIConf extends \Prefab {
             'system_kills' => [
                 'GET' => '/v2/universe/system_kills/'
             ],
+            'races' => [
+                'list' => [
+                    'GET' => '/v1/universe/races/'
+                ]
+            ],
             'regions' => [
                 'GET' => '/v1/universe/regions/{x}/',
                 'list' => [
@@ -104,6 +109,9 @@ class ESIConf extends \Prefab {
             ],
             'stargates' => [
                 'GET' => '/v1/universe/stargates/{x}/'
+            ],
+            'stations' => [
+                'GET' => '/v2/universe/stations/{x}/'
             ],
             'structures' => [
                 'GET' => '/v2/universe/structures/{x}/'

@@ -17,6 +17,16 @@ class Station extends mapper\AbstractIterator {
      */
     protected static $map = [
         'id'                => 'id',
-        'name'              => 'name'
+        'station_id'        => 'id',
+        'name'              => 'name',
+        'system_id'         => 'systemId',
+        'type_id'           => 'typeId',
+        'race_id'           => 'raceId',
+        'owner'             => 'ownerId',
+        'services'          => 'services',
+        'position'          => 'position',
+        'x'                 => 'x',
+        'y'                 => 'y',
+        'z'                 => 'z'
     ];
 }

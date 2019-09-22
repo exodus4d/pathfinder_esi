@@ -284,12 +284,13 @@ class ESI extends AbstractCcp implements EsiInterface {
         $requestOptions = $this->getRequestOptions();
         $response = $this->request('GET', $uri, $requestOptions)->getContents();
 
-        if(!$response->error){
+        if($response->error){
+            $factionData['error'] = $response->error;
+
+        }else{
             foreach((array)$response as $data){
                 $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
             }
-        }else{
-            $factionData['error'] = $response->error;
         }
 
         return $factionData;
@@ -310,6 +311,44 @@ class ESI extends AbstractCcp implements EsiInterface {
         }
 
         return $factionData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUniverseRaces() : array {
+        $uri = $this->getEndpointURI(['universe', 'races', 'list', 'GET']);
+        $raceData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if($response->error){
+            $raceData['error'] = $response->error;
+        }else{
+            foreach((array)$response as $data){
+                $raceData['races'][(int)$data->race_id] = (new Mapper\Universe\Race($data))->getData();
+            }
+        }
+
+        return $raceData;
+    }
+
+    /**
+     * @param int $raceId
+     * @return array
+     */
+    public function getUniverseRaceData(int $raceId) : array {
+        $raceDataAll = $this->getUniverseRaces();
+        $raceData = [];
+
+        if(isset($raceDataAll['error'])){
+            $raceData = $raceDataAll;
+        }elseif(is_array($raceDataAll['races']) && array_key_exists($raceId, $raceDataAll['races'])){
+            $raceData = $raceDataAll['races'][$raceId];
+        }
+
+        return $raceData;
     }
 
     /**
@@ -662,6 +701,26 @@ class ESI extends AbstractCcp implements EsiInterface {
         }
 
         return $structureData;
+    }
+
+    /**
+     * @param int $stationId
+     * @return array
+     */
+    public function getUniverseStationData(int $stationId) : array {
+        $uri = $this->getEndpointURI(['universe', 'stations', 'GET'], [$stationId]);
+        $stationData = [];
+
+        $requestOptions = $this->getRequestOptions();
+        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+
+        if($response->error){
+            $stationData['error'] = $response->error;
+        }else{
+            $stationData = (new Mapper\Universe\Station($response))->getData();
+        }
+
+        return $stationData;
     }
 
     /**
