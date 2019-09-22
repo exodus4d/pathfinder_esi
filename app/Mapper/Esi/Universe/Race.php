@@ -14,6 +14,6 @@ class Race extends mapper\AbstractIterator {
         'race_id'           => 'id',
         'name'              => 'name',
         'description'       => 'description',
-        'alliance_id'       => 'allianceId'
+        'alliance_id'       => 'factionId'      // CCP failed here...
     ];
 }
