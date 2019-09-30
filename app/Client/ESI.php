@@ -826,26 +826,26 @@ class ESI extends AbstractCcp implements EsiInterface {
     }
 
     /**
-     * @param int $systemId
+     * @param int $destinationId
      * @param string $accessToken
      * @param array $options
      * @return array
      */
-    public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array {
+    public function setWaypoint(int $destinationId, string $accessToken, array $options = []) : array {
         $uri = $this->getEndpointURI(['ui', 'autopilot', 'waypoint', 'POST']);
         $waypointData = [];
 
         $query = [
             'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
             'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
-            'destination_id'        => $systemId
+            'destination_id'        => $destinationId
         ];
 
         $requestOptions = $this->getRequestOptions($accessToken, null, $query);
         $response = $this->request('POST', $uri, $requestOptions)->getContents();
 
         // "null" === success => There is no response body send...
-        if( $response->error ){
+        if($response->error){
             $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
         }
 

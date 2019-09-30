@@ -226,12 +226,12 @@ interface EsiInterface {
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array;
 
     /**
-     * @param int $systemId
+     * @param int $destinationId
      * @param string $accessToken
      * @param array $options
      * @return array
      */
-    public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array;
+    public function setWaypoint(int $destinationId, string $accessToken, array $options = []) : array;
 
     /**
      * @param int $targetId
