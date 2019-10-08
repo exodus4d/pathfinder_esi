@@ -79,6 +79,28 @@ interface EsiInterface {
     /**
      * @return array
      */
+    public function getUniverseFactions() : array;
+
+    /**
+     * @param int $factionId
+     * @return array
+     */
+    public function getUniverseFactionData(int $factionId) : array;
+
+    /**
+     * @return array
+     */
+    public function getUniverseRaces() : array;
+
+    /**
+     * @param int $raceId
+     * @return array
+     */
+    public function getUniverseRaceData(int $raceId) : array;
+
+    /**
+     * @return array
+     */
     public function getUniverseRegions() : array;
 
     /**
@@ -173,10 +195,27 @@ interface EsiInterface {
     public function getUniverseStructureData(int $structureId, string $accessToken) : array;
 
     /**
+     * @param int $stationId
+     * @return array
+     */
+    public function getUniverseStationData(int $stationId) : array;
+
+    /**
      * @param int $typeId
      * @return array
      */
     public function getUniverseTypesData(int $typeId) : array;
+
+    /**
+     * @param int $attributeId
+     * @return array
+     */
+    public function getDogmaAttributeData(int $attributeId) : array;
+
+    /**
+     * @return array
+     */
+    public function getFactionWarSystems() : array;
 
     /**
      * @param int $sourceId
@@ -187,12 +226,12 @@ interface EsiInterface {
     public function getRouteData(int $sourceId, int $targetId, array $options = []) : array;
 
     /**
-     * @param int $systemId
+     * @param int $destinationId
      * @param string $accessToken
      * @param array $options
      * @return array
      */
-    public function setWaypoint(int $systemId, string $accessToken, array $options = []) : array;
+    public function setWaypoint(int $destinationId, string $accessToken, array $options = []) : array;
 
     /**
      * @param int $targetId
@@ -200,6 +239,11 @@ interface EsiInterface {
      * @return array
      */
     public function openWindow(int $targetId, string $accessToken) : array;
+
+    /**
+     * @return array
+     */
+    public function getSovereigntyMap() : array;
 
     /**
      * @param array $categories

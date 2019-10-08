@@ -6,7 +6,7 @@
  * Time: 14:49
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 

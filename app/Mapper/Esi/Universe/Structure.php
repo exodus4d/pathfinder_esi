@@ -6,7 +6,7 @@
  * Time: 15:40
  */
 
-namespace Exodus4D\ESI\Mapper\Universe;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 
@@ -19,7 +19,7 @@ class Structure extends mapper\AbstractIterator {
         'name'              => 'name',
         'solar_system_id'   => 'systemId',
         'type_id'           => 'typeId',
-        'owner_id'          => 'ownerId',
+        'owner_id'          => 'corporationId',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',

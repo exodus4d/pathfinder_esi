@@ -53,6 +53,16 @@ class ESIConf extends \Prefab {
                 'GET' => '/v2/characters/{x}/online/'
             ]
         ],
+        'dogma' => [
+            'attributes' => [
+                'GET' => '/v1/dogma/attributes/{x}/'
+            ]
+        ],
+        'fw' => [
+            'systems' => [
+                'GET' => '/v2/fw/systems/'
+            ]
+        ],
         'universe' => [
             'names' => [
                 'POST' => '/v3/universe/names/'
@@ -67,6 +77,11 @@ class ESIConf extends \Prefab {
             ],
             'system_kills' => [
                 'GET' => '/v2/universe/system_kills/'
+            ],
+            'races' => [
+                'list' => [
+                    'GET' => '/v1/universe/races/'
+                ]
             ],
             'regions' => [
                 'GET' => '/v1/universe/regions/{x}/',
@@ -94,6 +109,9 @@ class ESIConf extends \Prefab {
             ],
             'stargates' => [
                 'GET' => '/v1/universe/stargates/{x}/'
+            ],
+            'stations' => [
+                'GET' => '/v2/universe/stations/{x}/'
             ],
             'structures' => [
                 'GET' => '/v2/universe/structures/{x}/'
@@ -127,6 +145,11 @@ class ESIConf extends \Prefab {
                 'information' => [
                     'POST' => '/v1/ui/openwindow/information/'
                 ]
+            ]
+        ],
+        'sovereignty' => [
+            'map' => [
+                'GET' => '/v1/sovereignty/map/'
             ]
         ],
         'search' => [

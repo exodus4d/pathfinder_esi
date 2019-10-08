@@ -7,7 +7,7 @@
  * Time: 19:16
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Character;
 
 use data\mapper;
 

@@ -6,11 +6,11 @@
  * Time: 22:00
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Character;
 
 use data\mapper;
 
-class CharacterAffiliation extends mapper\AbstractIterator {
+class Affiliation extends mapper\AbstractIterator {
 
     /**
      * @var array

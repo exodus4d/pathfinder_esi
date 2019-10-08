@@ -6,7 +6,7 @@
  * Time: 15:40
  */
 
-namespace Exodus4D\ESI\Mapper\Universe;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 
@@ -28,6 +28,29 @@ class Type extends mapper\AbstractIterator {
         'capacity'          => 'capacity',
         'portion_size'      => 'portionSize',
         'mass'              => 'mass',
-        'graphic_id'        => 'graphicId'
+        'graphic_id'        => 'graphicId',
+        'dogma_attributes'  => 'dogma_attributes'
     ];
+
+    /**
+     * map iterator
+     * @return array
+     */
+    public function getData(){
+
+        $normalizeDogmaAttributes = function(\Iterator $iterator){
+            $dogmaAttributes = [];
+            foreach((array)$iterator->current() as $data){
+                $dogmaAttributes[] = [
+                    'attributeId'   => (int)$data->attribute_id,
+                    'value'         => (float)$data->value
+                ];
+            }
+            return $dogmaAttributes;
+        };
+
+        self::$map['dogma_attributes'] = $normalizeDogmaAttributes;
+
+        return parent::getData();
+    }
 }

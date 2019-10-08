@@ -6,7 +6,7 @@
  * Time: 00:09
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Alliance;
 
 use data\mapper;
 
@@ -18,6 +18,8 @@ class Alliance extends mapper\AbstractIterator {
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
-        'ticker'            => 'ticker'
+        'ticker'            => 'ticker',
+        'date_founded'      => 'dateFounded',
+        'faction_id'        => 'factionId'
     ];
 }

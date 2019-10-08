@@ -6,7 +6,7 @@
  * Time: 23:00
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Corporation;
 
 use data\mapper;
 
@@ -18,7 +18,10 @@ class Corporation extends mapper\AbstractIterator {
     protected static $map = [
         'id'                => 'id',
         'name'              => 'name',
+        'ticker'            => 'ticker',
+        'date_founded'      => 'dateFounded',
         'member_count'      => 'memberCount',
-        'ticker'            => 'ticker'
+        'faction_id'        => 'factionId',
+        'alliance_id'       => 'allianceId'
     ];
 }

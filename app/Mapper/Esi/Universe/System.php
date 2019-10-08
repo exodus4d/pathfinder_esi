@@ -6,7 +6,7 @@
  * Time: 11:10
  */
 
-namespace Exodus4D\ESI\Mapper;
+namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
 use data\mapper;
 
@@ -28,6 +28,7 @@ class System extends mapper\AbstractIterator {
         'moons'             => 'moons',
         'asteroid_belts'    => 'asteroidBelts',
         'stargates'         => 'stargates',
+        'stations'          => 'stations',
         'position'          => 'position',
         'x'                 => 'x',
         'y'                 => 'y',
