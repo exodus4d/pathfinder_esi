@@ -14,8 +14,8 @@ class Connection extends mapper\AbstractIterator {
         'id'                                => 'id',
         'type'                              => 'type',
 
-        'status'                            => ['status' => 'namep'],
-        'statusUpdatedAt'                   => ['status' => 'updated'],
+        'status'                            => ['state' => 'name'],
+        'statusUpdatedAt'                   => ['state' => 'updated'],
 
         'solarSystemId'                     => ['source' => 'id'],
         'wormholeDestinationSolarSystemId'  => ['target' => 'id'],
