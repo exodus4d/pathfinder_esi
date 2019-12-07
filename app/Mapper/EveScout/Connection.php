@@ -23,9 +23,11 @@ class Connection extends mapper\AbstractIterator {
         'wormholeDestinationSolarSystemId'  => ['target' => 'id'],
 
         'signatureId'                       => ['sourceSignature' => 'name'],
+        'sourceWormholeType'                => ['sourceSignature' => 'type'],
+
         'wormholeDestinationSignatureId'    => ['targetSignature' => 'name'],
-        //'wormholeMass'              => 'wormholeMass',
-        //'wormholeEol'               => 'wormholeEol'
+        'destinationWormholeType'           => ['targetSignature' => 'type'],
+
         'wormholeMass'                      => ['wormhole' => 'mass'],
         'wormholeEol'                       => ['wormhole' => 'eol'],
 
