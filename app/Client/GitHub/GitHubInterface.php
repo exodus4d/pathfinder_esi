@@ -8,7 +8,6 @@
 
 namespace Exodus4D\ESI\Client\GitHub;
 
-
 interface GitHubInterface {
 
     /**

@@ -21,7 +21,7 @@ class GitHub extends Client\AbstractApi implements GitHubInterface {
      * @return array
      */
     public function getProjectReleases(string $projectName, int $count = 1) : array {
-        $uri = $this->getReleasesEndpointURI($projectName);
+        $uri = $this->getConfig()->getEndpoint(['releases', 'GET'], [$projectName]);
         $releasesData = [];
 
         $requestOptions = [
@@ -87,7 +87,7 @@ class GitHub extends Client\AbstractApi implements GitHubInterface {
     /**
      * @return ConfigInterface
      */
-    protected function getConfig() : ConfigInterface{
+    protected function getConfig() : ConfigInterface {
         return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

@@ -3,7 +3,6 @@
 
 namespace Exodus4D\ESI\Config;
 
-
 interface ConfigInterface {
 
     /**

@@ -93,7 +93,7 @@ class Sso extends Ccp\AbstractCcp implements SsoInterface {
     /**
      * @return ConfigInterface
      */
-    protected function getConfig() : ConfigInterface{
+    protected function getConfig() : ConfigInterface {
         return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

@@ -8,7 +8,6 @@
 
 namespace Exodus4D\ESI\Client;
 
-
 interface ApiInterface {
 
     /**

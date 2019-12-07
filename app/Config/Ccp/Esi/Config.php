@@ -11,7 +11,6 @@ namespace Exodus4D\ESI\Config\Ccp\Esi;
 
 use Exodus4D\ESI\Config\AbstractConfig;
 
-
 class Config extends AbstractConfig {
 
     /**

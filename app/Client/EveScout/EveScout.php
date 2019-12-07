@@ -10,12 +10,11 @@ use Exodus4D\ESI\Mapper\EveScout as Mapper;
 
 class EveScout extends Client\AbstractApi implements EveScoutInterface {
 
-
+    /**
+     * @return array
+     */
     public function getTheraConnections() : array {
-        //$uri = 'https://www.eve-scout.com/api/wormholes';
-        $uri = $this->getConfig()->getEndpoint(['wormholes', 'GET']);;
-        var_dump('11111');
-        var_dump($uri);
+        $uri = $this->getConfig()->getEndpoint(['wormholes', 'GET']);
         $connectionsData = [];
 
         $response = $this->request('GET', $uri)->getContents();
@@ -34,7 +33,7 @@ class EveScout extends Client\AbstractApi implements EveScoutInterface {
     /**
      * @return ConfigInterface
      */
-    protected function getConfig() : ConfigInterface{
+    protected function getConfig() : ConfigInterface {
         return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

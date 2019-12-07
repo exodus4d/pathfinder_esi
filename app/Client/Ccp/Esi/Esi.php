@@ -8,7 +8,6 @@
 
 namespace Exodus4D\ESI\Client\Ccp\Esi;
 
-
 use Exodus4D\ESI\Client\Ccp;
 use Exodus4D\ESI\Config\ConfigInterface;
 use Exodus4D\ESI\Config\Ccp\Esi\Config;
@@ -1095,7 +1094,7 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     /**
      * @return ConfigInterface
      */
-    protected function getConfig() : ConfigInterface{
+    protected function getConfig() : ConfigInterface {
         return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }
