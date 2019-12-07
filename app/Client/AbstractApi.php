@@ -136,7 +136,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * Debug requests if enabled
      * @see https://guzzle.readthedocs.io/en/latest/request-options.html#debug
-     * @var bool
+     * @var bool|resource
      */
     private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
@@ -365,9 +365,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * debug requests
-     * @param bool $debugRequests
+     * @param bool|resource $debugRequests
      */
-    public function setDebugRequests(bool $debugRequests = self::DEFAULT_DEBUG_REQUESTS){
+    public function setDebugRequests($debugRequests = self::DEFAULT_DEBUG_REQUESTS){
         $this->debugRequests  = $debugRequests;
     }
 
@@ -552,7 +552,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @return bool
+     * @return bool|resource
      */
     public function getDebugRequests() : bool {
         return $this->debugRequests;
