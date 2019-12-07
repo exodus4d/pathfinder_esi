@@ -12,11 +12,10 @@ class EveScout extends Client\AbstractApi implements EveScoutInterface {
 
 
     public function getTheraConnections() : array {
-        $uri = 'https://www.eve-scout.com/api/wormholes';
-        $uri2 = $this->getConfig()->getEndpoint(['wormholes', 'GET']);;
+        //$uri = 'https://www.eve-scout.com/api/wormholes';
+        $uri = $this->getConfig()->getEndpoint(['wormholes', 'GET']);;
         var_dump('11111');
         var_dump($uri);
-        var_dump($uri2);
         $connectionsData = [];
 
         $response = $this->request('GET', $uri)->getContents();
