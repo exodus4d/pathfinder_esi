@@ -15,7 +15,7 @@ class Connection extends mapper\AbstractIterator {
         'type'                      => 'type',
         'status'                    => 'status',
         'signatureId'               => ['signature' => 'name'],
-        'wormhole'          => 'wormhole',
+        'wormhole'          => [],
         'wormholeMass'              => ['wormhole' => 'mass'],
         'wormholeEol'               => ['wormhole' => 'eol']
     ];
