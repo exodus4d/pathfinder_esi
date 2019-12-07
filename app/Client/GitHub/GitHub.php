@@ -16,7 +16,7 @@ use Exodus4D\ESI\Mapper;
 class GitHub extends Client\AbstractApi implements GitHubInterface {
 
     /**
-     * @param string $projectName
+     * @param string $projectName e.g. "exodus4d/pathfinder"
      * @param int $count
      * @return array
      */
@@ -48,7 +48,7 @@ class GitHub extends Client\AbstractApi implements GitHubInterface {
      * @return string
      */
     public function markdownToHtml(string $context, string $markdown) : string {
-        $uri = $this->getMarkdownToHtmlEndpointURI();
+        $uri = $this->getConfig()->getEndpoint(['markdown', 'POST']);
         $html = '';
 
         $requestOptions = [
@@ -67,21 +67,6 @@ class GitHub extends Client\AbstractApi implements GitHubInterface {
         }
 
         return $html;
-    }
-
-    /**
-     * @param string $projectName e.g. "exodus4d/pathfinder"
-     * @return string
-     */
-    protected function getReleasesEndpointURI(string $projectName) : string {
-        return '/repos/' . $projectName . '/releases';
-    }
-
-    /**
-     * @return string
-     */
-    protected function getMarkdownToHtmlEndpointURI() : string {
-        return '/markdown';
     }
 
     /**

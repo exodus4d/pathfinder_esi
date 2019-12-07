@@ -13,6 +13,9 @@ class Config extends AbstractConfig {
     protected static $spec = [
         'releases' => [
             'GET' =>  '/repos/{x}/releases'
+        ],
+        'markdown' => [
+            'POST' =>  '/markdown'
         ]
     ];
 }
