@@ -13,11 +13,6 @@ class Connection extends mapper\AbstractIterator {
     protected static $map = [
         'id'                                => 'id',
         'type'                              => 'type',
-        'status'                            => 'status',
-        //'signatureId'               => ['signature' => 'name'],
-
-        //'sourceSolarSystem'                 => 'source',
-        //'destinationSolarSystem'            => 'target',
 
         'solarSystemId'                     => ['source' => 'id'],
         'wormholeDestinationSolarSystemId'  => ['target' => 'id'],
@@ -28,12 +23,13 @@ class Connection extends mapper\AbstractIterator {
         'wormholeDestinationSignatureId'    => ['targetSignature' => 'name'],
         'destinationWormholeType'           => ['targetSignature' => 'type'],
 
+        'status'                            => ['status' => 'name'],
+        'statusUpdatedAt'                   => ['status' => 'updated'],
+
         'wormholeMass'                      => ['wormhole' => 'mass'],
         'wormholeEol'                       => ['wormhole' => 'eol'],
 
         'createdAt'                         => ['created' => 'created'],
         'updatedAt'                         => ['updated' => 'updated']
-
-
     ];
 }
