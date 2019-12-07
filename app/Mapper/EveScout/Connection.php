@@ -23,7 +23,7 @@ class Connection extends mapper\AbstractIterator {
         'wormholeDestinationSignatureId'    => ['targetSignature' => 'name'],
         'destinationWormholeType'           => ['targetSignature' => 'type'],
 
-        'status'                            => ['status' => 'name'],
+        'status'                            => ['status' => 'namep'],
         'statusUpdatedAt'                   => ['status' => 'updated'],
 
         'wormholeMass'                      => ['wormhole' => 'mass'],
