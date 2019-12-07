@@ -71,7 +71,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * WebClient instance
-     * @var \Exodus4D\ESI\Lib\WebClient|null
+     * @var WebClient|null
      */
     private $client                                 = null;
 

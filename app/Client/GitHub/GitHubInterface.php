@@ -6,7 +6,7 @@
  * Time: 22:38
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\GitHub;
 
 
 interface GitHubInterface {

@@ -9,7 +9,7 @@
 
 namespace Exodus4D\ESI\Config;
 
-class ESIConf extends \Prefab {
+class EsiConf extends \Prefab {
 
     /**
      * Swagger endpoint configuration

@@ -6,7 +6,7 @@
  * Time: 20:27
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\Ccp\Esi;
 
 
 interface EsiInterface {

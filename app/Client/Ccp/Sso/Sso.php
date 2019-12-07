@@ -6,12 +6,12 @@
  * Time: 16:21
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\Ccp\Sso;
 
-
+use Exodus4D\ESI\Client\Ccp;
 use Exodus4D\ESI\Mapper;
 
-class SSO extends AbstractCcp implements SsoInterface {
+class Sso extends Ccp\AbstractCcp implements SsoInterface {
 
     /**
      * verify character data by "access_token"

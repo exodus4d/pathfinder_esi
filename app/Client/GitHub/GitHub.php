@@ -6,12 +6,12 @@
  * Time: 22:38
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\GitHub;
 
-
+use Exodus4D\ESI\Client;
 use Exodus4D\ESI\Mapper;
 
-class Github extends AbstractApi implements GitHubInterface {
+class GitHub extends Client\AbstractApi implements GitHubInterface {
 
     /**
      * @param string $projectName

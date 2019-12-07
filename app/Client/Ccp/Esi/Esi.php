@@ -6,12 +6,14 @@
  * Time: 16:37
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\Ccp\Esi;
 
+
+use Exodus4D\ESI\Client\Ccp;
 use Exodus4D\ESI\Config;
 use Exodus4D\ESI\Mapper\Esi as Mapper;
 
-class ESI extends AbstractCcp implements EsiInterface {
+class Esi extends Ccp\AbstractCcp implements EsiInterface {
 
     /**
      * error message for set waypoint
@@ -963,7 +965,7 @@ class ESI extends AbstractCcp implements EsiInterface {
     public function getStatusForRoutes(string $version = 'last') : array {
         // data for all configured ESI endpoints
         $statusData = [
-            'status' => Config\ESIConf::getEndpointsData()
+            'status' => Config\EsiConf::getEndpointsData()
         ];
 
         $statusDataAll = $this->getStatus($version);
@@ -1044,7 +1046,7 @@ class ESI extends AbstractCcp implements EsiInterface {
      * @return string
      */
     protected function getEndpointURI(array $path = [], array $placeholders = []) : string {
-        $uri = Config\ESIConf::getEndpoint($path, $placeholders);
+        $uri = Config\EsiConf::getEndpoint($path, $placeholders);
 
         // overwrite endpoint version (debug)
         if( !empty($endpointVersion = $this->getVersion()) ){
