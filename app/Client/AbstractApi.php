@@ -136,7 +136,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * Debug requests if enabled
      * @see https://guzzle.readthedocs.io/en/latest/request-options.html#debug
-     * @var bool|resource
+     * @var bool|resource  e.g. fopen('php://stderr', 'w')
      */
     private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
