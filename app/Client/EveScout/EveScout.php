@@ -23,6 +23,6 @@ class EveScout extends Client\AbstractApi implements EveScoutInterface {
             }
         }
 
-        return $response;
+        return $connectionsData;
     }
 }
