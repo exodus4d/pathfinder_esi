@@ -13,7 +13,7 @@ class Config extends AbstractConfig {
      */
     protected static $spec = [
         'wormholes' => [
-            'GET' => '/wormholes'
+            'GET' => '/api/wormholes'
         ]
     ];
 }
