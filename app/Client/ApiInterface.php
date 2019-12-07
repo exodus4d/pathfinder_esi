@@ -202,9 +202,9 @@ interface ApiInterface {
     public function getVerify() : bool;
 
     /**
-     * @return bool
+     * @return bool|resource
      */
-    public function getDebugRequests() : bool;
+    public function getDebugRequests();
 
     /**
      * @return int

@@ -554,7 +554,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * @return bool|resource
      */
-    public function getDebugRequests() : bool {
+    public function getDebugRequests(){
         return $this->debugRequests;
     }
 
