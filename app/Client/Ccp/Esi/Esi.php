@@ -10,7 +10,8 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 
 
 use Exodus4D\ESI\Client\Ccp;
-use Exodus4D\ESI\Config\Ccp\Esi\EsiConf;
+use Exodus4D\ESI\Config\ConfigInterface;
+use Exodus4D\ESI\Config\Ccp\Esi\Config;
 use Exodus4D\ESI\Mapper\Esi as Mapper;
 
 class Esi extends Ccp\AbstractCcp implements EsiInterface {
@@ -965,7 +966,7 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     public function getStatusForRoutes(string $version = 'last') : array {
         // data for all configured ESI endpoints
         $statusData = [
-            'status' => EsiConf::getEndpointsData()
+            'status' => $this->getConfig()->getEndpointsData()
         ];
 
         $statusDataAll = $this->getStatus($version);
@@ -1046,7 +1047,7 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
      * @return string
      */
     protected function getEndpointURI(array $path = [], array $placeholders = []) : string {
-        $uri = EsiConf::getEndpoint($path, $placeholders);
+        $uri = $this->getConfig()->getEndpoint($path, $placeholders);
 
         // overwrite endpoint version (debug)
         if( !empty($endpointVersion = $this->getVersion()) ){
@@ -1089,5 +1090,12 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
         }
 
         return $options;
+    }
+
+    /**
+     * @return ConfigInterface
+     */
+    protected function getConfig() : ConfigInterface{
+        return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

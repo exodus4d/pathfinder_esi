@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI\Client\Ccp\Sso;
 
 use Exodus4D\ESI\Client\Ccp;
+use Exodus4D\ESI\Config\ConfigInterface;
+use Exodus4D\ESI\Config\Ccp\Sso\Config;
 use Exodus4D\ESI\Mapper;
 
 class Sso extends Ccp\AbstractCcp implements SsoInterface {
@@ -86,5 +88,12 @@ class Sso extends Ccp\AbstractCcp implements SsoInterface {
      */
     public function getVerifyAuthorizationCodeEndpointURI() : string {
         return '/oauth/token';
+    }
+
+    /**
+     * @return ConfigInterface
+     */
+    protected function getConfig() : ConfigInterface{
+        return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

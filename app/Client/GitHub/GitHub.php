@@ -9,6 +9,8 @@
 namespace Exodus4D\ESI\Client\GitHub;
 
 use Exodus4D\ESI\Client;
+use Exodus4D\ESI\Config\ConfigInterface;
+use Exodus4D\ESI\Config\GitHub\Config;
 use Exodus4D\ESI\Mapper;
 
 class GitHub extends Client\AbstractApi implements GitHubInterface {
@@ -80,5 +82,12 @@ class GitHub extends Client\AbstractApi implements GitHubInterface {
      */
     protected function getMarkdownToHtmlEndpointURI() : string {
         return '/markdown';
+    }
+
+    /**
+     * @return ConfigInterface
+     */
+    protected function getConfig() : ConfigInterface{
+        return ($this->config instanceof ConfigInterface) ? $this->config : $this->config = new Config();
     }
 }

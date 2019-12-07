@@ -20,6 +20,7 @@ use Exodus4D\ESI\Lib\Middleware\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Middleware\Cache\Storage\Psr6CacheStorage;
 use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\CacheStrategyInterface;
 use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\PrivateCacheStrategy;
+use Exodus4D\ESI\Config\ConfigInterface;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
@@ -175,6 +176,12 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * @var null|callable
      */
     private $isLoggable                             = null;
+
+    /**
+     * Endpoint config for this API
+     * @var ConfigInterface
+     */
+    protected $config;
 
     // Guzzle Log Middleware config -----------------------------------------------------------------------------------
 
@@ -810,4 +817,10 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
         return $body;
     }
+
+    /**
+     * get Config instance for this API
+     * @return ConfigInterface
+     */
+    abstract protected function getConfig() : ConfigInterface;
 }

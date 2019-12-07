@@ -12,6 +12,12 @@ namespace Exodus4D\ESI\Client;
 interface ApiInterface {
 
     /**
+     * ApiInterface constructor.
+     * @param string $url
+     */
+    public function __construct(string $url);
+
+    /**
      * @param string $url
      * @return mixed
      */
