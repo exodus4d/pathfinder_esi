@@ -22,8 +22,8 @@
   },
   "require": {
     "php-64bit": ">=7.1",
-    "guzzlehttp/guzzle": "6.3.*",
-    "caseyamcl/guzzle_retry_middleware": "2.2.*",
+    "guzzlehttp/guzzle": "6.5.*",
+    "caseyamcl/guzzle_retry_middleware": "2.3.*",
     "cache/void-adapter": "1.0.*"
   }
 }
