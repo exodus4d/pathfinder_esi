@@ -19,7 +19,7 @@ class AbstractConfig implements ConfigInterface {
     protected function stripVersion(string &$endpoint) : ?string {
         $version = null;
         $endpoint = preg_replace_callback(
-            '/^\/(v\d{1})\//',
+            '/^\/(v\d)\//',
             function($matches) use (&$version){
                 // set found version and strip it from $endpoint
                 $version = $matches[1];
