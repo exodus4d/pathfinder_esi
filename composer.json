@@ -21,7 +21,7 @@
     }
   },
   "require": {
-    "php-64bit": ">=7.1",
+    "php-64bit": ">=7.2",
     "ext-json": "*",
     "guzzlehttp/guzzle": "6.5.*",
     "caseyamcl/guzzle_retry_middleware": "2.3.*",
