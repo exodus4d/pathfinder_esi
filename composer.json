@@ -1,6 +1,8 @@
 {
   "name": "exodus4d/pathfinder_esi",
   "description": "ESI API library for Pathfinder",
+  "type": "library",
+  "homepage": "https://github.com/exodus4d/pathfinder_esi",
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
@@ -9,6 +11,10 @@
       "email": "pathfinder@exodus4d.de"
     }
   ],
+  "config": {
+    "optimize-autoloader": true,
+    "lock": false
+  },
   "repositories": [
     {
       "type": "vcs",
