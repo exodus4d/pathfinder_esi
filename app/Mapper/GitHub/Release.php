@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\GitHub;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Release extends mapper\AbstractIterator {
+class Release extends AbstractIterator {
 
     /**
      * @var array

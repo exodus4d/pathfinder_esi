@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\FactionWarfare;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class System extends mapper\AbstractIterator {
+class System extends AbstractIterator {
 
     /**
      * @var array

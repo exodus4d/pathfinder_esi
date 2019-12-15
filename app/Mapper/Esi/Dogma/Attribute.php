@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Dogma;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Attribute extends mapper\AbstractIterator {
+class Attribute extends AbstractIterator {
 
     /**
      * @var array

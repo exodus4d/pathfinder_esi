@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Alliance;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Alliance extends mapper\AbstractIterator {
+class Alliance extends AbstractIterator {
 
     /**
      * @var array

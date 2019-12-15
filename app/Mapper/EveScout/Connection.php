@@ -3,9 +3,9 @@
 
 namespace Exodus4D\ESI\Mapper\EveScout;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Connection extends mapper\AbstractIterator {
+class Connection extends AbstractIterator {
 
     /**
      * @var array

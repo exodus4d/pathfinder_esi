@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Character;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Online extends mapper\AbstractIterator {
+class Online extends AbstractIterator {
 
     /**
      * @var array

@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Search;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Search extends mapper\AbstractIterator {
+class Search extends AbstractIterator {
 
     /**
      * @var array

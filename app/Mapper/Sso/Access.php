@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Sso;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Access extends mapper\AbstractIterator {
+class Access extends AbstractIterator {
 
     /**
      * @var array

@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Universe;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Category extends mapper\AbstractIterator {
+class Category extends AbstractIterator {
 
     /**
      * @var array
