@@ -769,6 +769,101 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @param string $method
+     * @param string $uri
+     * @param array $options
+     * @return JsonStreamInterface|StreamInterface|null
+     */
+    protected function request(string $method, string $uri, array $options = []) : ?StreamInterface {
+        $body = null;
+
+        try{
+            $request = WebClient::newRequest($method, $uri);
+            $response = $this->getClient()->send($request, $options);
+            $body = $response->getBody();
+        }catch(TransferException $e){
+            // Base Exception of Guzzle errors
+            // -> this includes "expected" errors like 4xx responses (ClientException)
+            //    and "unexpected" errors like cURL fails (ConnectException)...
+            // -> error is already logged by LogMiddleware
+            $body = WebClient::newErrorResponse($e, $this->getAcceptType())->getBody();
+        }catch(\Exception $e){
+            // Hard fail! Any other type of error
+            // -> e.g. RuntimeException,...
+            $body = WebClient::newErrorResponse($e, $this->getAcceptType())->getBody();
+        }
+
+        return $body;
+    }
+
+    public function send(callable $requestHandler, ...$handlerParams){
+        $config = $requestHandler(...$handlerParams);
+
+        $response = $this->getClient()->send($config->request, $config->options);
+    }
+
+    public function sendAsync(callable $requestHandler, ...$handlerParams){
+
+    }
+
+    /**
+     * @param array $requestsConfig
+     * @return array
+     */
+    public function sendBatch(array $requestsConfig) : array {
+
+        $requestsConfig = array_map(function(array $config){
+            return array_shift($config)(...$config);
+        }, $requestsConfig);
+
+        /*
+        $batchRequests = [
+            (object)[
+                'request' => WebClient::newRequest('GET', 'abc'),
+                'options' => [],
+                'formatter' => function(JsonStreamInterface $body){
+                    return $body;
+                }]
+        ];*/
+
+        // must be 'Traversable of Promises'.
+        // So we’ll create a generator method which will only start the async request when the promise is grabbed
+        $requests = (function() use ($requestsConfig) {
+            foreach($requestsConfig as $config){
+                // don't forget using generator
+                yield $this->getClient()->sendAsync($config->request, $config->options);
+            }
+        })();
+
+        // run requests async (parallel)
+        // -> but wait()´s until all requests are either "fulfilled" or "rejected"
+        $results = $this->getClient()->runBatch($requests, [
+            'concurrency' => 2
+        ]);
+
+        return array_map(function($result, $key) use ($requestsConfig) {
+            // check result for valid responses
+            // -> wrap rejected requests into errorResponses
+            if($result instanceof Response){
+                $response = $result;
+            }elseif($result instanceof \Exception){
+                $response = WebClient::newErrorResponse($result, $this->getAcceptType());
+            }else{
+                // invalid result type. Hard fail!
+                $response = WebClient::newErrorResponse(
+                    new \InvalidArgumentException('Invalid result type: ' . gettype($result)),
+                    $this->getAcceptType()
+                );
+            }
+
+            $body = $response->getBody();
+
+            // call custom formatter for current $result (same $key)
+            return is_callable($formatter = $requestsConfig[$key]->formatter) ? $formatter($body) : $body;
+        }, $results, array_keys($results));
+    }
+
+    /**
      * same as PHP´s array_merge_recursive() function except of "distinct" array values in return
      * -> works like jQuery extend()
      * @param array $array1
@@ -785,37 +880,6 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             }
         }
         return $merged;
-    }
-
-    /**
-     * @param string $method
-     * @param string $uri
-     * @param array $options
-     * @return JsonStreamInterface|StreamInterface|null
-     */
-    protected function request(string $method, string $uri, array $options = []) : ?StreamInterface {
-        $body = null;
-
-        try{
-            $request = $this->getClient()->newRequest($method, $uri);
-            /**
-             * @var $response Response
-             */
-            $response = $this->getClient()->send($request, $options);
-            $body = $response->getBody();
-        }catch(TransferException $e){
-            // Base Exception of Guzzle errors
-            // -> this includes "expected" errors like 4xx responses (ClientException)
-            //    and "unexpected" errors like cURL fails (ConnectException)...
-            // -> error is already logged by LogMiddleware
-            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
-        }catch(\Exception $e){
-            // Hard fail! Any other type of error
-            // -> e.g. RuntimeException,...
-            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
-        }
-
-        return $body;
     }
 
     /**

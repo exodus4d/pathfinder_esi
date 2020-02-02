@@ -18,14 +18,18 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Promise;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class WebClient
  * @package Exodus4D\ESI\Lib
- * @method Client send(RequestInterface $request, array $options = [])
+ * @method ResponseInterface send(RequestInterface $request, array $options = [])
+ * @method Promise\PromiseInterface sendAsync(RequestInterface $request, array $options = [])
  */
 class WebClient {
 
@@ -60,11 +64,53 @@ class WebClient {
     }
 
     /**
+     * @param array|\Iterator $requests Requests or functions that return
+     *                                  requests to send concurrently.
+     * @param array           $config   Passes through the options available in
+     *                                  {@see Pool::__construct}
+     * @return Pool
+     */
+    public function newPool(iterable $requests, array $config = []) : Pool {
+        return new Pool($this->client, $requests, $config);
+    }
+
+    /**
+     * @param array|\Iterator $requests Requests or functions that return
+     *                                  requests to send concurrently.
+     * @param array           $config   Passes through the options available in
+     *                                  {@see Pool::__construct}
+     * @return array Returns an array containing the response or an exception
+     *               in the same order that the requests were sent.
+     */
+    public function runBatch(iterable $requests, array $config = []) : array {
+        return Pool::batch($this->client, $requests, $config);
+    }
+
+    /**
+     * pipe undefined method calls right into the Client
+     * @param string $name
+     * @param array $arguments
+     * @return array|mixed
+     */
+    public function __call(string $name, array $arguments = []){
+        $return = [];
+
+        if(is_object($this->client)){
+            if(method_exists($this->client, $name)){
+                $return = call_user_func_array([$this->client, $name], $arguments);
+            }
+        }
+
+        return $return;
+    }
+
+
+    /**
      * @param string $method
      * @param string $uri
      * @return Request
      */
-    public function newRequest(string $method, string $uri) : Request {
+    public static function newRequest(string $method, string $uri) : Request {
         return new Request($method, $uri);
     }
 
@@ -77,20 +123,20 @@ class WebClient {
      * @param string|null $reason
      * @return Response
      */
-    public function newResponse(int $status = 200, array $headers = [], $body = null, string $version = '1.1', ?string $reason = null) : Response {
+    public static function newResponse(int $status = 200, array $headers = [], $body = null, string $version = '1.1', ?string $reason = null) : Response {
         return new Response($status, $headers, $body, $version, $reason);
     }
 
     /**
      * get error response with error message in body
      * -> wraps a GuzzleException (or any other Exception) into an error response
-     * -> this class should handle any Exception thrown within Guzzle Context
+     * -> handles any Exception thrown within Guzzle Context
      * @see http://docs.guzzlephp.org/en/stable/quickstart.html#exceptions
      * @param \Exception $e
      * @param bool $json
      * @return Response
      */
-    public function newErrorResponse(\Exception $e, bool $json = true) : Response {
+    public static function newErrorResponse(\Exception $e, bool $json = true) : Response {
         $message = [get_class($e)];
 
         if($e instanceof ConnectException){
@@ -122,28 +168,10 @@ class WebClient {
             $bodyStream = new JsonStream($bodyStream);
         }
 
-        $response = $this->newResponse();
+        $response = static::newResponse();
         $response = $response->withStatus(200, 'Error Response');
         $response = $response->withBody($bodyStream);
 
         return $response;
-    }
-
-    /**
-     * pipe all functions right into the Client
-     * @param string $name
-     * @param array $arguments
-     * @return array|mixed
-     */
-    public function __call(string $name, array $arguments = []){
-        $return = [];
-
-        if(is_object($this->client)){
-            if( method_exists($this->client, $name) ){
-                $return  = call_user_func_array([$this->client, $name], $arguments);
-            }
-        }
-
-        return $return;
     }
 }

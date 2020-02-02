@@ -11,6 +11,8 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 use Exodus4D\ESI\Client\Ccp;
 use Exodus4D\ESI\Config\ConfigInterface;
 use Exodus4D\ESI\Config\Ccp\Esi\Config;
+use Exodus4D\ESI\Lib\WebClient;
+use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use Exodus4D\ESI\Mapper\Esi as Mapper;
 
 class Esi extends Ccp\AbstractCcp implements EsiInterface {
@@ -825,6 +827,43 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
         }
 
         return $routeData;
+    }
+
+    public function getRouteRequest(int $sourceId, int $targetId, array $options = []){
+        $query = [];
+        if( !empty($options['avoid']) ){
+            $query['avoid'] = $options['avoid'];
+        }
+        if( !empty($options['connections']) ){
+            $query['connections'] = $options['connections'];
+        }
+        if( !empty($options['flag']) ){
+            $query['flag'] = $options['flag'];
+        }
+
+        $query = $this->formatUrlParams($query, [
+            'connections' => [',', '|'],
+            'avoid' => [',']
+        ]);
+
+        $requestOptions = $this->getRequestOptions('', null, $query);
+
+        // 404 'No route found' error -> should not be logged
+        $requestOptions['log_off_status'] = [404];
+
+        return (object)[
+            'request' => WebClient::newRequest('GET', $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId])),
+            'options' => $requestOptions,
+            'formatter' => function(JsonStreamInterface $body) : array {
+                $routeData = [];
+                if(!$body->error){
+                    $routeData['route'] = array_unique(array_map('intval', (array)$body));
+                }else{
+                    $routeData['error'] = $body->error;
+                }
+                return $routeData;
+            }
+        ];
     }
 
     /**
