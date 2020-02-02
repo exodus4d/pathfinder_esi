@@ -813,7 +813,11 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     public function sendBatch(array $requestsConfig) : array {
 
         $requestsConfig = array_map(function(array $config){
-            return array_shift($config)(...$config);
+            if(is_callable([$this, $requestHandler = array_shift($config)])){
+               // return $requestHandler(...$config);
+                return call_user_func_array([$this, $requestHandler], $config);
+            }
+            return null;
         }, $requestsConfig);
 
         /*
