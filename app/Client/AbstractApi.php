@@ -845,7 +845,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         // run requests async (parallel)
         // -> but wait()´s until all requests are either "fulfilled" or "rejected"
         $results = $this->getClient()->runBatch($requests, [
-            'concurrency' => 2
+            'concurrency' => 5
         ]);
 
         return array_map(function($result, $key) use ($requestsConfig) {
