@@ -11,11 +11,6 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 interface EsiInterface {
 
     /**
-     * @return array
-     */
-    public function getServerStatus() : array;
-
-    /**
      * get corporation/alliance ids by characterIds
      * @param array $characterIds
      * @return array
@@ -215,14 +210,6 @@ interface EsiInterface {
      * @return array
      */
     public function getFactionWarSystems() : array;
-
-    /**
-     * @param int $sourceId
-     * @param int $targetId
-     * @param array $options
-     * @return array
-     */
-    public function getRouteData(int $sourceId, int $targetId, array $options = []) : array;
 
     /**
      * @param int $destinationId

@@ -68,22 +68,23 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getServerStatus() : array {
-        $uri = $this->getEndpointURI(['status', 'GET']);
-        $serverStatus = [];
+    protected function getServerStatusRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['status', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $serverStatus = [];
+                if(!$body->error){
+                    $serverStatus['status'] = (new Mapper\Status\Status($body))->getData();
+                }else{
+                    $serverStatus['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $serverStatus['status'] = (new Mapper\Status\Status($response))->getData();
-        }else{
-            $serverStatus['error'] = $response->error;
-        }
-
-        return $serverStatus;
+                return $serverStatus;
+            }
+        );
     }
 
     /**
@@ -788,47 +789,11 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     }
 
     /**
-     * @param int $sourceId
-     * @param int $targetId
+     * @param int   $sourceId
+     * @param int   $targetId
      * @param array $options
-     * @return array
+     * @return RequestConfig
      */
-    public function getRouteData(int $sourceId, int $targetId, array $options = []) : array {
-        $uri = $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId]);
-        $routeData = [];
-
-        $query = [];
-        if( !empty($options['avoid']) ){
-            $query['avoid'] = $options['avoid'];
-        }
-        if( !empty($options['connections']) ){
-            $query['connections'] = $options['connections'];
-        }
-        if( !empty($options['flag']) ){
-            $query['flag'] = $options['flag'];
-        }
-
-        $query = $this->formatUrlParams($query, [
-            'connections' => [',', '|'],
-            'avoid' => [',']
-        ]);
-
-        $requestOptions = $this->getRequestOptions('', null, $query);
-
-        // 404 'No route found' error -> should not be logged
-        $requestOptions['log_off_status'] = [404];
-
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $routeData['route'] = array_unique( array_map('intval', (array)$response) );
-        }else{
-            $routeData['error'] = $response->error;
-        }
-
-        return $routeData;
-    }
-
     protected function getRouteRequest(int $sourceId, int $targetId, array $options = []) : RequestConfig {
         $query = [];
         if( !empty($options['avoid']) ){
@@ -850,7 +815,6 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
 
         // 404 'No route found' error -> should not be logged
         $requestOptions['log_off_status'] = [404];
-
 
         return new RequestConfig(
             WebClient::newRequest('GET', $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId])),
