@@ -835,7 +835,10 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         $requests = (function() use ($requestsConfig) {
             foreach($requestsConfig as $config){
                 // don't forget using generator
-                yield $this->getClient()->sendAsync($config->request, $config->options);
+                //yield $this->getClient()->sendAsync($config->request, $config->options);
+                yield function() use ($config) {
+                    return $this->getClient()->sendAsync($config->request, $config->options);
+                };
             }
         })();
 
