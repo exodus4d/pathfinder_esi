@@ -244,10 +244,9 @@ interface ApiInterface {
     /**
      * @param string $requestHandler
      * @param mixed  ...$handlerParams
-     * @return string|null
+     * @return mixed|null
      */
     public function send(string $requestHandler, ...$handlerParams);
-
 
     /**
      * @param array $configs

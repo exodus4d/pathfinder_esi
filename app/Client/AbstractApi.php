@@ -844,7 +844,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * @param string $requestHandler
      * @param mixed  ...$handlerParams
-     * @return string|null
+     * @return mixed|null
      */
     public function send(string $requestHandler, ...$handlerParams){
         $bodyContent = null;
@@ -866,6 +866,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
             $body = $response->getBody();
             $bodyContent = $body->getContents();
+
+            // call custom formatter for current $result (same $key)
+            $bodyContent = is_callable($formatter = $requestConfig->getFormatter()) ? $formatter($bodyContent) : $bodyContent;
         }
 
         return $bodyContent;
