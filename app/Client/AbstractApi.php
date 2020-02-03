@@ -864,9 +864,10 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             }
 
             $body = $response->getBody();
+            $bodyContent = $body->getContents();
 
             // call custom formatter for current $result (same $key)
-            return is_callable($formatter = $requestsConfig[$key]->formatter) ? $formatter($body) : $body;
+            return is_callable($formatter = $requestsConfig[$key]->formatter) ? $formatter($bodyContent) : $bodyContent;
         }, $results, array_keys($results));
     }
 
