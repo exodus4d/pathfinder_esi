@@ -854,7 +854,7 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
         return (object)[
             'request' => WebClient::newRequest('GET', $this->getEndpointURI(['routes', 'GET'], [$sourceId, $targetId])),
             'options' => $requestOptions,
-            'formatter' => function(JsonStreamInterface $body) : array {
+            'formatter' => function($body) : array {
                 $routeData = [];
                 if(!$body->error){
                     $routeData['route'] = array_unique(array_map('intval', (array)$body));
