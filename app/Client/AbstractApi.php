@@ -361,17 +361,17 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @param int $batchConcurrency
-     */
-    public function setBatchConcurrency(int $batchConcurrency = self::DEFAULT_BATCH_CONCURRENCY){
-        $this->batchConcurrency = $batchConcurrency;
-    }
-
-    /**
      * @param float $readTimeout
      */
     public function setReadTimeout(float $readTimeout = self::DEFAULT_READ_TIMEOUT){
         $this->readTimeout = $readTimeout;
+    }
+
+    /**
+     * @param int $batchConcurrency
+     */
+    public function setBatchConcurrency(int $batchConcurrency = self::DEFAULT_BATCH_CONCURRENCY){
+        $this->batchConcurrency = $batchConcurrency;
     }
 
     /**
@@ -841,6 +841,11 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         return $body;
     }
 
+    /**
+     * @param string $requestHandler
+     * @param mixed  ...$handlerParams
+     * @return string|null
+     */
     public function send(string $requestHandler, ...$handlerParams){
         $bodyContent = null;
 
@@ -865,8 +870,6 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
         return $bodyContent;
     }
-
-
 
     /**
      * send batch requests (parallel async requests)
