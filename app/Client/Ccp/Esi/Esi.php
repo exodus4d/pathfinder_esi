@@ -829,7 +829,7 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
         return $routeData;
     }
 
-    public function getRouteRequest(int $sourceId, int $targetId, array $options = []) : RequestConfig {
+    protected function getRouteRequest(int $sourceId, int $targetId, array $options = []) : RequestConfig {
         $query = [];
         if( !empty($options['avoid']) ){
             $query['avoid'] = $options['avoid'];

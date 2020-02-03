@@ -802,12 +802,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * get config for API request call from config
-     * @param array $config
+     * @param string $requestHandler
+     * @param mixed  ...$handlerParams
      * @return RequestConfig|null
      */
-    protected function getRequestConfig(array $config) : ?RequestConfig {
-        if(is_callable([$this, $requestHandler = array_shift($config)])){
-            return call_user_func_array([$this, $requestHandler], $config);
+    protected function getRequestConfig(string $requestHandler, ...$handlerParams) : ?RequestConfig {
+        if(is_callable([$this, $requestHandler])){
+            return call_user_func_array([$this, $requestHandler], $handlerParams);
         }
         return null;
     }
@@ -840,10 +841,29 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
         return $body;
     }
 
-    public function send(callable $requestHandler, ...$handlerParams){
-        $config = $requestHandler(...$handlerParams);
+    public function send(string $requestHandler, ...$handlerParams){
+        $bodyContent = null;
 
-        $response = $this->getClient()->send($config->request, $config->options);
+        if($requestConfig = $this->getRequestConfig($requestHandler, ...$handlerParams)){
+            try{
+                $response = $this->getClient()->send($requestConfig->getRequest(), $requestConfig->getOptions());
+            }catch(TransferException $e){
+                // Base Exception of Guzzle errors
+                // -> this includes "expected" errors like 4xx responses (ClientException)
+                //    and "unexpected" errors like cURL fails (ConnectException)...
+                // -> error is already logged by LogMiddleware
+                $response = WebClient::newErrorResponse($e, $this->getAcceptType());
+            }catch(\Exception $e){
+                // Hard fail! Any other type of error
+                // -> e.g. RuntimeException,...
+                $response = WebClient::newErrorResponse($e, $this->getAcceptType());
+            }
+
+            $body = $response->getBody();
+            $bodyContent = $body->getContents();
+        }
+
+        return $bodyContent;
     }
 
 
@@ -859,7 +879,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
          * @var RequestConfig[] $requestConfigs
          */
         $requestConfigs = array_map(function(array $config){
-            if($requestConfig = $this->getRequestConfig($config)){
+            if($requestConfig = $this->getRequestConfig(...$config)){
                 return $requestConfig;
             }
             // invalid config
