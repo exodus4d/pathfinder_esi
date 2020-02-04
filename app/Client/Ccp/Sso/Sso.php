@@ -11,6 +11,8 @@ namespace Exodus4D\ESI\Client\Ccp\Sso;
 use Exodus4D\ESI\Client\Ccp;
 use Exodus4D\ESI\Config\ConfigInterface;
 use Exodus4D\ESI\Config\Ccp\Sso\Config;
+use Exodus4D\ESI\Lib\RequestConfig;
+use Exodus4D\ESI\Lib\WebClient;
 use Exodus4D\ESI\Mapper;
 
 class Sso extends Ccp\AbstractCcp implements SsoInterface {
@@ -20,23 +22,25 @@ class Sso extends Ccp\AbstractCcp implements SsoInterface {
      * -> get some basic information (like character id)
      * -> if more character information is required, use ESI "characters" endpoints request instead
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getVerifyCharacterData(string $accessToken) : array {
-        $uri = $this->getVerifyUserEndpointURI();
-        $characterData = [];
-
+    protected function getVerifyCharacterRequest(string $accessToken) : RequestConfig {
         $requestOptions = [
             'headers' => $this->getAuthHeader($accessToken, 'Bearer')
         ];
 
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getVerifyUserEndpointURI()),
+            $requestOptions,
+            function($body) : array {
+                $characterData = [];
+                if(!$body->error){
+                    $characterData = (new Mapper\Sso\Character($body))->getData();
+                }
 
-        if(!$response->error){
-            $characterData = (new Mapper\Sso\Character($response))->getData();
-        }
-
-        return $characterData;
+                return $characterData;
+            }
+        );
     }
 
     /**
@@ -49,24 +53,26 @@ class Sso extends Ccp\AbstractCcp implements SsoInterface {
      *      $requestParams['refresh_token]  = 'XXXX'
      * @param array $credentials
      * @param array $requestParams
-     * @return array
+     * @return RequestConfig
      */
-    public function getAccessData(array $credentials, array $requestParams = []) : array {
-        $uri = $this->getVerifyAuthorizationCodeEndpointURI();
-        $accessData = [];
-
+    protected function getAccessRequest(array $credentials, array $requestParams = []) : RequestConfig {
         $requestOptions = [
             'json' => $requestParams,
             'auth' => $credentials
         ];
 
-        $response = $this->request('POST', $uri, $requestOptions)->getContents();
+        return new RequestConfig(
+            WebClient::newRequest('POST',  $this->getVerifyAuthorizationCodeEndpointURI()),
+            $requestOptions,
+            function($body) : array {
+                $accessData = [];
+                if(!$body->error){
+                    $accessData = (new Mapper\Sso\Access($body))->getData();
+                }
 
-        if(!$response->error){
-            $accessData = (new Mapper\Sso\Access($response))->getData();
-        }
-
-        return $accessData;
+                return $accessData;
+            }
+        );
     }
 
     /**
