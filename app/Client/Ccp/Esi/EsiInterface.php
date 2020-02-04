@@ -11,51 +11,6 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 interface EsiInterface {
 
     /**
-     * @return array
-     */
-    public function getUniverseJumps() : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseKills() : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseCategories() : array;
-
-    /**
-     * @param int $categoryId
-     * @return array
-     */
-    public function getUniverseCategoryData(int $categoryId) : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseGroups() : array;
-
-    /**
-     * @param int $groupId
-     * @return array
-     */
-    public function getUniverseGroupData(int $groupId) : array;
-
-    /**
-     * @param int $structureId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getUniverseStructureData(int $structureId, string $accessToken) : array;
-
-    /**
-     * @param int $stationId
-     * @return array
-     */
-    public function getUniverseStationData(int $stationId) : array;
-
-    /**
      * @param int $typeId
      * @return array
      */

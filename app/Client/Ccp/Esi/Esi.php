@@ -566,165 +566,173 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseJumps() : array {
-        $uri = $this->getEndpointURI(['universe', 'system_jumps', 'GET']);
-        $systemJumps = [];
+    protected function getUniverseJumpsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'system_jumps', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $systemJumps = [];
+                if(!$body->error){
+                    foreach((array)$body as $jumpData){
+                        $systemJumps[$jumpData->system_id]['jumps'] = (int)$jumpData->ship_jumps;
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $jumpData){
-                $systemJumps[$jumpData->system_id]['jumps'] = (int)$jumpData->ship_jumps;
+                return $systemJumps;
             }
-        }
-
-        return $systemJumps;
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseKills() : array {
-        $uri = $this->getEndpointURI(['universe', 'system_kills', 'GET']);
-        $systemKills = [];
+    protected function getUniverseKillsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'system_kills', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $systemKills = [];
+                if(!$body->error){
+                    foreach((array)$body as $killData){
+                        $systemKills[$killData->system_id] = [
+                            'npc_kills' => (int)$killData->npc_kills,
+                            'pod_kills' => (int)$killData->pod_kills,
+                            'ship_kills' => (int)$killData->ship_kills
+                        ];
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $killData){
-                $systemKills[$killData->system_id] = [
-                    'npc_kills' => (int)$killData->npc_kills,
-                    'pod_kills' => (int)$killData->pod_kills,
-                    'ship_kills' => (int)$killData->ship_kills
-                ];
+                return $systemKills;
             }
-        }
-
-        return $systemKills;
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseCategories() : array {
-        $uri = $this->getEndpointURI(['universe', 'categories', 'list', 'GET']);
-        $categoryData = [];
+    protected function getUniverseCategoriesRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'categories', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $categoryData = [];
+                if(!$body->error){
+                    $categoryData = array_unique( array_map('intval', (array)$body) );
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $categoryData = array_unique( array_map('intval', (array)$response) );
-        }
-
-        return $categoryData;
+                return $categoryData;
+            }
+        );
     }
 
     /**
      * @param int $categoryId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseCategoryData(int $categoryId) : array {
-        $uri = $this->getEndpointURI(['universe', 'categories', 'GET'], [$categoryId]);
-        $categoryData = [];
+    protected function getUniverseCategoryRequest(int $categoryId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'categories', 'GET'], [$categoryId])),
+            $this->getRequestOptions(),
+            function($body) use ($categoryId) : array {
+                $categoryData = [];
+                if(!$body->error){
+                    $categoryData = (new Mapper\Universe\Category($body))->getData();
+                    if( !empty($categoryData) ){
+                        $categoryData['id'] = $categoryId;
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $categoryData = (new Mapper\Universe\Category($response))->getData();
-            if( !empty($categoryData) ){
-                $categoryData['id'] = $categoryId;
+                return $categoryData;
             }
-        }
-
-        return $categoryData;
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseGroups() : array {
-        $uri = $this->getEndpointURI(['universe', 'groups', 'list', 'GET']);
-        $groupData = [];
+    protected function getUniverseGroupsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'groups', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $groupData = [];
+                if(!$body->error){
+                    $groupData = array_unique( array_map('intval', (array)$body) );
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $groupData = array_unique( array_map('intval', (array)$response) );
-        }
-
-        return $groupData;
+                return $groupData;
+            }
+        );
     }
 
     /**
      * @param int $groupId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseGroupData(int $groupId) : array {
-        $uri = $this->getEndpointURI(['universe', 'groups', 'GET'], [$groupId]);
-        $groupData = [];
+    protected function getUniverseGroupRequest(int $groupId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'groups', 'GET'], [$groupId])),
+            $this->getRequestOptions(),
+            function($body) use ($groupId) : array {
+                $groupData = [];
+                if(!$body->error){
+                    $groupData = (new Mapper\Universe\Group($body))->getData();
+                    if( !empty($groupData) ){
+                        $groupData['id'] = $groupId;
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $groupData = (new Mapper\Universe\Group($response))->getData();
-            if( !empty($groupData) ){
-                $groupData['id'] = $groupId;
+                return $groupData;
             }
-        }
-
-        return $groupData;
+        );
     }
 
     /**
      * @param int $structureId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseStructureData(int $structureId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['universe', 'structures', 'GET'], [$structureId]);
-        $structureData = [];
+    protected function getUniverseStructureRequest(int $structureId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'structures', 'GET'], [$structureId])),
+            $this->getRequestOptions($accessToken),
+            function($body) use ($structureId) : array {
+                $structureData = [];
+                if(!$body->error){
+                    $structureData = (new Mapper\Universe\Structure($body))->getData();
+                    if( !empty($structureData) ){
+                        $structureData['id'] = $structureId;
+                    }
+                }else{
+                    $structureData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $structureData['error'] = $response->error;
-        }else{
-            $structureData = (new Mapper\Universe\Structure($response))->getData();
-            if( !empty($structureData) ){
-                $structureData['id'] = $structureId;
+                return $structureData;
             }
-        }
-
-        return $structureData;
+        );
     }
 
     /**
      * @param int $stationId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseStationData(int $stationId) : array {
-        $uri = $this->getEndpointURI(['universe', 'stations', 'GET'], [$stationId]);
-        $stationData = [];
+    protected function getUniverseStationRequest(int $stationId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'stations', 'GET'], [$stationId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $stationData = [];
+                if(!$body->error){
+                    $stationData = (new Mapper\Universe\Station($body))->getData();
+                }else{
+                    $stationData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $stationData['error'] = $response->error;
-        }else{
-            $stationData = (new Mapper\Universe\Station($response))->getData();
-        }
-
-        return $stationData;
+                return $stationData;
+            }
+        );
     }
 
     /**
