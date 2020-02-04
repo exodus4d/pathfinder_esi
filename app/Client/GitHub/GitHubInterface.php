@@ -10,18 +10,4 @@ namespace Exodus4D\ESI\Client\GitHub;
 
 interface GitHubInterface {
 
-    /**
-     * @param string $projectName
-     * @param int $count
-     * @return array
-     */
-    public function getProjectReleases(string $projectName, int $count) : array;
-
-    /**
-     * @param string $context
-     * @param string $markdown
-     * @return string
-     */
-    public function markdownToHtml(string $context, string $markdown) : string;
-
 }
