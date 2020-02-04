@@ -11,46 +11,6 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 interface EsiInterface {
 
     /**
-     * @param int $characterId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getCharacterClonesData(int $characterId, string $accessToken) : array;
-
-    /**
-     * @param int $characterId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getCharacterLocationData(int $characterId, string $accessToken) : array;
-
-    /**
-     * @param int $characterId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getCharacterShipData(int $characterId, string $accessToken) : array;
-
-    /**
-     * @param int $characterId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getCharacterOnlineData(int $characterId, string $accessToken) : array;
-
-    /**
-     * @param int $corporationId
-     * @return array
-     */
-    public function getCorporationData(int $corporationId) : array;
-
-    /**
-     * @param int $allianceId
-     * @return array
-     */
-    public function getAllianceData(int $allianceId) : array;
-
-    /**
      * @param int $corporationId
      * @param string $accessToken
      * @return array

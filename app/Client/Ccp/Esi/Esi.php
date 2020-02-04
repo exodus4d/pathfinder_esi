@@ -133,125 +133,131 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterClonesData(int $characterId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['characters', 'clones', 'GET'], [$characterId]);
-        $clonesData = [];
+    protected function getCharacterClonesRequest(int $characterId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'clones', 'GET'], [$characterId])),
+            $this->getRequestOptions($accessToken),
+            function($body) : array {
+                $clonesData = [];
+                if(!$body->error){
+                    $clonesData['home'] = (new Mapper\Character\CharacterClone($body->home_location))->getData();
+                }else{
+                    $clonesData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $clonesData['home'] = (new Mapper\Character\CharacterClone($response->home_location))->getData();
-        }else{
-            $clonesData['error'] = $response->error;
-        }
-
-        return $clonesData;
+                return $clonesData;
+            }
+        );
     }
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterLocationData(int $characterId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['characters', 'location', 'GET'], [$characterId]);
-        $locationData = [];
+    protected function getCharacterLocationRequest(int $characterId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'location', 'GET'], [$characterId])),
+            $this->getRequestOptions($accessToken),
+            function($body) : array {
+                $locationData = [];
+                if(!$body->error){
+                    $locationData = (new Mapper\Character\Location($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $locationData = (new Mapper\Character\Location($response))->getData();
-        }
-
-        return $locationData;
+                return $locationData;
+            }
+        );
     }
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterShipData(int $characterId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['characters', 'ship', 'GET'], [$characterId]);
-        $shipData = [];
+    protected function getCharacterShipRequest(int $characterId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'ship', 'GET'], [$characterId])),
+            $this->getRequestOptions($accessToken),
+            function($body) : array {
+                $shipData = [];
+                if(!$body->error){
+                    $shipData = (new Mapper\Character\Ship($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $shipData = (new Mapper\Character\Ship($response))->getData();
-        }
-
-        return $shipData;
+                return $shipData;
+            }
+        );
     }
 
     /**
      * @param int $characterId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterOnlineData(int $characterId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['characters', 'online', 'GET'], [$characterId]);
-        $onlineData = [];
+    protected function getCharacterOnlineRequest(int $characterId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'online', 'GET'], [$characterId])),
+            $this->getRequestOptions($accessToken),
+            function($body) : array {
+                $onlineData = [];
+                if(!$body->error){
+                    $onlineData = (new Mapper\Character\Online($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions($accessToken);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $onlineData = (new Mapper\Character\Online($response))->getData();
-        }
-
-        return $onlineData;
+                return $onlineData;
+            }
+        );
     }
 
     /**
      * @param int $corporationId
-     * @return array
+     * @return RequestConfig
      */
-    public function getCorporationData(int $corporationId) : array {
-        $uri = $this->getEndpointURI(['corporations', 'GET'], [$corporationId]);
-        $corporationData = [];
+    protected function getCorporationRequest(int $corporationId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['corporations', 'GET'], [$corporationId])),
+            $this->getRequestOptions(),
+            function($body) use ($corporationId) : array {
+                $corporationData = [];
+                if(!$body->error){
+                    $corporationData = (new Mapper\Corporation\Corporation($body))->getData();
+                    if( !empty($corporationData) ){
+                        $corporationData['id'] = $corporationId;
+                    }
+                }else{
+                    $corporationData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $corporationData = (new Mapper\Corporation\Corporation($response))->getData();
-            if( !empty($corporationData) ){
-                $corporationData['id'] = $corporationId;
+                return $corporationData;
             }
-        }else{
-            $corporationData['error'] = $response->error;
-        }
-
-        return $corporationData;
+        );
     }
 
     /**
      * @param int $allianceId
-     * @return array
+     * @return RequestConfig
      */
-    public function getAllianceData(int $allianceId) : array {
-        $uri = $this->getEndpointURI(['alliances', 'GET'], [$allianceId]);
-        $allianceData = [];
+    protected function getAllianceRequest(int $allianceId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['alliances', 'GET'], [$allianceId])),
+            $this->getRequestOptions(),
+            function($body) use ($allianceId) : array {
+                $allianceData = [];
+                if(!$body->error){
+                    $allianceData = (new Mapper\Alliance\Alliance($body))->getData();
+                    if( !empty($allianceData) ){
+                        $allianceData['id'] = $allianceId;
+                    }
+                }else{
+                    $allianceData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $allianceData = (new Mapper\Alliance\Alliance($response))->getData();
-            if( !empty($allianceData) ){
-                $allianceData['id'] = $allianceId;
+                return $allianceData;
             }
-        }else{
-            $allianceData['error'] = $response->error;
-        }
-
-        return $allianceData;
+        );
     }
 
     /**
