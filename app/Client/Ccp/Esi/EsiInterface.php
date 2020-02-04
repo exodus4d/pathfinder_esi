@@ -13,41 +13,6 @@ interface EsiInterface {
     /**
      * @return array
      */
-    public function getUniverseSystems() : array;
-
-    /**
-     * @param int $systemId
-     * @return array
-     */
-    public function getUniverseSystemData(int $systemId) : array;
-
-    /**
-     * @param int $starId
-     * @return array
-     */
-    public function getUniverseStarData(int $starId) : array;
-
-    /**
-     * @param int $planetId
-     * @return array
-     */
-    public function getUniversePlanetData(int $planetId) : array;
-
-    /**
-     * @param int $stargateId
-     * @return array
-     */
-    public function getUniverseStargateData(int $stargateId) : array;
-
-    /**
-     * @param array $universeIds
-     * @return array
-     */
-    public function getUniverseNamesData(array $universeIds) : array;
-
-    /**
-     * @return array
-     */
     public function getUniverseJumps() : array;
 
     /**

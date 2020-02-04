@@ -418,145 +418,151 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseSystems() : array {
-        $uri = $this->getEndpointURI(['universe', 'systems', 'list', 'GET']);
-        $systemData = [];
+    protected function getUniverseSystemsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'systems', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $systemData = [];
+                if(!$body->error){
+                    $systemData = array_unique( array_map('intval', (array)$body) );
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $systemData = array_unique( array_map('intval', (array)$response) );
-        }
-
-        return $systemData;
+                return $systemData;
+            }
+        );
     }
 
     /**
      * @param int $systemId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseSystemData(int $systemId) : array {
-        $uri = $this->getEndpointURI(['universe', 'systems', 'GET'], [$systemId]);
-        $systemData = [];
+    protected function getUniverseSystemRequest(int $systemId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'systems', 'GET'], [$systemId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $systemData = [];
+                if(!$body->error){
+                    $systemData = (new Mapper\Universe\System($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $systemData = (new Mapper\Universe\System($response))->getData();
-        }
-
-        return $systemData;
+                return $systemData;
+            }
+        );
     }
 
     /**
      * @param int $starId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseStarData(int $starId) : array {
-        $uri = $this->getEndpointURI(['universe', 'stars', 'GET'], [$starId]);
-        $starData = [];
+    protected function getUniverseStarRequest(int $starId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'stars', 'GET'], [$starId])),
+            $this->getRequestOptions(),
+            function($body) use ($starId) : array {
+                $starData = [];
+                if(!$body->error){
+                    $starData = (new Mapper\Universe\Star($body))->getData();
+                    if( !empty($starData) ){
+                        $starData['id'] = $starId;
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $starData = (new Mapper\Universe\Star($response))->getData();
-            if( !empty($starData) ){
-                $starData['id'] = $starId;
+                return $starData;
             }
-        }
-
-        return $starData;
+        );
     }
 
     /**
      * @param int $planetId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniversePlanetData(int $planetId) : array {
-        $uri = $this->getEndpointURI(['universe', 'planets', 'GET'], [$planetId]);
-        $planetData = [];
+    protected function getUniversePlanetRequest(int $planetId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'planets', 'GET'], [$planetId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $planetData = [];
+                if(!$body->error){
+                    $planetData = (new Mapper\Universe\Planet($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $planetData = (new Mapper\Universe\Planet($response))->getData();
-        }
-
-        return $planetData;
+                return $planetData;
+            }
+        );
     }
 
     /**
      * @param int $stargateId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseStargateData(int $stargateId) : array {
-        $uri = $this->getEndpointURI(['universe', 'stargates', 'GET'], [$stargateId]);
-        $stargateData = [];
+    protected function getUniverseStargateRequest(int $stargateId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'stargates', 'GET'], [$stargateId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $stargateData = [];
+                if(!$body->error){
+                    $stargateData = (new Mapper\Universe\Stargate($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $stargateData = (new Mapper\Universe\Stargate($response))->getData();
-        }
-
-        return $stargateData;
+                return $stargateData;
+            }
+        );
     }
 
     /**
      * @param array $universeIds
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseNamesData(array $universeIds) : array {
-        $uri = $this->getEndpointURI(['universe', 'names', 'POST']);
-        $universeData = [];
-
-        $requestOptions = $this->getRequestOptions('', $universeIds);
-        $response = $this->request('POST', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $data){
-                // store category because $data get changed in Mappers
-                $category = $data->category;
-                switch($category){
-                    case 'character':
-                        $categoryData = (new Mapper\Character\Character($data))->getData();
-                        break;
-                    case 'alliance':
-                        $categoryData = (new Mapper\Alliance\Alliance($data))->getData();
-                        break;
-                    case 'corporation':
-                        $categoryData = (new Mapper\Corporation\Corporation($data))->getData();
-                        break;
-                    case 'station':
-                        $categoryData = (new Mapper\Universe\Station($data))->getData();
-                        break;
-                    case 'solar_system':
-                        $category = 'system';
-                        $categoryData = (new Mapper\Universe\System($data))->getData();
-                        break;
-                    case 'inventory_type':
-                        $category = 'inventoryType';
-                        $categoryData = (new Mapper\InventoryType($data))->getData();
-                        break;
-                    default:
-                        $categoryData = [];
+    protected function getUniverseNamesRequest(array $universeIds) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('POST', $this->getEndpointURI(['universe', 'names', 'POST'])),
+            $this->getRequestOptions('', $universeIds),
+            function($body) : array {
+                $universeData = [];
+                if(!$body->error){
+                    foreach((array)$body as $data){
+                        // store category because $data get changed in Mappers
+                        $category = $data->category;
+                        switch($category){
+                            case 'character':
+                                $categoryData = (new Mapper\Character\Character($data))->getData();
+                                break;
+                            case 'alliance':
+                                $categoryData = (new Mapper\Alliance\Alliance($data))->getData();
+                                break;
+                            case 'corporation':
+                                $categoryData = (new Mapper\Corporation\Corporation($data))->getData();
+                                break;
+                            case 'station':
+                                $categoryData = (new Mapper\Universe\Station($data))->getData();
+                                break;
+                            case 'solar_system':
+                                $category = 'system';
+                                $categoryData = (new Mapper\Universe\System($data))->getData();
+                                break;
+                            case 'inventory_type':
+                                $category = 'inventoryType';
+                                $categoryData = (new Mapper\InventoryType($data))->getData();
+                                break;
+                            default:
+                                $categoryData = [];
+                        }
+                        if( !empty($categoryData) ){
+                            $universeData[$category][] = $categoryData;
+                        }
+                    }
+                }else{
+                    $universeData['error'] = $body->error;
                 }
-                if( !empty($categoryData) ){
-                    $universeData[$category][] = $categoryData;
-                }
+
+                return $universeData;
             }
-        }else{
-            $universeData['error'] = $response->error;
-        }
-
-        return $universeData;
+        );
     }
 
     /**
