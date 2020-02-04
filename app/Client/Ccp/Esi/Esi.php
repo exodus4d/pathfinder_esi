@@ -737,61 +737,64 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
 
     /**
      * @param int $typeId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseTypesData(int $typeId) : array {
-        $uri = $this->getEndpointURI(['universe', 'types', 'GET'], [$typeId]);
-        $typesData = [];
+    protected function getUniverseTypeRequest(int $typeId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'types', 'GET'], [$typeId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $typeData = [];
+                if(!$body->error){
+                    $typeData = (new Mapper\Universe\Type($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $typesData = (new Mapper\Universe\Type($response))->getData();
-        }
-
-        return $typesData;
+                return $typeData;
+            }
+        );
     }
 
     /**
      * @param int $attributeId
-     * @return array
+     * @return RequestConfig
      */
-    public function getDogmaAttributeData(int $attributeId) : array {
-        $uri = $this->getEndpointURI(['dogma', 'attributes', 'GET'], [$attributeId]);
-        $attributeData = [];
+    protected function getDogmaAttributeRequest(int $attributeId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['dogma', 'attributes', 'GET'], [$attributeId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $attributeData = [];
+                if(!$body->error){
+                    $attributeData = (new Mapper\Dogma\Attribute($body))->getData();
+                }else{
+                    $attributeData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $attributeData['error'] = $response->error;
-        }else{
-            $attributeData = (new Mapper\Dogma\Attribute($response))->getData();
-        }
-
-        return $attributeData;
+                return $attributeData;
+            }
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getFactionWarSystems() : array {
-        $uri = $this->getEndpointURI(['fw', 'systems', 'GET']);
-        $systemsData = [];
+    protected function getFactionWarSystemsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['fw', 'systems', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $systemsData = [];
+                if(!$body->error){
+                    foreach((array)$body as $data){
+                        $systemsData['systems'][(int)$data->solar_system_id] = (new Mapper\FactionWarfare\System($data))->getData();
+                    }
+                }else{
+                    $systemsData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $systemsData['error'] = $response->error;
-        }else{
-            foreach((array)$response as $data){
-                $systemsData['systems'][(int)$data->solar_system_id] = (new Mapper\FactionWarfare\System($data))->getData();
+                return $systemsData;
             }
-        }
-
-        return $systemsData;
+        );
     }
 
     /**
@@ -841,84 +844,80 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
      * @param int $destinationId
      * @param string $accessToken
      * @param array $options
-     * @return array
+     * @return RequestConfig
      */
-    public function setWaypoint(int $destinationId, string $accessToken, array $options = []) : array {
-        $uri = $this->getEndpointURI(['ui', 'autopilot', 'waypoint', 'POST']);
-        $waypointData = [];
+    protected function setWaypointRequest(int $destinationId, string $accessToken, array $options = []) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('POST', $this->getEndpointURI(['ui', 'autopilot', 'waypoint', 'POST'])),
+            $this->getRequestOptions($accessToken, null, [
+                'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
+                'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
+                'destination_id'        => $destinationId
+            ]),
+            function($body) : array {
+                $return = [];
+                // "null" === success => There is no response body send...
+                if($body->error){
+                    $return['error'] = self::ERROR_ESI_WAYPOINT;
+                }
 
-        $query = [
-            'add_to_beginning'      => var_export( (bool)$options['addToBeginning'], true),
-            'clear_other_waypoints' => var_export( (bool)$options['clearOtherWaypoints'], true),
-            'destination_id'        => $destinationId
-        ];
-
-        $requestOptions = $this->getRequestOptions($accessToken, null, $query);
-        $response = $this->request('POST', $uri, $requestOptions)->getContents();
-
-        // "null" === success => There is no response body send...
-        if($response->error){
-            $waypointData['error'] = self::ERROR_ESI_WAYPOINT;
-        }
-
-        return $waypointData;
+                return $return;
+            }
+        );
     }
 
     /**
      * @param int $targetId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function openWindow(int $targetId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['ui', 'openwindow', 'information', 'POST']);
-        $return = [];
+    protected function openWindowRequest(int $targetId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('POST', $this->getEndpointURI(['ui', 'openwindow', 'information', 'POST'])),
+            $this->getRequestOptions($accessToken, null, [
+                'target_id' => $targetId
+            ]),
+            function($body) : array {
+                $return = [];
+                // "null" === success => There is no response body send...
+                if($body->error){
+                    $return['error'] = self::ERROR_ESI_WINDOW;
+                }
 
-        $query = [
-            'target_id' => $targetId
-        ];
-
-        $requestOptions = $this->getRequestOptions($accessToken, null, $query);
-        $response = $this->request('POST', $uri, $requestOptions)->getContents();
-
-        // "null" === success => There is no response body send...
-        if( $response->error ){
-            $return['error'] = self::ERROR_ESI_WINDOW;
-        }
-
-        return $return;
+                return $return;
+            }
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getSovereigntyMap() : array {
-        $uri = $this->getEndpointURI(['sovereignty', 'map', 'GET']);
-        $sovData = [];
+    protected function getSovereigntyMapRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['sovereignty', 'map', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $sovData = [];
+                if(!$body->error){
+                    foreach((array)$body as $data){
+                        $sovData['map'][(int)$data->system_id] = (new Mapper\Sovereignty\Map($data))->getData();
+                    }
+                }else{
+                    $sovData['error'] = $body->error;
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $data){
-                $sovData['map'][(int)$data->system_id] = (new Mapper\Sovereignty\Map($data))->getData();
+                return $sovData;
             }
-        }else{
-            $sovData['error'] = $response->error;
-        }
-
-        return $sovData;
+        );
     }
 
     /**
      * @param array $categories
      * @param string $search
      * @param bool $strict
-     * @return array
+     * @return RequestConfig
      */
-    public function search(array $categories, string $search, bool $strict = false) : array {
-        $uri = $this->getEndpointURI(['search', 'GET']);
-        $searchData = [];
-
+    protected function searchRequest(array $categories, string $search, bool $strict = false) : RequestConfig {
         $query = [
             'categories'            => $categories,
             'search'                => $search,
@@ -929,100 +928,90 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
             'categories' => [',']
         ]);
 
-        $requestOptions = $this->getRequestOptions('', null, $query);
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['search', 'GET'])),
+            $this->getRequestOptions('', null, $query),
+            function($body) : array {
+                $searchData = [];
+                if(!$body->error){
+                    $searchData = (new Mapper\Search\Search($body))->getData();
+                }else{
+                    $searchData['error'] = $body->error;
+                }
 
-        if($response->error){
-            $searchData['error'] = $response->error;
-        }else{
-            $searchData = (new Mapper\Search\Search($response))->getData();
-        }
-
-        return $searchData;
+                return $searchData;
+            }
+        );
     }
 
     /**
      * @param string $version
-     * @return array
+     * @param bool $forRoutes
+     * @return RequestConfig
      */
-    public function getStatus(string $version = 'last') : array {
-        $uri = $this->getEndpointURI(['meta', 'status', 'GET']);
-        $statusData = [];
-
+    protected function getStatusRequest(string $version = 'last', bool $forRoutes = false) : RequestConfig {
         $requestOptions = [
             'query' => [
                 'version' => $version
             ]
         ];
 
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $status){
-                $statusData['status'][] = (new Mapper\Status($status))->getData();
-            }
-        }else{
-            $statusData['error'] = $response->error;
-        }
-
-        return $statusData;
-    }
-
-    /**
-     * @param string $version
-     * @return array
-     */
-    public function getStatusForRoutes(string $version = 'last') : array {
-        // data for all configured ESI endpoints
-        $statusData = [
-            'status' => $this->getConfig()->getEndpointsData()
-        ];
-
-        $statusDataAll = $this->getStatus($version);
-        if(!isset($statusDataAll['error'])){
-            foreach((array)$statusData['status'] as $key => $data){
-                foreach((array)$statusDataAll['status'] as $status){
-                    if(
-                        $status['route'] == $data['route'] &&
-                        $status['method'] == $data['method']
-                    ){
-                        $statusData['status'][$key]['status'] = $status['status'];
-                        $statusData['status'][$key]['tags']   = $status['tags'];
-                        break;
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['meta', 'status', 'GET'])),
+            $requestOptions,
+            function($body) use ($forRoutes) : array {
+                $statusData = [];
+                if(!$body->error){
+                    foreach((array)$body as $status){
+                        $statusData['status'][] = (new Mapper\Status($status))->getData();
                     }
+
+                    if($forRoutes){
+                        // data for all configured ESI endpoints
+                        $statusDataRoutes = [
+                            'status' => $this->getConfig()->getEndpointsData()
+                        ];
+
+                        foreach((array)$statusDataRoutes['status'] as $key => $data){
+                            foreach((array)$statusData['status'] as $status){
+                                if(
+                                    $status['route'] == $data['route'] &&
+                                    $status['method'] == $data['method']
+                                ){
+                                    $statusDataRoutes['status'][$key]['status'] = $status['status'];
+                                    $statusDataRoutes['status'][$key]['tags']   = $status['tags'];
+                                    break;
+                                }
+                            }
+                        }
+
+                        $statusData = $statusDataRoutes;
+                    }
+                }else{
+                    $statusData['error'] = $body->error;
                 }
+
+                return $statusData;
             }
-        }else{
-            $statusData['error'] = $statusDataAll['error'];
-        }
-
-        return $statusData;
+        );
     }
 
     /**
-     * @param int $corporationId
-     * @return bool
+     * @return RequestConfig
      */
-    public function isNpcCorporation(int $corporationId) : bool {
-        $npcCorporations = $this->getNpcCorporations();
-        return in_array($corporationId, $npcCorporations);
-    }
+    protected function getNpcCorporationsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['corporations', 'npccorps', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $npcCorporations = [];
+                if(!$body->error){
+                    $npcCorporations = array_unique(array_map('intval', (array)$body));
+                }
 
-    /**
-     * @return array
-     */
-    protected function getNpcCorporations() : array {
-        $uri = $this->getEndpointURI(['corporations', 'npccorps', 'GET']);
-        $npcCorporations = [];
-
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $npcCorporations = $response;
-        }
-
-        return $npcCorporations;
+                return $npcCorporations;
+            }
+        );
     }
 
     /**
