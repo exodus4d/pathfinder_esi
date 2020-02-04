@@ -263,174 +263,158 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     /**
      * @param int $corporationId
      * @param string $accessToken
-     * @return array
+     * @return RequestConfig
      */
-    public function getCorporationRoles(int $corporationId, string $accessToken) : array {
-        $uri = $this->getEndpointURI(['corporations', 'roles', 'GET'], [$corporationId]);
-        $rolesData = [];
-
+    protected function getCorporationRolesRequest(int $corporationId, string $accessToken) : RequestConfig {
         $requestOptions = $this->getRequestOptions($accessToken);
 
         // 403 'Character cannot grant roles' error
         $requestOptions['log_off_status'] = [403];
 
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['corporations', 'roles', 'GET'], [$corporationId])),
+            $requestOptions,
+            function($body) : array {
+                $rolesData = [];
+                if(!$body->error){
+                    foreach((array)$body as $characterRoleData){
+                        $rolesData['roles'][(int)$characterRoleData->character_id] = array_map('strtolower', (array)$characterRoleData->roles);
+                    }
+                }else{
+                    $rolesData['error'] = $body->error;
+                }
 
-        if(!$response->error){
-            foreach((array)$response as $characterRoleData){
-                $rolesData['roles'][(int)$characterRoleData->character_id] = array_map('strtolower', (array)$characterRoleData->roles);
+                return $rolesData;
             }
-        }else{
-            $rolesData['error'] = $response->error;
-        }
-
-        return $rolesData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getUniverseFactions() : array {
-        $uri = $this->getEndpointURI(['universe', 'factions', 'list', 'GET']);
-        $factionData = [];
-
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $factionData['error'] = $response->error;
-        }else{
-            foreach((array)$response as $data){
-                $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
-            }
-        }
-
-        return $factionData;
+        );
     }
 
     /**
      * @param int $factionId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseFactionData(int $factionId) : array {
-        $factionDataAll = $this->getUniverseFactions();
-        $factionData = [];
+    protected function getUniverseFactionRequest(int $factionId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'factions', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) use ($factionId) : array {
+                $factionData = [];
+                if($body->error){
+                    $factionData['error'] = $body->error;
+                }else{
+                    foreach((array)$body as $data){
+                        $factionData['factions'][(int)$data->faction_id] = (new Mapper\Universe\Faction($data))->getData();
+                    }
 
-        if(isset($factionDataAll['error'])){
-            $factionData = $factionDataAll;
-        }elseif(is_array($factionDataAll['factions']) && array_key_exists($factionId, $factionDataAll['factions'])){
-            $factionData = $factionDataAll['factions'][$factionId];
-        }
+                    if($factionId && array_key_exists($factionId, $factionData['factions'])){
+                        $factionData = $factionData['factions'][$factionId];
+                    }
+                }
 
-        return $factionData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getUniverseRaces() : array {
-        $uri = $this->getEndpointURI(['universe', 'races', 'list', 'GET']);
-        $raceData = [];
-
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if($response->error){
-            $raceData['error'] = $response->error;
-        }else{
-            foreach((array)$response as $data){
-                $raceData['races'][(int)$data->race_id] = (new Mapper\Universe\Race($data))->getData();
+                return $factionData;
             }
-        }
-
-        return $raceData;
+        );
     }
 
     /**
      * @param int $raceId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseRaceData(int $raceId) : array {
-        $raceDataAll = $this->getUniverseRaces();
-        $raceData = [];
+    protected function getUniverseRaceRequest(int $raceId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'races', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) use ($raceId) : array {
+                $raceData = [];
+                if($body->error){
+                    $raceData['error'] = $body->error;
+                }else{
+                    foreach((array)$body as $data){
+                        $raceData['races'][(int)$data->race_id] = (new Mapper\Universe\Race($data))->getData();
+                    }
 
-        if(isset($raceDataAll['error'])){
-            $raceData = $raceDataAll;
-        }elseif(is_array($raceDataAll['races']) && array_key_exists($raceId, $raceDataAll['races'])){
-            $raceData = $raceDataAll['races'][$raceId];
-        }
+                    if($raceId && array_key_exists($raceId, $raceData['races'])){
+                        $raceData = $raceData['races'][$raceId];
+                    }
+                }
 
-        return $raceData;
+                return $raceData;
+            }
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseRegions() : array {
-        $uri = $this->getEndpointURI(['universe', 'regions', 'list', 'GET']);
-        $regionData = [];
+    protected function getUniverseRegionsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'regions', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $regionData = [];
+                if(!$body->error){
+                    $regionData = array_unique( array_map('intval', (array)$body) );
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $regionData = array_unique( array_map('intval', (array)$response) );
-        }
-
-        return $regionData;
+                return $regionData;
+            }
+        );
     }
 
     /**
      * @param int $regionId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseRegionData(int $regionId) : array {
-        $uri = $this->getEndpointURI(['universe', 'regions', 'GET'], [$regionId]);
-        $regionData = [];
+    protected function getUniverseRegionRequest(int $regionId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'regions', 'GET'], [$regionId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $regionData = [];
+                if(!$body->error){
+                    $regionData = (new Mapper\Universe\Region($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $regionData = (new Mapper\Universe\Region($response))->getData();
-        }
-
-        return $regionData;
+                return $regionData;
+            }
+        );
     }
 
     /**
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseConstellations() : array {
-        $uri = $this->getEndpointURI(['universe', 'constellations', 'list', 'GET']);
-        $constellationData = [];
+    protected function getUniverseConstellationsRequest() : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'constellations', 'list', 'GET'])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $constellationData = [];
+                if(!$body->error){
+                    $constellationData = array_unique( array_map('intval', (array)$body) );
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $constellationData = array_unique( array_map('intval', (array)$response) );
-        }
-
-        return $constellationData;
+                return $constellationData;
+            }
+        );
     }
 
     /**
      * @param int $constellationId
-     * @return array
+     * @return RequestConfig
      */
-    public function getUniverseConstellationData(int $constellationId) : array {
-        $uri = $this->getEndpointURI(['universe', 'constellations', 'GET'], [$constellationId]);
-        $constellationData = [];
+    protected function getUniverseConstellationRequest(int $constellationId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['universe', 'constellations', 'GET'], [$constellationId])),
+            $this->getRequestOptions(),
+            function($body) : array {
+                $constellationData = [];
+                if(!$body->error){
+                    $constellationData = (new Mapper\Universe\Constellation($body))->getData();
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $constellationData = (new Mapper\Universe\Constellation($response))->getData();
-        }
-
-        return $constellationData;
+                return $constellationData;
+            }
+        );
     }
 
     /**

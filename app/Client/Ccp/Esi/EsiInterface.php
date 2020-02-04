@@ -11,57 +11,6 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 interface EsiInterface {
 
     /**
-     * @param int $corporationId
-     * @param string $accessToken
-     * @return array
-     */
-    public function getCorporationRoles(int $corporationId, string $accessToken) : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseFactions() : array;
-
-    /**
-     * @param int $factionId
-     * @return array
-     */
-    public function getUniverseFactionData(int $factionId) : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseRaces() : array;
-
-    /**
-     * @param int $raceId
-     * @return array
-     */
-    public function getUniverseRaceData(int $raceId) : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseRegions() : array;
-
-    /**
-     * @param int $regionId
-     * @return array
-     */
-    public function getUniverseRegionData(int $regionId) : array;
-
-    /**
-     * @return array
-     */
-    public function getUniverseConstellations() : array;
-
-    /**
-     * @param int $constellationId
-     * @return array
-     */
-    public function getUniverseConstellationData(int $constellationId) : array;
-
-    /**
      * @return array
      */
     public function getUniverseSystems() : array;
