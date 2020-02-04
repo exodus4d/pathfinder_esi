@@ -807,6 +807,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * @return RequestConfig|null
      */
     protected function getRequestConfig(string $requestHandler, ...$handlerParams) : ?RequestConfig {
+        $requestHandler .= 'Request';
         if(is_callable([$this, $requestHandler])){
             return call_user_func_array([$this, $requestHandler], $handlerParams);
         }
