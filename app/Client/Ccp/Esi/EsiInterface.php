@@ -11,19 +11,6 @@ namespace Exodus4D\ESI\Client\Ccp\Esi;
 interface EsiInterface {
 
     /**
-     * get corporation/alliance ids by characterIds
-     * @param array $characterIds
-     * @return array
-     */
-    public function getCharacterAffiliationData(array $characterIds) : array;
-
-    /**
-     * @param int $characterId
-     * @return array
-     */
-    public function getCharacterData(int $characterId) : array;
-
-    /**
      * @param int $characterId
      * @param string $accessToken
      * @return array

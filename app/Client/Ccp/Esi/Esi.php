@@ -89,43 +89,45 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
 
     /**
      * @param array $characterIds
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterAffiliationData(array $characterIds) : array {
-        $uri = $this->getEndpointURI(['characters', 'affiliation', 'POST']);
-        $characterAffiliationData = [];
+    protected function getCharacterAffiliationRequest(array $characterIds) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('POST', $this->getEndpointURI(['characters', 'affiliation', 'POST'])),
+            $this->getRequestOptions('', $characterIds),
+            function($body) : array {
+                $characterAffiliationData = [];
+                if(!$body->error){
+                    foreach((array)$body as $affiliationData){
+                        $characterAffiliationData[] = (new Mapper\Character\Affiliation($affiliationData))->getData();
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions('', $characterIds);
-        $response = $this->request('POST', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            foreach((array)$response as $affiliationData){
-                $characterAffiliationData[] = (new Mapper\Character\Affiliation($affiliationData))->getData();
+                return $characterAffiliationData;
             }
-        }
-
-        return $characterAffiliationData;
+        );
     }
 
     /**
      * @param int $characterId
-     * @return array
+     * @return RequestConfig
      */
-    public function getCharacterData(int $characterId) : array {
-        $uri = $this->getEndpointURI(['characters', 'GET'], [$characterId]);
-        $characterData = [];
+    protected function getCharacterRequest(int $characterId) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'GET'], [$characterId])),
+            $this->getRequestOptions(),
+            function($body) use ($characterId) : array {
+                $characterData = [];
+                if(!$body->error){
+                    $characterData = (new Mapper\Character\Character($body))->getData();
+                    if( !empty($characterData) ){
+                        $characterData['id'] = $characterId;
+                    }
+                }
 
-        $requestOptions = $this->getRequestOptions();
-        $response = $this->request('GET', $uri, $requestOptions)->getContents();
-
-        if(!$response->error){
-            $characterData = (new Mapper\Character\Character($response))->getData();
-            if( !empty($characterData) ){
-                $characterData['id'] = $characterId;
+                return $characterData;
             }
-        }
-
-        return $characterData;
+        );
     }
 
     /**
