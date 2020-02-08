@@ -28,6 +28,7 @@ class Connection extends AbstractIterator {
 
         'wormholeMass'                      => ['wormhole' => 'mass'],
         'wormholeEol'                       => ['wormhole' => 'eol'],
+        'wormholeEstimatedEol'              => ['wormhole' => 'estimatedEol'],
 
         'createdAt'                         => ['created' => 'created'],
         'updatedAt'                         => ['updated' => 'updated']
