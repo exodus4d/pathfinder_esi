@@ -33,7 +33,7 @@ class Connection extends AbstractIterator {
         'createdAt'                         => ['created' => 'created'],
         'updatedAt'                         => ['updated' => 'updated'],
 
-        'createdById'                       => ['createdCharacter' => 'id'],
-        'createdBy'                         => ['createdCharacter' => 'name']
+        'createdById'                       => ['character' => 'id'],
+        'createdBy'                         => ['character' => 'name']
     ];
 }
