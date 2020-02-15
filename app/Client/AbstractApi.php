@@ -228,6 +228,16 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     private $logCacheHeader                         = GuzzleLogMiddleware::DEFAULT_LOG_CACHE_HEADER;
 
     /**
+     * @var GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS
+     */
+    private $logRequestHeaders                      = GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS;
+
+    /**
+     * @var GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS
+     */
+    private $logResponseHeaders                     = GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS;
+
+    /**
      * @see GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS
      * @var bool
      */
@@ -478,6 +488,20 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      */
     public function setLogAllStatus(bool $logAllStatus = GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS){
         $this->logAllStatus = $logAllStatus;
+    }
+
+    /**
+     * @param bool $logRequestHeaders
+     */
+    public function setLogRequestHeaders(bool $logRequestHeaders = GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS){
+        $this->logRequestHeaders = $logRequestHeaders;
+    }
+
+    /**
+     * @param bool $logResponseHeaders
+     */
+    public function setLogResponseHeaders(bool $logResponseHeaders = GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS){
+        $this->logResponseHeaders = $logResponseHeaders;
     }
 
     /**
@@ -736,6 +760,8 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             'log_stats'                 => $this->logStats,
             'log_cache'                 => $this->logCache,
             'log_cache_header'          => $this->logCacheHeader,
+            'log_request_headers'       => $this->logRequestHeaders,
+            'log_response_headers'      => $this->logResponseHeaders,
             'log_5xx'                   => true,
             'log_4xx'                   => true,
             'log_all_status'            => $this->logAllStatus,

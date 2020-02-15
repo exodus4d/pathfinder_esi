@@ -48,6 +48,16 @@ class GuzzleLogMiddleware {
     const DEFAULT_LOG_CACHE_HEADER      = 'X-Guzzle-Cache';
 
     /**
+     * default for: log all requests HTTP headers
+     */
+    const DEFAULT_LOG_REQUEST_HEADERS   = false;
+
+    /**
+     * default for: log all response HTTP headers
+     */
+    const DEFAULT_LOG_RESPONSE_HEADERS  = false;
+
+    /**
      * default for: log requests with HTTP 5xx response
      */
     const DEFAULT_LOG_5XX               = true;
@@ -115,6 +125,8 @@ class GuzzleLogMiddleware {
         'log_stats'                 => self::DEFAULT_LOG_STATS,
         'log_cache'                 => self::DEFAULT_LOG_CACHE,
         'log_cache_header'          => self::DEFAULT_LOG_CACHE_HEADER,
+        'log_request_headers'       => self::DEFAULT_LOG_REQUEST_HEADERS,
+        'log_response_headers'      => self::DEFAULT_LOG_RESPONSE_HEADERS,
         'log_5xx'                   => self::DEFAULT_LOG_5XX,
         'log_4xx'                   => self::DEFAULT_LOG_4XX,
         'log_3xx'                   => self::DEFAULT_LOG_3XX,
@@ -255,7 +267,7 @@ class GuzzleLogMiddleware {
         if(!is_null($response)){
             $statusCode = $response->getStatusCode();
             if($logError || $this->checkStatusCode($options, $statusCode)){
-                $logData['response'] = $this->logResponse($response);
+                $logData['response'] = $this->logResponse($response, $options);
 
                 if($options['log_cache']){
                     $logData['cache'] = $this->logCache($response, $options);
@@ -280,7 +292,7 @@ class GuzzleLogMiddleware {
         }
 
         if($logRequestData){
-            $logData['request'] = $this->logRequest($request);
+            $logData['request'] = $this->logRequest($request, $options);
         }
 
         // log stats in case other logData should be logged
@@ -296,10 +308,11 @@ class GuzzleLogMiddleware {
     /**
      * log request
      * @param RequestInterface $request
+     * @param array            $options
      * @return array
      */
-    protected function logRequest(RequestInterface $request) : array {
-        return [
+    protected function logRequest(RequestInterface $request, array $options) : array {
+        $logData = [
             'method'                    => $request->getMethod(),
             'url'                       => $request->getUri()->__toString(),
             'host'                      => $request->getUri()->getHost(),
@@ -307,24 +320,37 @@ class GuzzleLogMiddleware {
             'target'                    => $request->getRequestTarget(),
             'version'                   => $request->getProtocolVersion()
         ];
+
+        if($options['log_request_headers']){
+            $logData['requestHeaders']  =  $request->getHeaders();
+        }
+
+        return $logData;
     }
 
     /**
      * log response -> this might be a HTTP 1xx up to 5xx response
      * @param ResponseInterface $response
+     * @param array             $options
      * @return array
      */
-    protected function logResponse(ResponseInterface $response) : array {
+    protected function logResponse(ResponseInterface $response, array $options) : array {
         // response body might contain additional error message
         $errorMessage = $this->getErrorMessageFromResponseBody($response);
 
-        return [
+        $logData = [
             'code'                      => $response->getStatusCode(),
             'phrase'                    => $response->getReasonPhrase(),
             'version'                   => $response->getProtocolVersion(),
             'res_header_content-length' => $response->getHeaderLine('content-length'),
             'error_msg'                 => $errorMessage
         ];
+
+        if($options['log_response_headers']){
+            $logData['responseHeaders'] =  $response->getHeaders();
+        }
+
+        return $logData;
     }
 
     /**
@@ -367,7 +393,7 @@ class GuzzleLogMiddleware {
         }
 
         return [
-            'status' => $response->getHeaders() //$cacheStatusHeader
+            'status' => $cacheStatusHeader
         ];
     }
 
