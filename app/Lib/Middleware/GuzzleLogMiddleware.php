@@ -367,7 +367,7 @@ class GuzzleLogMiddleware {
         }
 
         return [
-            'status' => $cacheStatusHeader
+            'status' => $response->getHeaders() //$cacheStatusHeader
         ];
     }
 
