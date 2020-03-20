@@ -2,9 +2,10 @@
 This Web API client library is used by [_Pathfinder_](https://github.com/exodus4d/pathfinder) and handles all _ESI_ API requests.<br />
 Additional APIs can easily be added and can be used side by side with their own configuration. Included clients:
 
-- _CCP ESI_ API client: [ESI.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/ESI.php) 
-- _CCP SSO_ API client: [SSO.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/SSO.php) 
-- _GitHub_ basic API client: [Github.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/Github.php) 
+- _CCP ESI_ API client: [Esi.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/Ccp/Esi/Esi.php) 
+- _CCP SSO_ API client: [Sso.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/Ccp/Sso/Sso.php) 
+- _GitHub_ basic API client: [GitHub.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/GitHub/GitHub.php) 
+- _eve-scout_ _"Thera"_ API client: [EveScout.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/EveScout/EveScout.php) 
   
 This Web client is build on [_Guzzle_](http://guzzlephp.org) and makes much use of the build in 
 [_Middleware_](http://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#middleware) concept in _Guzzle_.
@@ -14,8 +15,8 @@ Use [_Composer_](https://getcomposer.org/) for installation. In `composer.json` 
 ```json
 {
   "require": {
-    "php-64bit": ">=7.1",
-    "exodus4d/pathfinder_esi": "dev-master#v1.2.5"
+    "php-64bit": ">=7.2",
+    "exodus4d/pathfinder_esi": "v2.0.0"
   }
 }
 ```
@@ -90,7 +91,7 @@ _Middlewares_ classes are _small_ functions that _hook_ into the "request → re
 - The **order** in the `HandlerStack()` is essential!
 
 ### _Guzzle_ [_HandlerStack_](http://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#handlerstack) :
-This flowchart shows all _Middlewares_ used by [ESI.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/ESI.php) API client. 
+This flowchart shows all _Middlewares_ used by [ESI.php](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Client/Ccp/Esi/Esi.php) API client. 
 Each request to _ESI_ API invokes all _Middlewares_ in the following **order**:
 ##### Before request
 [GuzzleJsonMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleJsonMiddleware.php) → 
