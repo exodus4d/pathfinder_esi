@@ -3,9 +3,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Character;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class CharacterClone extends mapper\AbstractIterator {
+class CharacterClone extends AbstractIterator {
 
     /**
      * @var array

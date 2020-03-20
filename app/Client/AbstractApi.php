@@ -11,6 +11,7 @@ namespace Exodus4D\ESI\Client;
 
 use lib\logging\LogInterface;
 use Exodus4D\ESI\Lib\WebClient;
+use Exodus4D\ESI\Lib\RequestConfig;
 use Exodus4D\ESI\Lib\Stream\JsonStreamInterface;
 use Exodus4D\ESI\Lib\Middleware\GuzzleJsonMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleLogMiddleware;
@@ -20,6 +21,7 @@ use Exodus4D\ESI\Lib\Middleware\Cache\Storage\CacheStorageInterface;
 use Exodus4D\ESI\Lib\Middleware\Cache\Storage\Psr6CacheStorage;
 use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\CacheStrategyInterface;
 use Exodus4D\ESI\Lib\Middleware\Cache\Strategy\PrivateCacheStrategy;
+use Exodus4D\ESI\Config\ConfigInterface;
 use GuzzleHttp\Exception\TransferException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\HandlerStack;
@@ -49,6 +51,11 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     const DEFAULT_READ_TIMEOUT                      = 10.0;
 
     /**
+     * default for: max count of parallel requests (batch request)
+     */
+    const DEFAULT_BATCH_CONCURRENCY                 = 5;
+
+    /**
      * default for: auto decode responses with encoded body
      * -> checks "Content-Encoding" response HTTP Header for 'gzip' or 'deflate' value
      * @see http://docs.guzzlephp.org/en/stable/request-options.html#decode-content
@@ -65,13 +72,19 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      */
     const DEFAULT_DEBUG_LEVEL                       = 0;
 
+    /**
+     * error message for invalid request config
+     * -> e.g. method name not callable
+     */
+    const ERROR_INVALID_REQUEST_CONFIG              = 'Invalid request config';
+
     // ================================================================================================================
     // API class properties
     // ================================================================================================================
 
     /**
      * WebClient instance
-     * @var \Exodus4D\ESI\Lib\WebClient|null
+     * @var WebClient|null
      */
     private $client                                 = null;
 
@@ -110,6 +123,12 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     private $readTimeout                            = self::DEFAULT_READ_TIMEOUT;
 
     /**
+     * Max count of parallel requests (batch request)
+     * @var int
+     */
+    private $batchConcurrency                       = self::DEFAULT_BATCH_CONCURRENCY;
+
+    /**
      * decode response body
      * @see http://docs.guzzlephp.org/en/stable/request-options.html#decode-content
      * @var bool|array|string
@@ -136,7 +155,7 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     /**
      * Debug requests if enabled
      * @see https://guzzle.readthedocs.io/en/latest/request-options.html#debug
-     * @var bool
+     * @var bool|resource  e.g. fopen('php://stderr', 'w')
      */
     private $debugRequests                          = self::DEFAULT_DEBUG_REQUESTS;
 
@@ -176,6 +195,12 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      */
     private $isLoggable                             = null;
 
+    /**
+     * Endpoint config for this API
+     * @var ConfigInterface
+     */
+    protected $config;
+
     // Guzzle Log Middleware config -----------------------------------------------------------------------------------
 
     /**
@@ -201,6 +226,16 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      * @var string
      */
     private $logCacheHeader                         = GuzzleLogMiddleware::DEFAULT_LOG_CACHE_HEADER;
+
+    /**
+     * @var GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS
+     */
+    private $logRequestHeaders                      = GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS;
+
+    /**
+     * @var GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS
+     */
+    private $logResponseHeaders                     = GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS;
 
     /**
      * @see GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS
@@ -343,6 +378,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @param int $batchConcurrency
+     */
+    public function setBatchConcurrency(int $batchConcurrency = self::DEFAULT_BATCH_CONCURRENCY){
+        $this->batchConcurrency = $batchConcurrency;
+    }
+
+    /**
      * @param array|bool|string $decodeContent
      */
     public function setDecodeContent($decodeContent = self::DEFAULT_DECODE_CONTENT){
@@ -365,9 +407,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
 
     /**
      * debug requests
-     * @param bool $debugRequests
+     * @param bool|resource $debugRequests
      */
-    public function setDebugRequests(bool $debugRequests = self::DEFAULT_DEBUG_REQUESTS){
+    public function setDebugRequests($debugRequests = self::DEFAULT_DEBUG_REQUESTS){
         $this->debugRequests  = $debugRequests;
     }
 
@@ -446,6 +488,20 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
      */
     public function setLogAllStatus(bool $logAllStatus = GuzzleLogMiddleware::DEFAULT_LOG_ALL_STATUS){
         $this->logAllStatus = $logAllStatus;
+    }
+
+    /**
+     * @param bool $logRequestHeaders
+     */
+    public function setLogRequestHeaders(bool $logRequestHeaders = GuzzleLogMiddleware::DEFAULT_LOG_REQUEST_HEADERS){
+        $this->logRequestHeaders = $logRequestHeaders;
+    }
+
+    /**
+     * @param bool $logResponseHeaders
+     */
+    public function setLogResponseHeaders(bool $logResponseHeaders = GuzzleLogMiddleware::DEFAULT_LOG_RESPONSE_HEADERS){
+        $this->logResponseHeaders = $logResponseHeaders;
     }
 
     /**
@@ -531,6 +587,13 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * @return int
+     */
+    public function getBatchConcurrency() : int {
+        return $this->batchConcurrency;
+    }
+
+    /**
      * @return array|bool|string
      */
     public function getDecodeContent(){
@@ -552,9 +615,9 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @return bool
+     * @return bool|resource
      */
-    public function getDebugRequests() : bool {
+    public function getDebugRequests(){
         return $this->debugRequests;
     }
 
@@ -697,6 +760,8 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
             'log_stats'                 => $this->logStats,
             'log_cache'                 => $this->logCache,
             'log_cache_header'          => $this->logCacheHeader,
+            'log_request_headers'       => $this->logRequestHeaders,
+            'log_response_headers'      => $this->logResponseHeaders,
             'log_5xx'                   => true,
             'log_4xx'                   => true,
             'log_all_status'            => $this->logAllStatus,
@@ -762,6 +827,142 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
+     * get config for API request call from config
+     * @param string $requestHandler
+     * @param mixed  ...$handlerParams
+     * @return RequestConfig|null
+     */
+    protected function getRequestConfig(string $requestHandler, ...$handlerParams) : ?RequestConfig {
+        $requestHandler .= 'Request';
+        if(is_callable([$this, $requestHandler])){
+            return call_user_func_array([$this, $requestHandler], $handlerParams);
+        }
+        return null;
+    }
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $options
+     * @return JsonStreamInterface|StreamInterface|null
+     */
+    protected function request(string $method, string $uri, array $options = []) : ?StreamInterface {
+        $body = null;
+
+        try{
+            $request = WebClient::newRequest($method, $uri);
+            $response = $this->getClient()->send($request, $options);
+            $body = $response->getBody();
+        }catch(TransferException $e){
+            // Base Exception of Guzzle errors
+            // -> this includes "expected" errors like 4xx responses (ClientException)
+            //    and "unexpected" errors like cURL fails (ConnectException)...
+            // -> error is already logged by LogMiddleware
+            $body = WebClient::newErrorResponse($e, $this->getAcceptType())->getBody();
+        }catch(\Exception $e){
+            // Hard fail! Any other type of error
+            // -> e.g. RuntimeException,...
+            $body = WebClient::newErrorResponse($e, $this->getAcceptType())->getBody();
+        }
+
+        return $body;
+    }
+
+    /**
+     * @param string $requestHandler
+     * @param mixed  ...$handlerParams
+     * @return mixed|null
+     */
+    public function send(string $requestHandler, ...$handlerParams){
+        $bodyContent = null;
+
+        if($requestConfig = $this->getRequestConfig($requestHandler, ...$handlerParams)){
+            try{
+                $response = $this->getClient()->send($requestConfig->getRequest(), $requestConfig->getOptions());
+            }catch(TransferException $e){
+                // Base Exception of Guzzle errors
+                // -> this includes "expected" errors like 4xx responses (ClientException)
+                //    and "unexpected" errors like cURL fails (ConnectException)...
+                // -> error is already logged by LogMiddleware
+                $response = WebClient::newErrorResponse($e, $this->getAcceptType());
+            }catch(\Exception $e){
+                // Hard fail! Any other type of error
+                // -> e.g. RuntimeException,...
+                $response = WebClient::newErrorResponse($e, $this->getAcceptType());
+            }
+
+            $body = $response->getBody();
+            $bodyContent = $body->getContents();
+
+            // call custom formatter for current $result (same $key)
+            $bodyContent = is_callable($formatter = $requestConfig->getFormatter()) ? $formatter($bodyContent) : $bodyContent;
+        }
+
+        return $bodyContent;
+    }
+
+    /**
+     * send batch requests (parallel async requests)
+     * @param array $configs
+     * @return array
+     */
+    public function sendBatch(array $configs) : array {
+
+        /**
+         * @var RequestConfig[] $requestConfigs
+         */
+        $requestConfigs = array_map(function(array $config){
+            if($requestConfig = $this->getRequestConfig(...$config)){
+                return $requestConfig;
+            }
+            // invalid config
+            throw new \InvalidArgumentException(self::ERROR_INVALID_REQUEST_CONFIG);
+        }, $configs);
+
+        // $requests must be 'Traversable of Promises'
+        // So we’ll create a generator method which will only start the async request when the promise is grabbed
+        $requests = (function() use ($requestConfigs) {
+            foreach($requestConfigs as $requestConfig){
+                // don't forget using generator
+                yield function() use ($requestConfig) {
+                    return $this->getClient()->sendAsync(
+                        $requestConfig->getRequest(),
+                        $requestConfig->getOptions()
+                    );
+                };
+            }
+        })();
+
+        // run requests async (parallel)
+        // -> but wait()´s until all requests are either "fulfilled" or "rejected"
+        $results = $this->getClient()->runBatch($requests, [
+            'concurrency' => $this->getBatchConcurrency()
+        ]);
+
+        return array_map(function($result, $key) use ($requestConfigs) {
+            // check result for valid responses
+            // -> wrap rejected requests into errorResponses
+            if($result instanceof Response){
+                $response = $result;
+            }elseif($result instanceof \Exception){
+                $response = WebClient::newErrorResponse($result, $this->getAcceptType());
+            }else{
+                // invalid result type. Hard fail!
+                $response = WebClient::newErrorResponse(
+                    new \InvalidArgumentException('Invalid result type: ' . gettype($result)),
+                    $this->getAcceptType()
+                );
+            }
+
+            $body = $response->getBody();
+            $bodyContent = $body->getContents();
+
+            // call custom formatter for current $result (same $key)
+            return is_callable($formatter = $requestConfigs[$key]->getFormatter()) ? $formatter($bodyContent) : $bodyContent;
+        }, $results, array_keys($results));
+    }
+
+    /**
      * same as PHP´s array_merge_recursive() function except of "distinct" array values in return
      * -> works like jQuery extend()
      * @param array $array1
@@ -781,33 +982,8 @@ abstract class AbstractApi extends \Prefab implements ApiInterface {
     }
 
     /**
-     * @param string $method
-     * @param string $uri
-     * @param array $options
-     * @return JsonStreamInterface|StreamInterface|null
+     * get Config instance for this API
+     * @return ConfigInterface
      */
-    protected function request(string $method, string $uri, array $options = []) : ?StreamInterface {
-        $body = null;
-
-        try{
-            $request = $this->getClient()->newRequest($method, $uri);
-            /**
-             * @var $response Response
-             */
-            $response = $this->getClient()->send($request, $options);
-            $body = $response->getBody();
-        }catch(TransferException $e){
-            // Base Exception of Guzzle errors
-            // -> this includes "expected" errors like 4xx responses (ClientException)
-            //    and "unexpected" errors like cURL fails (ConnectException)...
-            // -> error is already logged by LogMiddleware
-            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
-        }catch(\Exception $e){
-            // Hard fail! Any other type of error
-            // -> e.g. RuntimeException,...
-            $body = $this->getClient()->newErrorResponse($e, $this->getAcceptType())->getBody();
-        }
-
-        return $body;
-    }
+    abstract protected function getConfig() : ConfigInterface;
 }

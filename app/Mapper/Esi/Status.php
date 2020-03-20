@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Status extends mapper\AbstractIterator {
+class Status extends AbstractIterator {
 
     /**
      * @var array
@@ -30,7 +30,7 @@ class Status extends mapper\AbstractIterator {
     public function getData(){
 
         $normalize = function(\Iterator $iterator){
-            return preg_replace('/\/\{(\w+)\}/', '/{x}', $iterator->current());
+            return preg_replace('/\/{(\w+)}/', '/{x}', $iterator->current());
         };
 
         self::$map['route'] = $normalize;

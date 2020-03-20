@@ -3,9 +3,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Sovereignty;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Map extends mapper\AbstractIterator {
+class Map extends AbstractIterator {
 
     /**
      * @var array

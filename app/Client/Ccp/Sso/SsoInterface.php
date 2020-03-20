@@ -6,23 +6,9 @@
  * Time: 16:23
  */
 
-namespace Exodus4D\ESI\Client;
-
+namespace Exodus4D\ESI\Client\Ccp\Sso;
 
 interface SsoInterface {
-
-    /**
-     * @param string $accessToken
-     * @return array
-     */
-    public function getVerifyCharacterData(string $accessToken) : array;
-
-    /**
-     * @param array $credentials
-     * @param array $requestParams
-     * @return array
-     */
-    public function getAccessData(array $credentials, array $requestParams = []) : array;
 
     /**
      * @return string

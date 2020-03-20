@@ -8,9 +8,9 @@
 
 namespace Exodus4D\ESI\Mapper\Esi\Corporation;
 
-use data\mapper;
+use Exodus4D\Pathfinder\Data\Mapper\AbstractIterator;
 
-class Corporation extends mapper\AbstractIterator {
+class Corporation extends AbstractIterator {
 
     /**
      * @var array

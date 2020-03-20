@@ -8,8 +8,13 @@
 
 namespace Exodus4D\ESI\Client;
 
-
 interface ApiInterface {
+
+    /**
+     * ApiInterface constructor.
+     * @param string $url
+     */
+    public function __construct(string $url);
 
     /**
      * @param string $url
@@ -40,6 +45,11 @@ interface ApiInterface {
      * @return mixed
      */
     public function setReadTimeout(float $readTimeout);
+
+    /**
+    * @param int $batchConcurrency
+    */
+    public function setBatchConcurrency(int $batchConcurrency = self::DEFAULT_BATCH_CONCURRENCY);
 
     /**
      * @param $decodeContent
@@ -187,6 +197,11 @@ interface ApiInterface {
     public function getReadTimeout() : float;
 
     /**
+     * @return int
+     */
+    public function getBatchConcurrency() : int;
+
+    /**
      * @return mixed
      */
     public function getDecodeContent();
@@ -202,9 +217,9 @@ interface ApiInterface {
     public function getVerify() : bool;
 
     /**
-     * @return bool
+     * @return bool|resource
      */
-    public function getDebugRequests() : bool;
+    public function getDebugRequests();
 
     /**
      * @return int
@@ -226,4 +241,16 @@ interface ApiInterface {
      */
     public function getNewLog() : ?\Closure;
 
+    /**
+     * @param string $requestHandler
+     * @param mixed  ...$handlerParams
+     * @return mixed|null
+     */
+    public function send(string $requestHandler, ...$handlerParams);
+
+    /**
+     * @param array $configs
+     * @return array
+     */
+    public function sendBatch(array $configs) : array;
 }

@@ -6,13 +6,14 @@
  * Time: 18:41
  */
 
-namespace Exodus4D\ESI\Client;
+namespace Exodus4D\ESI\Client\Ccp;
 
+use Exodus4D\ESI\Client;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpErrorLimitMiddleware;
 use Exodus4D\ESI\Lib\Middleware\GuzzleCcpLogMiddleware;
 use GuzzleHttp\HandlerStack;
 
-abstract class AbstractCcp extends AbstractApi {
+abstract class AbstractCcp extends Client\AbstractApi {
 
     /**
      * see parent
