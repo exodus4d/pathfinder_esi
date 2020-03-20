@@ -30,7 +30,7 @@ Check  _Pathfinder_ [release](https://github.com/exodus4d/pathfinder/releases) n
 
 ```php
 // New web client instance for GitHub API [→ Github() implements ApiInterface()]
-$client = new \Exodus4D\ESI\Client\Github('https://api.github.com');
+$client = new \Exodus4D\ESI\Client\GitHub\GitHub('https://api.github.com');
 
 // configure client [→ check ApiInterface() for methods]
 $client->setTimeout(3);                     // Timeout of the request (seconds)
@@ -52,20 +52,22 @@ $client->setIsLoggable(function() : \Closure {
     };
 });
 
-$client->setLogStats(true);                 // Add some cURL status information (e.g. transferTime) to logged responses
+$client->setLogStats(true);                 // add some cURL status information (e.g. transferTime) to logged responses
 
-$client->setLogCache(true);                 // Add (local) cache info (e.g. response data cached) to logged requests
-// $client->setLogAllStatus(true);          // Log all requests regardless of response HTTP status code
-$client->setLogFile('requests');            // Log file name for request/response errors
-$client->setRetryLogFile('retry_requests'); // Log file for requests errors due to max request retry exceeds
+$client->setLogCache(true);                 // add (local) cache info (e.g. response data cached) to logged requests
+$client->setLogAllStatus(false);            // log all requests regardless of response HTTP status code
+$client->setLogRequestHeaders(false);       // add request HTTP headers to loggable requests
+$client->setLogResponseHeaders(false);      // add response HTTP headers to loggable requests
+$client->setLogFile('requests');            // log file name for request/response errors
+$client->setRetryLogFile('retry_requests'); // log file for requests errors due to max request retry exceeds
 
-$client->setCacheDebug(true);               // Add debug HTTP Header with local cache status information (HIT/MISS)
+$client->setCacheDebug(true);               // add debug HTTP Header with local cache status information (HIT/MISS)
 $client->setCachePool(function() : \Closure {
     return function() : ?CacheItemPoolInterface {
         $client = new \Redis();             // Cache backend used accross the web client
         $client->connect('localhost', 6379);
           
-        // → more PSR-6 compatible adapters at www.php-cache.com (e.g. Filesystem, Array,..)
+        // → more PSR-6 compatible adapters at www.php-cache.com (e.g. Filesystem, Array,…)
         $poolRedis = new RedisCachePool($client);
         $cachePool = new NamespacedCachePool($poolRedis, 'myCachePoolName');
         return $cachePool;                  // This can be any PSR-6 compatible instance of CacheItemPoolInterface()
@@ -76,8 +78,8 @@ $client->setCachePool(function() : \Closure {
 #### 2. Send requests
 ```php
 // get all releases from GitHub for a repo
-$releases = $client->getProjectReleases('exodus4d/pathfinder');
-// .. more requests here ...
+$releases = $client->send('getProjectReleases', 'exodus4d/pathfinder');
+// … more requests here
 ```
 
 ## Concept
@@ -85,7 +87,7 @@ $releases = $client->getProjectReleases('exodus4d/pathfinder');
 _Middlewares_ classes are _small_ functions that _hook_ into the "request → response" chain in _Guzzle_.
 - A _Middleware_ can _manipulate_ the `request` and `response` objects
 - Each _Middleware_ is dedicated to handles its own task. 
-- There are _Middlewares_ for "logging", "caching",... pre-configured. 
+- There are _Middlewares_ for "logging", "caching",… pre-configured. 
 - Each _Middleware_ has its own set of config options that can be set through the `$client->`.
 - All configured _Middlewares_ are pushed into a [_HandlerStack()_](http://docs.guzzlephp.org/en/stable/handlers-and-middleware.html#handlerstack) that gets _resolved_ for **each** request.
 - The **order** in the `HandlerStack()` is essential!
@@ -121,7 +123,7 @@ A client instance _should_ be set up with a [_PSR-6_](https://www.php-fig.org/ps
 Valid `response` data can be cached by its `Cache-Expire` HTTP Header. 
 [GuzzleCacheMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleCacheMiddleware.php) also handle `Etag` Headers.
 Other _Middlewares_ can also access the cache pool for their needs. 
-E.g. [GuzzleLogMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleLogMiddleware.php) can _throttle_ error logging by using the cache pool for error counts,..
+E.g. [GuzzleLogMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleLogMiddleware.php) can _throttle_ error logging by using the cache pool for error counts,…
 
 → See: `$client->setCachePool();`
 > **Hint:** Check out [www.php-cache.com](http://www.php-cache.com) for _PSR-6_ compatible cache pools.
@@ -134,7 +136,7 @@ Other _Middlewares_ also have access to the _global_ new log callback and implem
 `$client->setNewLog();`
 
 #### Retry
-Requests result in an _expected_ error (timeouts, _cURL_ connect errors,.. ) will be retried [default: 2 times → configurable!]. 
+Requests result in an _expected_ error (timeouts, _cURL_ connect errors,… ) will be retried [default: 2 times → configurable!]. 
 Check out [GuzzleRetryMiddleware](https://github.com/exodus4d/pathfinder_esi/blob/master/app/Lib/Middleware/GuzzleRetryMiddleware.php) for more information.
 
 ### _CCP ESI_ exclusive _Middlewares_:
