@@ -213,6 +213,31 @@ class Esi extends Ccp\AbstractCcp implements EsiInterface {
     }
 
     /**
+     * @param int    $characterId
+     * @param string $accessToken
+     * @return RequestConfig
+     */
+    protected function getCharacterRolesRequest(int $characterId, string $accessToken) : RequestConfig {
+        return new RequestConfig(
+            WebClient::newRequest('GET', $this->getEndpointURI(['characters', 'roles', 'GET'], [$characterId])),
+            $this->getRequestOptions($accessToken),
+            function($body) : array {
+                $rolesData = [];
+                if(!$body->error){
+                    $rolesData = (new Mapper\Character\Roles($body))->getData();
+                    array_walk($rolesData, function(&$roles){
+                        $roles = array_map('strtolower', (array)$roles);
+                    });
+                }else{
+                    $rolesData['error'] = $body->error;
+                }
+
+                return $rolesData;
+            }
+        );
+    }
+
+    /**
      * @param int $corporationId
      * @return RequestConfig
      */

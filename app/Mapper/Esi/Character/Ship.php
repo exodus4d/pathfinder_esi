@@ -16,10 +16,10 @@ class Ship extends AbstractIterator {
      * @var array
      */
     protected static $map = [
-        'ship_type_id' => ['ship' => 'typeId'],
+        'ship_type_id'      => ['ship' => 'typeId'],
 
-        'ship_item_id' => ['ship' => 'id'],
+        'ship_item_id'      => ['ship' => 'id'],
 
-        'ship_name' => ['ship' => 'name']
+        'ship_name'         => ['ship' => 'name']
     ];
 }
