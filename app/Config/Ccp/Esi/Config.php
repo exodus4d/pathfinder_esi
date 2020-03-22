@@ -53,6 +53,9 @@ class Config extends AbstractConfig {
             ],
             'online' => [
                 'GET' => '/v2/characters/{x}/online/'
+            ],
+            'roles' => [
+                'GET' => '/v2/characters/{x}/roles/'
             ]
         ],
         'dogma' => [
