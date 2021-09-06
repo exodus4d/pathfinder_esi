@@ -57,7 +57,7 @@ class Sso extends Ccp\AbstractCcp implements SsoInterface {
      */
     protected function getAccessRequest(array $credentials, array $requestParams = []) : RequestConfig {
         $requestOptions = [
-            'json' => $requestParams,
+            'form_params' => $requestParams,
             'auth' => $credentials
         ];
 
