@@ -38,7 +38,7 @@ class Config extends AbstractConfig {
             ]
         ],
         'characters' => [
-            'GET' => '/v4/characters/{x}/',
+            'GET' => '/v5/characters/{x}/',
             'affiliation' => [
                 'POST' => '/v1/characters/affiliation/'
             ],
